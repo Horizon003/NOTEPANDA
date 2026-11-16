@@ -11,7 +11,7 @@ import '../../../core/widgets/surfaces.dart';
 import '../../downloads/domain/download_record.dart';
 import 'home_background.dart';
 import 'home_dashboard_top.dart';
-import 'home_time_artwork.dart';
+
 import 'home_visuals.dart';
 import 'announcement_carousel.dart';
 import '../../../core/widgets/ui_kit.dart';
@@ -29,8 +29,10 @@ import '../../downloads/data/downloads_controller.dart';
 // The reference artwork is decorative; all controls below are live Flutter UI.
 final homeClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 String homeGreeting(DateTime time) {
-  final greeting = HomeTimePhase.at(time).greeting;
-  return greeting[0] + greeting.substring(1).toLowerCase();
+  if (time.hour < 5 || time.hour >= 23) return 'Good night';
+  if (time.hour < 12) return 'Good morning';
+  if (time.hour < 16) return 'Good afternoon';
+  return 'Good evening';
 }
 
 class HomeScreen extends ConsumerWidget {
@@ -65,18 +67,23 @@ class HomeScreen extends ConsumerWidget {
       if (counts.$2 > 0) '${counts.$2} Saved',
       if (counts.$3 > 0) '${counts.$3} New',
     ];
-    Widget grid(List<Widget> children, double height) => GridView(
-      shrinkWrap: true,
-      primary: false,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: scale > 1.3 ? 1 : 2,
-        mainAxisExtent: height * scale.clamp(1, 2),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-      ),
-      children: children,
+    Widget grid(List<Widget> children) => LayoutBuilder(
+      builder: (context, c) {
+        final columns = scale > 1.3 || c.maxWidth < 300
+            ? 1
+            : (c.maxWidth >= 700 ? 3 : 2);
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final child in children)
+              SizedBox(
+                width: (c.maxWidth - (columns - 1) * 12) / columns,
+                child: child,
+              ),
+          ],
+        );
+      },
     );
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
@@ -131,17 +138,15 @@ class HomeScreen extends ConsumerWidget {
                       children: [
                         if (scale <= 1.3)
                           Text(
-                            homeGreeting(
-                              ref.watch(homePhaseClockProvider).value,
-                            ).toUpperCase(),
+                            homeGreeting(ref.watch(homeClockProvider)()),
                             key: const ValueKey('home-greeting'),
                             style: TextStyle(
-                              fontSize: 10,
-                              letterSpacing: .7,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              letterSpacing: 0,
+                              fontWeight: FontWeight.w600,
                               color: dark
                                   ? Colors.white70
-                                  : const Color(0xFF436187),
+                                  : const Color(0xFF5D5D5D),
                             ),
                           ),
                         Tooltip(
@@ -152,10 +157,10 @@ class HomeScreen extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w600,
                               color: dark
                                   ? Colors.white
-                                  : const Color(0xFF0C1933),
+                                  : const Color(0xFF181818),
                             ),
                           ),
                         ),
@@ -195,7 +200,7 @@ class HomeScreen extends ConsumerWidget {
                           offset: const Offset(0, -4),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16),
                               boxShadow: homeDepthShadows(
                                 context,
                                 blur: 18,
@@ -204,7 +209,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                             child: Material(
                               color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(32),
+                              borderRadius: BorderRadius.circular(16),
                               clipBehavior: Clip.antiAlias,
                               child: InkWell(
                                 onTap: () => context.go('/search', extra: true),
@@ -217,23 +222,31 @@ class HomeScreen extends ConsumerWidget {
                                     children: [
                                       Icon(
                                         Icons.search,
-                                        color: Theme.of(context).colorScheme.onSurface,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
                                         child: Text(
-                                          'Search subjects, topics or files',
+                                          'Search academic resources',
                                           style: TextStyle(
-                                            color: Theme.of(context).colorScheme.onSurface,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
                                             fontSize: 13,
                                           ),
                                         ),
                                       ),
-                                      IconButton(tooltip: 'Scan a document',
-                                        onPressed: () => context.push('/create-pdf'),
+                                      IconButton(
+                                        tooltip: 'Scan a document',
+                                        onPressed: () =>
+                                            context.push('/create-pdf'),
                                         icon: Icon(
                                           Icons.document_scanner_outlined,
-                                          color: Theme.of(context).colorScheme.onSurface,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                         ),
                                       ),
                                     ],
@@ -258,7 +271,7 @@ class HomeScreen extends ConsumerWidget {
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontSize: 18,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w600,
                                     ),
                               ),
                             ),
@@ -274,7 +287,6 @@ class HomeScreen extends ConsumerWidget {
                             title: 'Study Library',
                             subtitle: 'Your academic library',
                             icon: Icons.menu_book_outlined,
-                            art: 'books',
                             black: true,
                             onTap: () => context.go('/study'),
                           ),
@@ -282,15 +294,14 @@ class HomeScreen extends ConsumerWidget {
                             title: 'Office Workspace',
                             subtitle: 'Scan, read & create',
                             icon: Icons.document_scanner_outlined,
-                            art: 'papers',
                             onTap: () => context.go('/pdf-studio'),
                           ),
-                        ], 116),
+                        ]),
                         const Gap(14),
                         Text(
                           'Others',
                           style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const Gap(8),
                         Row(
@@ -380,107 +391,42 @@ class _ReferenceCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
-    required this.art,
     required this.onTap,
     this.black = false,
   });
-  final String title, subtitle, art;
+  final String title, subtitle;
   final IconData icon;
   final VoidCallback onTap;
   final bool black;
   @override
   Widget build(BuildContext context) {
-    final ink = black || Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
-    return Semantics(
-      button: true,
-      label: title,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          gradient: black
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF0D2F5C),
-                    Color(0xFF174E8B),
-                    Color(0xFF91B7D8),
-                  ],
-                  stops: [0, .58, 1],
-                )
-              : null,
-          boxShadow: homeDepthShadows(context, blur: 16, y: 8),
-        ),
-        child: Material(
-          color: black
-              ? Colors.transparent
-              : (Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF212123)
-                    : Colors.white),
-          borderRadius: BorderRadius.circular(26),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -6,
-                  bottom: -8,
-                  child: ExcludeSemantics(
-                    child: Image.asset(
-                      'assets/home/$art.webp',
-                      width: 58,
-                      height: 60,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(13, 11, 13, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(icon, color: ink, size: 25),
-                          const Spacer(),
-                          Icon(Icons.arrow_outward, color: ink, size: 17),
-                        ],
-                      ),
-                      const Spacer(),
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          height: 1.2,
-                        ),
-                      ),
-                      const Gap(4),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 56),
-                        child: Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: ink.withValues(alpha: .72),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    final t = Theme.of(context);
+    final ink = black ? Colors.white : t.colorScheme.onSurface;
+    return HCard(
+      onTap: onTap,
+      semanticLabel: title,
+      color: black ? const Color(0xFF111111) : null,
+      shadow: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: ink, size: 20),
+              const Spacer(),
+              Icon(Icons.arrow_outward, color: ink, size: 16),
+            ],
+          ),
+          const Gap(12),
+          Text(title, style: t.textTheme.titleLarge?.copyWith(color: ink)),
+          const Gap(4),
+          Text(
+            subtitle,
+            style: t.textTheme.bodySmall?.copyWith(
+              color: black ? Colors.white70 : t.colorScheme.onSurfaceVariant,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -499,60 +445,59 @@ class _CompactHomeLink extends StatelessWidget {
   final List<String> badges;
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: homeDepthShadows(context, blur: 11, y: 5, opacity: .85),
       ),
       child: Material(
         color: Theme.of(context).colorScheme.surface,
-        elevation: dark ? 0 : 2,
-        borderRadius: BorderRadius.circular(17),
+        elevation: 0,
+        borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height:
-              ((68 + 12 * badges.length) *
-                      MediaQuery.textScalerOf(context).scale(1))
-                  .clamp(68.0, 260.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 25,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+          onTap: onTap,
+          child: SizedBox(
+            height:
+                ((68 + 12 * badges.length) *
+                        MediaQuery.textScalerOf(context).scale(1))
+                    .clamp(68.0, 260.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-                for (final badge in badges)
+                  const SizedBox(height: 6),
                   Text(
-                    badge,
+                    label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-              ],
+                  for (final badge in badges)
+                    Text(
+                      badge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );

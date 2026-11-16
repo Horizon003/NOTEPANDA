@@ -1915,7 +1915,7 @@ class _ThemeState extends ConsumerState<AdminThemeScreen> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

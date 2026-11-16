@@ -125,8 +125,7 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
             ),
           ),
         ),
-        if (all.isEmpty)
-          const SliverToBoxAdapter(child: _EmptyWorkspace()),
+        if (all.isEmpty) const SliverToBoxAdapter(child: _EmptyWorkspace()),
         if (all.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: Padding(
@@ -136,7 +135,7 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
                 style: TextStyle(
                   color: OfficeColors.ink(context),
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -202,7 +201,7 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
                 style: TextStyle(
                   color: OfficeColors.ink(context),
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -289,7 +288,7 @@ class _FileRow extends ConsumerWidget {
                         const Icon(
                           Icons.star_rounded,
                           size: 17,
-                          color: Color(0xFFF5A524),
+                          color: Color(0xFFADADAD),
                         ),
                       ],
                     ],
@@ -344,15 +343,15 @@ class _OfficeSearch extends StatelessWidget {
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(vertical: 13),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: OfficeColors.divider(context)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: OfficeColors.divider(context)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: OfficeColors.blue, width: 1.6),
       ),
     ),
@@ -421,7 +420,7 @@ class _EmptyWorkspace extends StatelessWidget {
           style: TextStyle(
             color: OfficeColors.ink(context),
             fontSize: 20,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 6),

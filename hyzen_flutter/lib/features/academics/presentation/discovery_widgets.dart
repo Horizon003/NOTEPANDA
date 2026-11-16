@@ -57,7 +57,7 @@ class LibraryShortcuts extends ConsumerWidget {
                   style: t.textTheme.labelSmall?.copyWith(
                     fontSize: 11,
                     letterSpacing: 0,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 3),

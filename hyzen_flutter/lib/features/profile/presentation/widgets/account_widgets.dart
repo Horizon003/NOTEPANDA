@@ -12,7 +12,7 @@ abstract final class AccountStyle {
   static const raised = Color(0xFF38383D);
   static const secondary = Color(0xFFA7A7AE);
   static const destructive = Color(0xFFFF6053);
-  static const link = Color(0xFF72BEF1);
+  static const link = Color(0xFFB2B2B2);
   static const divider = Color(0xFF454549);
 
   static bool isDark(BuildContext context) =>
@@ -24,7 +24,7 @@ abstract final class AccountStyle {
   static Color secondaryOf(BuildContext context) =>
       isDark(context) ? secondary : const Color(0xFF626269);
   static Color linkOf(BuildContext context) =>
-      isDark(context) ? link : const Color(0xFF1976C9);
+      isDark(context) ? link : const Color(0xFF686868);
   static Color avatarOf(BuildContext context) =>
       isDark(context) ? const Color(0xFF1D1D20) : const Color(0xFFE9EAED);
 
@@ -71,7 +71,7 @@ abstract final class AccountStyle {
       dialogTheme: base.dialogTheme.copyWith(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       bottomSheetTheme: base.bottomSheetTheme.copyWith(
         backgroundColor: surface,
@@ -101,7 +101,7 @@ abstract final class AccountStyle {
         hintStyle: TextStyle(color: muted),
         labelStyle: TextStyle(color: muted),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
       ),
@@ -152,7 +152,7 @@ class AccountPage extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: close ? 23 : 28,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: -.8,
                     ),
                   ),
@@ -245,7 +245,7 @@ class SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) => Material(
     color: AccountStyle.cardOf(context, elevated: raised),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(16),
       side: AccountStyle.isDark(context)
           ? BorderSide.none
           : const BorderSide(color: Color(0xFFE6E6E8)),
@@ -304,7 +304,7 @@ class SettingsRow extends StatelessWidget {
                       color: destructive
                           ? Theme.of(context).colorScheme.error
                           : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
                   ),
@@ -420,7 +420,7 @@ class AccountProfileCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 19,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -481,15 +481,15 @@ class RoundedPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FilledButton(
     style: FilledButton.styleFrom(
-      minimumSize: const Size(double.infinity, 58),
+      minimumSize: const Size(0, 48),
       backgroundColor: AccountStyle.isDark(context)
           ? Colors.white
           : HColors.ink,
       foregroundColor: AccountStyle.isDark(context)
           ? Colors.black
           : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
     ),
     onPressed: loading ? null : onPressed,
     child: Padding(
@@ -580,7 +580,7 @@ class AccountToggle extends StatelessWidget {
                       color: AccountStyle.isDark(context)
                           ? AccountStyle.raised
                           : const Color(0xFFE1E1E5),
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(16),
                       border: Focus.of(context).hasFocus
                           ? Border.all(
                               color: AccountStyle.linkOf(context),

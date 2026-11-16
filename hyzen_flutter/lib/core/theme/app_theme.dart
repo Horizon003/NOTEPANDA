@@ -14,7 +14,7 @@ class AppTheme {
         fontFamily: f,
         fontSize: 26,
         height: 1.15,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w600,
         color: ink,
         letterSpacing: -0.6,
       ),
@@ -22,7 +22,7 @@ class AppTheme {
         fontFamily: f,
         fontSize: 21,
         height: 1.2,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w600,
         color: ink,
         letterSpacing: -0.4,
       ),
@@ -30,7 +30,7 @@ class AppTheme {
         fontFamily: f,
         fontSize: 18,
         height: 1.25,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: ink,
         letterSpacing: -0.2,
       ),
@@ -38,21 +38,21 @@ class AppTheme {
         fontFamily: f,
         fontSize: 15,
         height: 1.3,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: ink,
       ),
       titleMedium: TextStyle(
         fontFamily: f,
         fontSize: 13,
         height: 1.35,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: ink,
       ),
       titleSmall: TextStyle(
         fontFamily: f,
         fontSize: 13,
         height: 1.35,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: ink,
       ),
       bodyLarge: TextStyle(
@@ -64,14 +64,14 @@ class AppTheme {
       ),
       bodyMedium: TextStyle(
         fontFamily: f,
-        fontSize: 12,
+        fontSize: 13,
         height: 1.4,
-        fontWeight: FontWeight.w500,
-        color: ink2,
+        fontWeight: FontWeight.w400,
+        color: ink,
       ),
       bodySmall: TextStyle(
         fontFamily: f,
-        fontSize: 11,
+        fontSize: 13,
         height: 1.45,
         fontWeight: FontWeight.w500,
         color: ink2,
@@ -79,7 +79,7 @@ class AppTheme {
       labelLarge: TextStyle(
         fontFamily: f,
         fontSize: 13,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: ink,
         letterSpacing: 0.1,
       ),
@@ -91,10 +91,10 @@ class AppTheme {
       ),
       labelSmall: TextStyle(
         fontFamily: f,
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
         color: ink2,
-        letterSpacing: 0.6,
+        letterSpacing: 0,
       ),
     );
   }
@@ -108,44 +108,45 @@ class AppTheme {
     final dark = b == Brightness.dark;
     final ink = dark ? HColors.darkInk : HColors.ink;
     final ink2 = dark ? HColors.darkInk2 : HColors.ink2;
-    final generated = ColorScheme.fromSeed(seedColor: seed, brightness: b);
-    final isBrand = seed.toARGB32() == HColors.primary.toARGB32();
+    // Explicit neutral scheme: Material seed generation introduces hue even
+    // when the seed is grey. Legacy palette preferences remain stored.
     final bg = dark ? HColors.darkBackground : HColors.background;
     final surface = dark ? HColors.darkSurface : HColors.surface;
-    final primary = dark
-        ? (isBrand ? HColors.darkPrimary : generated.primary)
-        : seed;
-    final container = dark
-        ? Color.alphaBlend(primary.withValues(alpha: .18), HColors.darkSurface)
-        : (isBrand
-              ? HColors.primarySoft
-              : Color.alphaBlend(seed.withValues(alpha: .14), Colors.white));
-    final scheme = generated.copyWith(
+    final primary = dark ? HColors.darkPrimary : HColors.primary;
+    final container = dark ? HColors.darkSurfaceAlt : HColors.surfaceAlt;
+    final scheme = ColorScheme(
+      brightness: b,
       primary: primary,
-      onPrimary: dark ? HColors.ink : Colors.white,
+      onPrimary: dark ? Colors.black : Colors.white,
       primaryContainer: container,
-      onPrimaryContainer: dark ? HColors.darkInk : HColors.slate,
-      secondary: dark ? HColors.darkInk2 : HColors.slate,
+      onPrimaryContainer: ink,
+      secondary: ink2,
+      onSecondary: dark ? Colors.black : Colors.white,
       secondaryContainer: container,
       onSecondaryContainer: ink,
-      onSecondary: dark ? HColors.slateDeep : Colors.white,
+      tertiary: ink2,
+      onTertiary: dark ? Colors.black : Colors.white,
+      tertiaryContainer: container,
+      onTertiaryContainer: ink,
       surface: surface,
       onSurface: ink,
       onSurfaceVariant: ink2,
-      surfaceContainerLowest: dark ? HColors.darkSurface : Colors.white,
-      surfaceContainerLow: dark ? HColors.darkSurfaceAlt : HColors.surfaceAlt,
-      surfaceContainer: dark ? HColors.darkSurfaceAlt : HColors.surfaceAlt,
+      surfaceContainerLowest: bg,
+      surfaceContainerLow: surface,
+      surfaceContainer: container,
       surfaceContainerHigh: dark
-          ? const Color(0xFF323232)
-          : const Color(0xFFE6E6E4),
+          ? const Color(0xFF303030)
+          : const Color(0xFFEEEEEE),
       surfaceContainerHighest: dark
-          ? const Color(0xFF3B3B3B)
-          : const Color(0xFFDCDCD9),
-      error: HColors.error,
-      outline: dark ? const Color(0x33FFFFFF) : HColors.outlineStrong,
-      outlineVariant: dark ? const Color(0x1FFFFFFF) : HColors.outline,
-      inverseSurface: dark ? HColors.darkInk : HColors.slate,
-      onInverseSurface: dark ? HColors.slate : Colors.white,
+          ? const Color(0xFF383838)
+          : const Color(0xFFE5E5E5),
+      surfaceTint: Colors.transparent,
+      error: dark ? const Color(0xFFFFB4AB) : HColors.error,
+      onError: dark ? Colors.black : Colors.white,
+      outline: dark ? const Color(0xFF737373) : HColors.outlineStrong,
+      outlineVariant: dark ? const Color(0xFF333333) : HColors.outline,
+      inverseSurface: dark ? Colors.white : HColors.ink,
+      onInverseSurface: dark ? Colors.black : Colors.white,
     );
     final text = _text(ink, ink2);
     final border = OutlineInputBorder(
@@ -159,6 +160,16 @@ class AppTheme {
       fontFamily: fontFamily,
       scaffoldBackgroundColor: bg,
       textTheme: text,
+      iconTheme: IconThemeData(size: 20, color: ink2),
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        minLeadingWidth: 24,
+        horizontalTitleGap: 12,
+        minVerticalPadding: 8,
+        iconColor: ink2,
+        titleTextStyle: text.bodyLarge,
+        subtitleTextStyle: text.bodyMedium,
+      ),
       splashFactory: InkRipple.splashFactory,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -213,9 +224,9 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(0, 44),
+          minimumSize: const Size(0, 48),
           textStyle: text.labelLarge?.copyWith(fontSize: 14),
-          elevation: 1,
+          elevation: 0,
           shadowColor: dark ? Colors.black87 : Colors.black26,
           shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.md)),
         ),
@@ -228,7 +239,7 @@ class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? Colors.white : null,
+          (s) => s.contains(WidgetState.selected) ? scheme.onPrimary : null,
         ),
         trackColor: WidgetStateProperty.resolveWith(
           (s) => s.contains(WidgetState.selected) ? scheme.primary : null,
@@ -252,10 +263,10 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(0, 44),
+          minimumSize: const Size(0, 48),
           foregroundColor: ink,
           textStyle: text.labelLarge,
-          elevation: 1,
+          elevation: 0,
           shadowColor: dark ? Colors.black87 : Colors.black26,
           side: BorderSide(color: scheme.outline),
           shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.md)),
@@ -263,7 +274,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          minimumSize: const Size(48, 44),
+          minimumSize: const Size(48, 48),
           textStyle: text.labelLarge?.copyWith(fontSize: 14),
         ),
       ),
@@ -280,13 +291,13 @@ class AppTheme {
           (s) => text.labelSmall!.copyWith(
             color: s.contains(WidgetState.selected) ? scheme.primary : ink2,
             fontWeight: s.contains(WidgetState.selected)
-                ? FontWeight.w800
+                ? FontWeight.w600
                 : FontWeight.w500,
           ),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (s) => IconThemeData(
-            size: 27,
+            size: 20,
             color: s.contains(WidgetState.selected) ? scheme.primary : ink2,
           ),
         ),
@@ -296,7 +307,7 @@ class AppTheme {
         style: IconButton.styleFrom(
           backgroundColor: dark ? HColors.darkSurfaceAlt : Colors.white,
           foregroundColor: ink,
-          minimumSize: const Size(42, 42),
+          minimumSize: const Size(48, 48),
           shape: const CircleBorder(),
         ),
       ),
@@ -321,9 +332,34 @@ class AppTheme {
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.android: HyzenPageTransitions(),
+          TargetPlatform.iOS: HyzenPageTransitions(),
         },
+      ),
+    );
+  }
+}
+
+/// Small route transform, with no work on the child subtree during a frame.
+class HyzenPageTransitions extends PageTransitionsBuilder {
+  const HyzenPageTransitions();
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    final eased = animation.drive(CurveTween(curve: HMotion.curve));
+    return FadeTransition(
+      opacity: eased,
+      child: SlideTransition(
+        position: eased.drive(
+          Tween(begin: const Offset(.025, 0), end: Offset.zero),
+        ),
+        child: child,
       ),
     );
   }

@@ -142,7 +142,7 @@ class _ProfilePromotionsState extends ConsumerState<ProfilePromotions> {
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w600,
                                     letterSpacing: 1.2,
                                   ),
                                 ),
@@ -155,7 +155,7 @@ class _ProfilePromotionsState extends ConsumerState<ProfilePromotions> {
                                   color: overlay
                                       ? Colors.white
                                       : theme.colorScheme.onSurface,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               if (slide.subtitle.isNotEmpty)

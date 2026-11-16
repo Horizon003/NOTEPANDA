@@ -7,50 +7,50 @@ import 'package:flutter/material.dart';
 class HColors {
   HColors._();
   // Brand
-  static const primary = Color(0xFF174E8B);
-  static const primaryDeep = Color(0xFF0D2F5C);
-  static const primarySoft = Color(0xFFE6F0FC);
-  static const slate = Color(0xFF1B3557);
-  static const slateDeep = Color(0xFF0C1933);
-  static const teal = Color(0xFF087F76);
-  static const mint = Color(0xFF5FD1C1);
+  static const primary = Color(0xFF111111);
+  static const primaryDeep = Color(0xFF171717);
+  static const primarySoft = Color(0xFFF2F2F2);
+  static const slate = Color(0xFF242424);
+  static const slateDeep = Color(0xFF101010);
+  static const teal = Color(0xFF363636);
+  static const mint = Color(0xFFD4D4D4);
   static const onPrimary = Colors.white;
 
   // Ink
-  static const ink = Color(0xFF1C1C1E);
-  static const ink2 = Color(0xFF626262);
-  static const ink3 = Color(0xFF8C8C8C);
+  static const ink = Color(0xFF111111);
+  static const ink2 = Color(0xFF616161);
+  static const ink3 = Color(0xFF737373);
 
   // Surfaces (light)
-  static const background = Color(0xFFEEF4FC);
-  static const surface = Color(0xFFF9FBFF);
-  static const surfaceAlt = Color(0xFFE7F0FB);
-  static const outline = Color(0xFFD1E0F1);
-  static const outlineStrong = Color(0xFF9DBBDE);
+  static const background = Color(0xFFFFFFFF);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceAlt = Color(0xFFF5F5F5);
+  static const outline = Color(0xFFE5E5E5);
+  static const outlineStrong = Color(0xFFB3B3B3);
 
   // Status
   static const success = Color(0xFF15885A);
   static const warning = Color(0xFFB7791F);
   static const error = Color(0xFFC0392B);
-  static const info = Color(0xFF2B6F9E);
+  static const info = Color(0xFF525252);
 
   // Dark
   static const darkBackground = Colors.black;
-  static const darkSurface = Color(0xFF191A1C);
-  static const darkSurfaceAlt = Color(0xFF25272B);
-  static const darkInk = Color(0xFFF7F9FC);
-  static const darkInk2 = Color(0xFFB8C0CC);
-  static const darkPrimary = Color(0xFF79BCFF);
+  static const darkSurface = Color(0xFF181818);
+  static const darkSurfaceAlt = Color(0xFF262626);
+  static const darkInk = Color(0xFFFFFFFF);
+  static const darkInk2 = Color(0xFFB8B8B8);
+  static const darkPrimary = Color(0xFFF5F5F5);
 
   /// Restrained module accents – used on small icon badges only.
-  static const notes = Color(0xFF1C1C1E);
-  static const mcqs = Color(0xFF2B6F9E);
-  static const papers = Color(0xFF3F7D4E);
-  static const special = Color(0xFFB0702A);
-  static const lectures = Color(0xFF8A4E6B);
+  static const notes = Color(0xFF111111);
+  static const mcqs = Color(0xFF525252);
+  static const papers = Color(0xFF525252);
+  static const special = Color(0xFF525252);
+  static const lectures = Color(0xFF525252);
 }
 
-/// 8-point rhythm.
+/// Four-point rhythm; touch targets remain at least 48dp.
 class HSpace {
   HSpace._();
   static const xxs = 4.0;
@@ -58,7 +58,7 @@ class HSpace {
   static const sm = 12.0;
   static const md = 16.0;
   static const lg = 20.0;
-  static const xl = 24.0;
+  static const xl = 20.0;
   static const xxl = 32.0;
   static const xxxl = 48.0;
   static const screen = 16.0;
@@ -67,9 +67,9 @@ class HSpace {
 class HRadius {
   HRadius._();
   static const sm = 10.0;
-  static const md = 14.0;
-  static const lg = 18.0;
-  static const xl = 24.0;
+  static const md = 12.0;
+  static const lg = 16.0;
+  static const xl = 20.0;
   static const pill = 999.0;
   static BorderRadius all(double r) => BorderRadius.circular(r);
 }
@@ -79,19 +79,21 @@ class HMotion {
   static const fast = Duration(milliseconds: 160);
   static const medium = Duration(milliseconds: 240);
   static const slow = Duration(milliseconds: 360);
-  static const curve = Curves.easeOutCubic;
+  static const curve = Cubic(0.22, 1, 0.36, 1);
+  static Duration duration(BuildContext context, [Duration value = fast]) =>
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : value;
 }
 
 class HShadow {
   HShadow._();
   static const soft = [
-    BoxShadow(color: Color(0x0D1A1A1A), blurRadius: 16, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x0D1A1A1A), blurRadius: 4, offset: Offset(0, 1)),
   ];
   static const lifted = [
-    BoxShadow(color: Color(0x161A1A1A), blurRadius: 28, offset: Offset(0, 10)),
+    BoxShadow(color: Color(0x161A1A1A), blurRadius: 12, offset: Offset(0, 4)),
   ];
   static const glow = [
-    BoxShadow(color: Color(0x261C1C1E), blurRadius: 22, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x261C1C1E), blurRadius: 4, offset: Offset(0, 1)),
   ];
 }
 
@@ -99,7 +101,7 @@ class HShadow {
 const hSlateGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
-  colors: [Color(0xFF111111), Color(0xFF292929), Color(0xFF4A4A4A)],
+  colors: [Color(0xFF111111), Color(0xFF111111), Color(0xFF111111)],
   stops: [0, .62, 1],
 );
 

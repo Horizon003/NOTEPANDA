@@ -19,7 +19,7 @@ class SplashScreen extends StatelessWidget {
               'PHARM D',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: HColors.primary,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const Text('WITH HYZEN · Your pharmacy journey'),
@@ -97,7 +97,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           'PHARM D',
                           style: t.textTheme.headlineMedium?.copyWith(
                             color: t.colorScheme.primary,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const Text('WITH HYZEN · Your pharmacy journey'),
@@ -121,24 +121,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ? Column(
                               children: [
                                 Container(
-                                  height: (c.maxHeight * .52).clamp(170, 380),
+                                  height: (c.maxHeight * .36).clamp(120, 240),
                                   width: double.infinity,
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(36),
-                                    gradient: RadialGradient(
-                                      center: const Alignment(0, -.2),
-                                      radius: .95,
-                                      colors: t.brightness == Brightness.dark
-                                          ? const [
-                                              Color(0xFF454548),
-                                              Color(0xFF19191B),
-                                            ]
-                                          : const [
-                                              Color(0xFFFAFAFA),
-                                              Color(0xFFE2E2E5),
-                                            ],
-                                    ),
+                                    color: t.colorScheme.surfaceContainer,
                                   ),
                                   child: const HyzenRiveMascot(
                                     state: HyzenRiveState.welcome,
@@ -152,7 +140,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   padding: const EdgeInsets.all(22),
                                   decoration: BoxDecoration(
                                     color: t.colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(30),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -161,7 +149,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                       Text(
                                         'Your Brain',
                                         style: t.textTheme.displaySmall
-                                            ?.copyWith(fontSize: 36),
+                                            ?.copyWith(fontSize: 24),
                                       ),
                                       Text(
                                         'Called. It wants more 👋',
@@ -194,7 +182,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   item.$2,
                                   textAlign: TextAlign.center,
                                   style: t.textTheme.displaySmall?.copyWith(
-                                    fontSize: 29,
+                                    fontSize: 24,
                                   ),
                                 ),
                                 const SizedBox(height: 16),

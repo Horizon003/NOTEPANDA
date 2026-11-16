@@ -15,8 +15,8 @@ import '../data/studio_pdf_engine.dart';
 /// Neutral document surfaces matching the home and study hierarchy.
 class OfficeColors {
   OfficeColors._();
-  static const blue = Color(0xFF1473E6);
-  static const navy = Color(0xFF0B3A8F);
+  static const blue = Color(0xFF737373);
+  static const navy = Color(0xFF333333);
   static bool dark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
   static Color canvas(BuildContext c) =>
       dark(c) ? const Color(0xFF1B1B1D) : const Color(0xFFEEF0F3);
@@ -99,7 +99,7 @@ class OfficeBrandHeader extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: OfficeColors.ink(context),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       fontSize: 16.5,
                       letterSpacing: -.1,
                     ),
@@ -223,7 +223,7 @@ ButtonStyle officePrimaryStyle() => FilledButton.styleFrom(
   textStyle: const TextStyle(
     fontFamily: 'Manrope',
     fontSize: 14,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
   ),
 );
 
@@ -239,7 +239,7 @@ ButtonStyle officeOutlineStyle(BuildContext context) =>
       textStyle: const TextStyle(
         fontFamily: 'Manrope',
         fontSize: 14,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
       ),
     );
 

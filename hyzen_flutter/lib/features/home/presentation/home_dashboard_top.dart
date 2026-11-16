@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/surfaces.dart';
+import '../../../core/widgets/rive_mascot.dart';
 import '../../study_progress/study_tracker.dart';
 import '../../study_progress/campus_rank_screen.dart';
-import 'home_time_artwork.dart';
-import 'home_visuals.dart';
 
-const _blue = Color(0xFF174E8B);
-
-/// Native Flutter reconstruction of the approved Home dashboard summary.
+/// Content-driven study summary. The panda is the only decorative element.
 class HomeDashboardTop extends ConsumerWidget {
   const HomeDashboardTop({super.key, required this.year});
   final int? year;
@@ -16,297 +15,128 @@ class HomeDashboardTop extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = ref.watch(studyTrackerProvider);
-    final weeklyBoard = ref.watch(campusBoardProvider('week')).valueOrNull;
-    final rank = weeklyBoard?.mine?.rank;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final text = dark ? Colors.white : const Color(0xFF091936);
-    final percent = (p.todaySeconds / (p.dailyGoal * 60))
-        .clamp(0.0, 1.0)
-        .toDouble();
-    final progressColor = dark ? const Color(0xFF79BCFF) : _blue;
-    final heroHeight =
-        180 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 4.0);
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 9, 16, 0),
-          child: Material(
-            color: dark ? const Color(0xFF191A1C) : const Color(0xFFF9FBFF),
-            borderRadius: BorderRadius.circular(26),
-            elevation: dark ? 0 : 2,
-            shadowColor: dark ? Colors.black87 : Colors.black26,
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: () => context.push('/study-progress'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+    final board = ref.watch(campusBoardProvider('week')).valueOrNull;
+    final t = Theme.of(context);
+    final percent = (p.todaySeconds / (p.dailyGoal * 60)).clamp(0.0, 1.0);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          HCard(
+            shadow: false,
+            onTap: () => context.push('/study-progress'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Study Time', style: t.textTheme.bodyMedium),
+                const SizedBox(height: 4),
+                Text(
+                  formatStudyTime(p.todaySeconds),
+                  style: t.textTheme.headlineMedium,
                 ),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: dark
-                        ? const Color(0xFF323C4B)
-                        : const Color(0xFF9DBBDE),
-                  ),
-                  borderRadius: BorderRadius.circular(26),
+                const SizedBox(height: 12),
+                LinearProgressIndicator(
+                  value: percent,
+                  minHeight: 4,
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                child: Row(
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 4,
                   children: [
-                    SizedBox(
-                      width: 42,
-                      height: 42,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: percent,
-                              strokeWidth: 6,
-                              strokeCap: StrokeCap.round,
-                              color: progressColor,
-                              backgroundColor: dark
-                                  ? Colors.white24
-                                  : const Color(0xFFD2DFEF),
-                            ),
-                          ),
-                          Icon(
-                            Icons.menu_book_rounded,
-                            color: progressColor,
-                            size: 26,
-                          ),
-                        ],
-                      ),
+                    Text(
+                      'Daily Goal · ${p.dailyGoal ~/ 60}h ${p.dailyGoal % 60}m',
+                      style: t.textTheme.bodyMedium,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Study Time',
-                            style: TextStyle(
-                              color: text,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              formatStudyTime(p.todaySeconds),
-                              style: TextStyle(
-                                color: text,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 54,
-                      color: dark ? Colors.white24 : const Color(0xFF9DACBF),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.gps_fixed_rounded,
-                                size: 17,
-                                color: progressColor,
-                              ),
-                              const SizedBox(width: 5),
-                              Flexible(
-                                child: Text(
-                                  'Daily Goal',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: text,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '${p.dailyGoal ~/ 60}h ${(p.dailyGoal % 60).toString().padLeft(2, '0')}m',
-                            style: TextStyle(
-                              color: text,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 7),
-                          LinearProgressIndicator(
-                            value: percent,
-                            color: progressColor,
-                            minHeight: 5,
-                            borderRadius: BorderRadius.circular(6),
-                            backgroundColor: dark
-                                ? Colors.white24
-                                : const Color(0xFFD3E0F0),
-                          ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              '${(percent * 100).round()}%',
-                              style: TextStyle(
-                                color: text,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    Text(
+                      '${(percent * 100).round()}%',
+                      style: t.textTheme.labelMedium,
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: _StatTile(
+          const SizedBox(height: 8),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow =
+                  constraints.maxWidth < 340 &&
+                  MediaQuery.textScalerOf(context).scale(1) > 1.3;
+              final tiles = [
+                _StatTile(
                   value: '${p.currentStreak} Days',
                   label: 'Study Streak',
-                  icon: Icons.local_fire_department_rounded,
-                  tint: const Color(0xFFFF923D),
                   onTap: () => context.push('/study-streak'),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatTile(
-                  value: rank == null
+                _StatTile(
+                  value: board?.mine?.rank == null
                       ? '—'
-                      : '#$rank${weeklyBoard!.cached ? '*' : ''}',
-                  label: weeklyBoard?.cached == true
-                      ? 'Saved rank'
-                      : 'Prof. Rank',
-                  icon: Icons.emoji_events_rounded,
-                  tint: const Color(0xFFE3B22E),
+                      : '#${board!.mine!.rank}${board.cached ? '*' : ''}',
+                  label: board?.cached == true ? 'Saved rank' : 'Prof. Rank',
                   onTap: () => context.push('/campus-rank'),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatTile(
+                _StatTile(
                   value:
                       '${p.weekSeconds ~/ 3600}h ${(p.weekSeconds ~/ 60) % 60}m',
                   label: 'This Week',
-                  icon: Icons.track_changes_rounded,
-                  tint: progressColor,
                   onTap: () => context.push('/study-goals'),
                 ),
-              ),
-            ],
+              ];
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final tile in tiles)
+                    SizedBox(
+                      width: narrow
+                          ? constraints.maxWidth
+                          : (constraints.maxWidth - 16) / 3,
+                      child: tile,
+                    ),
+                ],
+              );
+            },
           ),
-        ),
-        const SizedBox(height: 6),
-        HomePhaseArtwork(
-          height: heroHeight,
-          builder: (context, phase) => Stack(
-              children: [
-                Positioned.fill(
-                  child: HomeLandscape(
-                    phase: phase,
-                    height: heroHeight,
-                    key: const ValueKey('home-hero-art'),
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  left: 12,
-                  right: 12,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: FilledButton.icon(
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FilledButton.icon(
                       key: const ValueKey('home-continue-study'),
                       onPressed: () {
                         p.start();
                         context.go('/study');
                       },
-                      icon: const Icon(Icons.play_arrow_rounded, size: 19),
+                      icon: const Icon(Icons.play_arrow_rounded, size: 18),
                       label: const Text('Continue to Study'),
-                      style: FilledButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: dark ? const Color(0xFF21588F) : _blue,
-                        elevation: dark ? 2 : 3,
-                        shadowColor: dark ? Colors.black87 : Colors.black38,
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 11,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    TextButton.icon(
+                      key: const ValueKey('home-professional-badge'),
+                      onPressed: () => context.push('/profile'),
+                      icon: const Icon(Icons.school_outlined, size: 18),
+                      label: Text(
+                        year == null
+                            ? 'Your academic year'
+                            : 'Pharm D · Year $year',
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                Positioned(
-                  left: 12,
-                  bottom: 4,
-                  child: Material(
-                    key: const ValueKey('home-professional-badge'),
-                    color: dark
-                        ? const Color(0xEE152338)
-                        : const Color(0xEFFFFFFF),
-                    borderRadius: BorderRadius.circular(20),
-                    elevation: dark ? 1 : 2,
-                    shadowColor: dark ? Colors.black87 : Colors.black26,
-                    child: InkWell(
-                      onTap: () => context.push('/profile'),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 11,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.school_outlined,
-                              size: 17,
-                              color: dark ? Colors.white : _blue,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              year == null
-                                  ? 'Your academic year'
-                                  : 'Pharm D · Year $year',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 11,
-                                color: dark
-                                    ? Colors.white
-                                    : const Color(0xFF142C4F),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
+              if (MediaQuery.textScalerOf(context).scale(1) <= 1.3)
+                const HyzenRiveMascot(state: HyzenRiveState.studying, size: 64),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -315,70 +145,22 @@ class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.value,
     required this.label,
-    required this.icon,
-    required this.tint,
     required this.onTap,
   });
   final String value, label;
-  final IconData icon;
-  final Color tint;
   final VoidCallback onTap;
-
   @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: homeDepthShadows(context, blur: 10, y: 4, opacity: .9),
-      ),
-      child: Material(
-        color: dark ? const Color(0xFF1C1D20) : const Color(0xFFF7FAFF),
-        borderRadius: BorderRadius.circular(18),
-        clipBehavior: Clip.antiAlias,
-        elevation: dark ? 0 : 2,
-        child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(icon, size: 19, color: tint),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          value,
-                          maxLines: 1,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  label,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 10),
-                ),
-              ],
-            ),
-          ),
-        ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => HCard(
+    onTap: onTap,
+    shadow: false,
+    padding: const EdgeInsets.all(HSpace.sm),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 4),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    ),
+  );
 }

@@ -176,7 +176,7 @@ class TextSizeNotifier extends Notifier<int> {
   @override
   int build() {
     final value = ref.watch(sharedPrefsProvider).getInt('app_text_size');
-    return sizes.contains(value) ? value! : 8;
+    return sizes.contains(value) ? value! : 13;
   }
 
   Future<void> set(int value) async {

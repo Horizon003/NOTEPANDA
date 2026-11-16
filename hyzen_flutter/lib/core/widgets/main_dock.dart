@@ -29,11 +29,10 @@ class MainDock extends ConsumerWidget {
   final String path;
   final ValueChanged<DockDestination> onSelected;
 
-  static double height(BuildContext context) =>
-      48.0 + math.max(22.0, MediaQuery.textScalerOf(context).scale(11) * 2.4);
+  static double height(BuildContext context) => 64.0;
   static double contentInset(BuildContext context) =>
       height(context) * 1.25 +
-      16 +
+      12 +
       math.max(10.0, MediaQuery.viewPaddingOf(context).bottom);
 
   @override
@@ -58,15 +57,17 @@ class MainDock extends ConsumerWidget {
           child: Material(
             key: const ValueKey('main-dock'),
             color: dark ? Colors.black : Colors.white,
-            elevation: 3,
+            elevation: 0,
             shadowColor: Colors.black26,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(HRadius.pill),
-              side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(HRadius.md),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
             ),
             clipBehavior: Clip.antiAlias,
             child: SizedBox(
-              height: height(context) * size,
+              height: math.max(64, height(context) * size),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: LayoutBuilder(
@@ -117,6 +118,7 @@ class _DockItem extends StatelessWidget {
     final reduce = MediaQuery.disableAnimationsOf(context);
     final duration = reduce ? Duration.zero : HMotion.medium;
     final office = destination == DockDestination.office;
+    final iconOnly = MediaQuery.textScalerOf(context).scale(11) > 18;
     return Expanded(
       child: Tooltip(
         message: destination.label,
@@ -130,7 +132,7 @@ class _DockItem extends StatelessWidget {
           child: ExcludeSemantics(
             child: InkWell(
               onTap: onTap,
-              borderRadius: BorderRadius.circular(HRadius.pill),
+              borderRadius: BorderRadius.circular(HRadius.md),
               child: AnimatedContainer(
                 duration: duration,
                 curve: HMotion.curve,
@@ -138,7 +140,7 @@ class _DockItem extends StatelessWidget {
                   color: selected
                       ? ink.withValues(alpha: .12)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(HRadius.pill),
+                  borderRadius: BorderRadius.circular(HRadius.md),
                 ),
                 child: Center(
                   child: Column(
@@ -151,40 +153,39 @@ class _DockItem extends StatelessWidget {
                         duration: duration,
                         curve: HMotion.curve,
                         child: AnimatedScale(
-                          scale: !reduce && selected
-                              ? (office ? 1.10 : 1.05)
-                              : 1,
+                          scale: !reduce && selected ? 1.04 : 1,
                           duration: duration,
                           curve: HMotion.curve,
                           child: Icon(
                             destination.icon,
                             color: ink,
-                            size: 23 * size,
+                            size: 20 * size,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            office && compact ? 'Office' : destination.label,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            softWrap: false,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10.5 * size,
-                              height: 1.15,
-                              color: ink,
-                              fontWeight: selected
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
+                      if (!iconOnly) const SizedBox(height: 4),
+                      if (!iconOnly)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              office && compact ? 'Office' : destination.label,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10.5 * size,
+                                height: 1.15,
+                                color: ink,
+                                fontWeight: selected
+                                    ? FontWeight.w600
+                                    : FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -204,7 +205,7 @@ Future<void> showStudyMenu(BuildContext context) {
     barrierDismissible: true,
     barrierLabel: 'Close study menu',
     barrierColor: Colors.black12,
-    transitionDuration: const Duration(milliseconds: 160),
+    transitionDuration: HMotion.duration(context),
     transitionBuilder: (_, animation, __, child) => FadeTransition(
       opacity: animation,
       child: SlideTransition(

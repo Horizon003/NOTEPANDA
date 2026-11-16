@@ -6,85 +6,24 @@ import '../../features/content/data/content_providers.dart';
 import '../config/brand.dart';
 import '../theme/tokens.dart';
 import 'surfaces.dart';
+import 'press_feedback.dart';
 
 /// Keeps dense utility rows to one line while gently revealing long titles.
 /// Reduced-motion users receive a normal ellipsis instead of autoplaying text.
-class HMarqueeText extends StatefulWidget {
+class HMarqueeText extends StatelessWidget {
   const HMarqueeText(this.text, {super.key, this.style});
   final String text;
   final TextStyle? style;
-
   @override
-  State<HMarqueeText> createState() => _HMarqueeTextState();
-}
-
-class _HMarqueeTextState extends State<HMarqueeText>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 2600),
+  Widget build(BuildContext context) => Tooltip(
+    message: text,
+    child: Text(
+      text,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: style,
+    ),
   );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final style = DefaultTextStyle.of(context).style.merge(widget.style);
-    final reduced = MediaQuery.disableAnimationsOf(context);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final painter = TextPainter(
-          text: TextSpan(text: widget.text, style: style),
-          maxLines: 1,
-          textDirection: Directionality.of(context),
-          textScaler: MediaQuery.textScalerOf(context),
-        )..layout(maxWidth: double.infinity);
-        final distance = painter.width - constraints.maxWidth;
-        if (distance <= 1 || reduced) {
-          _controller.stop();
-          return Tooltip(
-            message: widget.text,
-            child: Text(
-              widget.text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: widget.style,
-            ),
-          );
-        }
-        final duration = Duration(
-          milliseconds: (5000 + distance * 35).round().clamp(5000, 30000),
-        );
-        if (_controller.duration != duration) {
-          _controller.stop();
-          _controller.duration = duration;
-        }
-        if (!_controller.isAnimating) _controller.repeat(reverse: true);
-        return ClipRect(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (_, child) => Transform.translate(
-              offset: Offset(-distance * _controller.value, 0),
-              child: child,
-            ),
-            child: SizedBox(
-              height: painter.height,
-              child: OverflowBox(
-                minWidth: painter.width,
-                maxWidth: painter.width,
-                alignment: Alignment.centerLeft,
-                child: Text(widget.text, maxLines: 1, style: widget.style),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
 
 /// Local brand mark: every square app-logo presentation shares a soft clip.
@@ -106,7 +45,7 @@ class HyzenBrandIcon extends StatelessWidget {
 }
 
 class HyzenLogo extends ConsumerWidget {
-  const HyzenLogo({super.key, this.size = 72, this.glow = true});
+  const HyzenLogo({super.key, this.size = 72, this.glow = false});
   final double size;
   final bool glow;
   @override
@@ -175,7 +114,7 @@ class HButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final child = AnimatedSwitcher(
-      duration: HMotion.fast,
+      duration: HMotion.duration(context),
       child: loading
           ? SizedBox(
               key: const ValueKey('l'),
@@ -204,9 +143,12 @@ class HButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: outlined
-          ? OutlinedButton(onPressed: cb, child: child)
-          : FilledButton(onPressed: cb, child: child),
+      child: HPressFeedback(
+        enabled: cb != null,
+        child: outlined
+            ? OutlinedButton(onPressed: cb, child: child)
+            : FilledButton(onPressed: cb, child: child),
+      ),
     );
   }
 }
@@ -359,7 +301,7 @@ class ErrorState extends StatelessWidget {
 }
 
 /// Lightweight shimmer-free skeleton (static pulse via opacity only).
-class Skeleton extends StatefulWidget {
+class Skeleton extends StatelessWidget {
   const Skeleton({
     super.key,
     this.height = 72,
@@ -370,38 +312,14 @@ class Skeleton extends StatefulWidget {
   final double? width;
   final double radius;
   @override
-  State<Skeleton> createState() => _SkeletonState();
-}
-
-class _SkeletonState extends State<Skeleton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final base = Theme.of(
-      context,
-    ).colorScheme.onSurface.withValues(alpha: 0.07);
-    return FadeTransition(
-      opacity: Tween(begin: 0.55, end: 1.0).animate(_c),
-      child: Container(
-        height: widget.height,
-        width: widget.width,
-        decoration: BoxDecoration(
-          color: base,
-          borderRadius: BorderRadius.circular(widget.radius),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    height: height,
+    width: width,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(radius),
+    ),
+  );
 }
 
 class SkeletonList extends StatelessWidget {
@@ -443,7 +361,7 @@ class SectionHeader extends StatelessWidget {
               title,
               style: t.textTheme.titleLarge?.copyWith(
                 fontSize: 16,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 letterSpacing: -.2,
               ),
             ),
@@ -461,7 +379,7 @@ class IconBadge extends StatelessWidget {
     super.key,
     required this.icon,
     required this.color,
-    this.size = 44,
+    this.size = 36,
   });
   final IconData icon;
   final Color color;

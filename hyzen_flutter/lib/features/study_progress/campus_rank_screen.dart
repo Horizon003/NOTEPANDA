@@ -7,10 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
-import '../home/presentation/home_time_artwork.dart';
 
-const _navy = Color(0xFF091C43);
-const _blue = Color(0xFF1B66B2);
+const _navy = Color(0xFF1B1B1B);
+const _blue = Color(0xFF5C5C5C);
 
 class CampusEntry {
   const CampusEntry(
@@ -282,7 +281,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
     final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 3.0);
     final dark = Theme.of(context).brightness == Brightness.dark;
     final ink = dark ? Colors.white : _navy;
-    final bg = dark ? Colors.black : const Color(0xFFEAF3FF);
+    final bg = dark ? Colors.black : const Color(0xFFF2F2F2);
     final surface = dark ? const Color(0xFF1B1C20) : Colors.white;
     final board = ref.watch(campusBoardProvider(period));
     final verifiedYear = board.valueOrNull?.academicYear;
@@ -291,9 +290,9 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: dark ? Colors.white12 : const Color(0xFFD3E2F3),
+          color: dark ? Colors.white12 : const Color(0xFFE0E0E0),
         ),
       ),
       child: content,
@@ -312,7 +311,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
               semanticsLabel: 'Professional Rank',
               style: TextStyle(
                 color: ink,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w600,
                 fontSize: 22,
               ),
             ),
@@ -349,25 +348,16 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
               height: 135 + 50 * (scale - 1),
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset(
-                      HomeTimePhase.at(DateTime.now()).asset,
-                      fit: BoxFit.cover,
+                    child: ColoredBox(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
                     ),
                   ),
-                  const Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xC7F0F6FF), Color(0x00FFFFFF)],
-                        ),
-                      ),
-                    ),
-                  ),
+
                   Positioned(
                     left: 16,
                     bottom: 16,
@@ -376,7 +366,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                       alignment: Alignment.bottomLeft,
                       child: Material(
                         color: const Color(0xEDFFFFFF),
-                        borderRadius: BorderRadius.circular(22),
+                        borderRadius: BorderRadius.circular(16),
                         child: Padding(
                           padding: const EdgeInsets.all(11),
                           child: Row(
@@ -392,7 +382,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                                   maxLines: 4,
                                   style: const TextStyle(
                                     color: _navy,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -474,7 +464,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                               'Your Rank',
                               style: TextStyle(
                                 color: ink,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -517,7 +507,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                           children: [
                             const Icon(
                               Icons.emoji_events_outlined,
-                              color: Color(0xFFE3B52A),
+                              color: Color(0xFFB5B5B5),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -525,7 +515,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                                 'Leaderboard',
                                 style: TextStyle(
                                   color: ink,
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w600,
                                   fontSize: 18,
                                 ),
                               ),
@@ -596,7 +586,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                 leading: const Icon(Icons.bar_chart_rounded, color: _blue),
                 title: Text(
                   'How Professional Rank Works?',
-                  style: TextStyle(fontWeight: FontWeight.w800, color: ink),
+                  style: TextStyle(fontWeight: FontWeight.w600, color: ink),
                 ),
                 subtitle: Text(
                   'Only verified active study and eligible students count.',
@@ -648,7 +638,7 @@ class _RankStat extends StatelessWidget {
     children: [
       Text(
         value,
-        style: TextStyle(color: ink, fontWeight: FontWeight.w900, fontSize: 17),
+        style: TextStyle(color: ink, fontWeight: FontWeight.w600, fontSize: 17),
       ),
       Text(
         label,
@@ -673,7 +663,7 @@ class _RankRow extends StatelessWidget {
     padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
       color: highlight
-          ? (dark ? const Color(0xFF13355C) : const Color(0xFFD1E7FF))
+          ? (dark ? const Color(0xFF313131) : const Color(0xFFE4E4E4))
           : (dark ? Colors.white10 : const Color(0xFFF4F7FE)),
       borderRadius: BorderRadius.circular(14),
     ),
@@ -683,7 +673,7 @@ class _RankRow extends StatelessWidget {
           width: 25,
           child: Text(
             '#${entry.rank}',
-            style: TextStyle(color: ink, fontWeight: FontWeight.w900),
+            style: TextStyle(color: ink, fontWeight: FontWeight.w600),
           ),
         ),
         const CircleAvatar(
@@ -697,7 +687,7 @@ class _RankRow extends StatelessWidget {
             children: [
               Text(
                 entry.name,
-                style: TextStyle(color: ink, fontWeight: FontWeight.w800),
+                style: TextStyle(color: ink, fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -727,7 +717,7 @@ class _RankRow extends StatelessWidget {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 10,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

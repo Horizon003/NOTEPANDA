@@ -42,7 +42,12 @@ Future<void> main() async {
   if (reviewTheme == 'light' || reviewTheme == 'dark') {
     await prefs.setString('theme_mode', reviewTheme!);
   }
-  final requestedPath = Uri.base.fragment;
+  final requestedPath = Uri.base.fragment.isNotEmpty
+      ? Uri.base.fragment
+      : const String.fromEnvironment(
+          'HYZEN_REVIEW_ROUTE',
+          defaultValue: '/profile',
+        );
   final initialPath =
       const [
         '/welcome',
@@ -62,6 +67,11 @@ Future<void> main() async {
         '/shop',
         '/downloads',
         '/search',
+        '/study-goals',
+        '/study-streak',
+        '/study-progress',
+        '/campus-rank',
+        '/admin',
       ].contains(requestedPath)
       ? requestedPath
       : '/profile';
@@ -92,6 +102,8 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         sharedPrefsProvider.overrideWithValue(prefs),
+        // Isolated fixture app only; production authorization is unchanged.
+        isAdminProvider.overrideWithValue(requestedPath == '/admin'),
         downloadsProvider.overrideWith(() => _ReviewDownloads(emptyHome)),
         recentProvider.overrideWith(() => _ReviewRecent(emptyHome)),
         pdfStudioHistoryProvider.overrideWith(() => _ReviewOffice(emptyHome)),

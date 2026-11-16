@@ -14,7 +14,7 @@ class HomeStudyTracker extends ConsumerWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: dark ? const Color(0xFF202023) : Colors.white,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/study-progress'),
@@ -33,7 +33,7 @@ class HomeStudyTracker extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 11,
                         letterSpacing: 1.1,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -45,7 +45,7 @@ class HomeStudyTracker extends ConsumerWidget {
                 formatStudyTime(progress.todaySeconds),
                 style: const TextStyle(
                   fontSize: 26,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 9),
@@ -53,7 +53,7 @@ class HomeStudyTracker extends ConsumerWidget {
                 value: (progress.todaySeconds / (progress.dailyGoal * 60))
                     .clamp(0.0, 1.0)
                     .toDouble(),
-                color: const Color(0xFF087F76),
+                color: const Color(0xFF656565),
                 backgroundColor: dark ? Colors.white12 : Colors.black12,
                 minHeight: 5,
                 borderRadius: BorderRadius.circular(9),
@@ -96,14 +96,14 @@ class StudyProgressScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             name,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 14),
           body,
@@ -114,7 +114,7 @@ class StudyProgressScreen extends ConsumerWidget {
     Widget progressBar(int seconds, int goal) => LinearProgressIndicator(
       value: (seconds / (goal * 60)).clamp(0.0, 1.0).toDouble(),
       minHeight: 7,
-      color: const Color(0xFF087F76),
+      color: const Color(0xFF656565),
       backgroundColor: dark ? Colors.white12 : Colors.black12,
       borderRadius: BorderRadius.circular(12),
     );
@@ -126,7 +126,7 @@ class StudyProgressScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         title: const Text(
           'Study progress',
-          style: TextStyle(fontWeight: FontWeight.w800),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         leading: IconButton(
           tooltip: 'Back',
@@ -153,7 +153,7 @@ class StudyProgressScreen extends ConsumerWidget {
                   key: const ValueKey('study-time'),
                   style: const TextStyle(
                     fontSize: 38,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -269,7 +269,7 @@ class StudyProgressScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 const Text(
                   'Recent breaks',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 if (progress.recentBreaks.isEmpty)
@@ -450,7 +450,7 @@ class StudyProgressScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'New study task',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),
                 TextField(
@@ -540,7 +540,7 @@ class _Stat extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         Text(name, style: Theme.of(context).textTheme.bodySmall),
       ],

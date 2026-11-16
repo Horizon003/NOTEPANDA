@@ -99,12 +99,12 @@ class HyzenBanner extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, c) {
           final hideArt = MediaQuery.textScalerOf(context).scale(1) > 1.6;
-          final artSize = (c.maxWidth * .44).clamp(120.0, 196.0);
+          final artSize = (c.maxWidth * .28).clamp(64.0, 100.0);
           final text = Padding(
             padding: EdgeInsets.fromLTRB(
               16,
               16,
-              hideArt ? 16 : c.maxWidth * .43,
+              hideArt ? 16 : c.maxWidth * .29,
               16,
             ),
             child: Column(
@@ -113,7 +113,7 @@ class HyzenBanner extends StatelessWidget {
               children: [
                 if (eyebrow != null) ...[
                   Text(
-                    eyebrow!.toUpperCase(),
+                    eyebrow!,
                     style: t.textTheme.labelSmall?.copyWith(
                       color: t.colorScheme.onSurfaceVariant,
                       letterSpacing: .8,
@@ -124,7 +124,7 @@ class HyzenBanner extends StatelessWidget {
                 Text(
                   title,
                   style: t.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     fontSize: c.maxWidth < 350 ? 19 : 21,
                     height: 1.15,
                   ),
@@ -169,9 +169,7 @@ class HyzenBanner extends StatelessWidget {
           );
           return ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: action == null
-                  ? (hideArt ? 144 : (artSize + 12).clamp(144.0, 220.0))
-                  : 188,
+              minHeight: action == null ? (hideArt ? 0 : artSize + 12) : 144,
             ),
             child: Stack(
               children: [

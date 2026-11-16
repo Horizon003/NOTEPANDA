@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
+import 'press_feedback.dart';
 
 /// Opaque surfaces; deliberately inexpensive to compose on Android.
 class SurfacePanel extends StatelessWidget {
@@ -57,9 +58,10 @@ class HCard extends StatelessWidget {
             ? BorderSide(color: t.colorScheme.outlineVariant)
             : BorderSide.none,
       ),
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.none,
       child: InkWell(
         onTap: onTap,
+        borderRadius: br,
         child: Padding(padding: padding, child: child),
       ),
     );
@@ -69,14 +71,14 @@ class HCard extends StatelessWidget {
         boxShadow: shadow && t.brightness == Brightness.light
             ? const [
                 BoxShadow(
-                  color: Color(0x0A1A3440),
-                  blurRadius: 14,
-                  offset: Offset(0, 4),
+                  color: Color(0x08000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 1),
                 ),
               ]
             : null,
       ),
-      child: card,
+      child: HPressFeedback(enabled: onTap != null, child: card),
     );
     return semanticLabel == null
         ? decorated
@@ -109,12 +111,12 @@ class HEntrance extends StatelessWidget {
       begin: MediaQuery.disableAnimationsOf(context) ? 1 : 0,
       end: 1,
     ),
-    duration: HMotion.slow,
+    duration: HMotion.duration(context, HMotion.medium),
     curve: HMotion.curve,
     child: child,
     builder: (_, v, c) => Opacity(
       opacity: v.clamp(0, 1),
-      child: Transform.translate(offset: Offset(0, 12 * (1 - v)), child: c),
+      child: Transform.translate(offset: Offset(0, 6 * (1 - v)), child: c),
     ),
   );
 }

@@ -29,10 +29,10 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: dark ? const Color(0xFF142C34) : const Color(0xFFDCEEF5),
-          borderRadius: BorderRadius.circular(20),
+          color: dark ? const Color(0xFF272727) : const Color(0xFFEBEBEB),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: dark ? const Color(0xFF2B454F) : const Color(0xFFABC8D5),
+            color: dark ? const Color(0xFF404040) : const Color(0xFFC3C3C3),
           ),
         ),
         child: Column(
@@ -57,7 +57,7 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
                             : 'Announcement',
                         style: const TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),

@@ -108,7 +108,7 @@ class ResourceTile extends StatelessWidget {
                 children: [
                   if (eyebrow != null)
                     Text(
-                      eyebrow!.toUpperCase(),
+                      eyebrow!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: t.textTheme.labelSmall?.copyWith(
@@ -269,10 +269,10 @@ class HeroPanel extends StatelessWidget {
                   children: [
                     if (eyebrow != null)
                       Text(
-                        eyebrow!.toUpperCase(),
+                        eyebrow!,
                         style: t.textTheme.labelSmall?.copyWith(
                           color: adaptiveAccent(context, color),
-                          letterSpacing: 1.1,
+                          letterSpacing: 0,
                         ),
                       ),
                     const SizedBox(height: 6),
@@ -371,7 +371,7 @@ class HtmlText extends StatelessWidget {
           TextSpan(
             text: clean(src.substring(last, m.start)),
             style: TextStyle(
-              fontWeight: bold > 0 ? FontWeight.w800 : null,
+              fontWeight: bold > 0 ? FontWeight.w600 : null,
               fontStyle: italic > 0 ? FontStyle.italic : null,
               color: bold > 0 ? Theme.of(context).colorScheme.onSurface : null,
             ),

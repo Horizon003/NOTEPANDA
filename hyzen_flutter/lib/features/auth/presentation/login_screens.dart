@@ -249,7 +249,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   'Welcome to PHARM D WITH HYZEN',
                                   style: t.textTheme.headlineSmall?.copyWith(
                                     fontSize: 24,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
                                     height: 1.2,
                                   ),
                                 ),
@@ -530,7 +530,7 @@ class AccountChoiceScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
                     'assets/auth/login_panda.webp',
                     height: 210,

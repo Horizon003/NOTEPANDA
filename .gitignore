@@ -27,3 +27,8 @@
 # Do not commit personal or production signing backups.
 private-signing/
 **/private-signing/
+
+# Generated responsive/native QA; curated before/after captures are versioned.
+hyzen_flutter/qa/monochrome/matrix/
+hyzen_flutter/qa/monochrome/native/
+hyzen_flutter/qa/pr9/

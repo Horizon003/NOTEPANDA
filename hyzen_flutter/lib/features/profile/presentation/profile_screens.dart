@@ -188,7 +188,7 @@ class AccountInfoScreen extends ConsumerWidget {
               'Change Photo',
               style: TextStyle(
                 color: AccountStyle.linkOf(context),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
             ),
@@ -450,7 +450,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
           title: const Text(
             'Edit profile',
-            style: TextStyle(fontWeight: FontWeight.w800),
+            style: TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
         body: SafeArea(

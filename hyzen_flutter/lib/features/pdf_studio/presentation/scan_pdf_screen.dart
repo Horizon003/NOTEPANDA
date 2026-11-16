@@ -647,7 +647,7 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
             style: TextStyle(
               color: OfficeColors.ink(context),
               fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 6),

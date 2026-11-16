@@ -3,10 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'study_tracker.dart';
-import '../home/presentation/home_time_artwork.dart';
 
-const _deep = Color(0xFF071632);
-const _azure = Color(0xFF1D65AE);
+const _deep = Color(0xFF151515);
+const _azure = Color(0xFF5B5B5B);
 
 /// Study-streak detail reconstructed from the uploaded UI references.
 /// Every count, day and milestone derives from locally recorded focus time.
@@ -23,20 +22,24 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
   Widget build(BuildContext context) {
     final p = ref.watch(studyTrackerProvider);
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = dark ? Colors.black : const Color(0xFFEAF2FF);
+    final bg = dark ? Colors.black : const Color(0xFFF1F1F1);
     final card = dark ? const Color(0xFF181B20) : Colors.white;
     final ink = dark ? Colors.white : _deep;
-    final subtle = dark ? Colors.white60 : const Color(0xFF576983);
+    final subtle = dark ? Colors.white60 : const Color(0xFF676767);
     final now = DateTime.now();
     final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 3.0);
     final today = DateTime(now.year, now.month, now.day);
     final monday = today.subtract(Duration(days: today.weekday - 1));
     final week = [
       for (var i = 0; i < 7; i++)
-        i >= now.weekday ? 0 : p.days[studyDayKey(monday.add(Duration(days: i)))] ?? 0,
+        i >= now.weekday
+            ? 0
+            : p.days[studyDayKey(monday.add(Duration(days: i)))] ?? 0,
     ];
     final weekCount = week.where((n) => n >= 900).length;
-    final totalDays = p.days.entries.where((e) => e.value >= 900 && e.key.compareTo(studyDayKey(now)) <= 0).length;
+    final totalDays = p.days.entries
+        .where((e) => e.value >= 900 && e.key.compareTo(studyDayKey(now)) <= 0)
+        .length;
     final totals = [
       for (var i = historyRange - 1; i >= 0; i--)
         p.days[studyDayKey(today.subtract(Duration(days: i)))] ?? 0,
@@ -48,9 +51,9 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: card,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: dark ? const Color(0xFF30343C) : const Color(0xFFCEDCF0),
+          color: dark ? const Color(0xFF343434) : const Color(0xFFDADADA),
         ),
       ),
       child: child,
@@ -69,7 +72,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
             text,
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: ink,
             ),
           ),
@@ -80,7 +83,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
             child: Text(
               trailing,
               style: const TextStyle(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: _azure,
               ),
             ),
@@ -98,7 +101,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
           children: [
             Text(
               'Study Streak',
-              style: TextStyle(color: ink, fontWeight: FontWeight.w900),
+              style: TextStyle(color: ink, fontWeight: FontWeight.w600),
             ),
             Text(
               'Stay consistent and build your study habit',
@@ -137,25 +140,16 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
         children: [
           Container(
             clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(25)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: Image.asset(
-                    HomeTimePhase.at(now).asset,
-                    fit: BoxFit.cover,
+                  child: ColoredBox(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                   ),
                 ),
                 const Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xD30D3560), Color(0x250A2448)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                    ),
-                  ),
+                  child: ColoredBox(color: Color(0xFF202020)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(18),
@@ -166,7 +160,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                         '${p.currentStreak} Days',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w600,
                           fontSize: 34,
                         ),
                       ),
@@ -183,7 +177,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                         ),
                         label: const Text('Keep it going!'),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xE8D6ECFF),
+                          backgroundColor: const Color(0xE8E9E9E9),
                           foregroundColor: _deep,
                         ),
                       ),
@@ -214,7 +208,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                               height: 40,
                               decoration: BoxDecoration(
                                 color: week[i] >= 900
-                                    ? const Color(0xFFCDEBFF)
+                                    ? const Color(0xFFE6E6E6)
                                     : (dark
                                           ? Colors.white10
                                           : const Color(0xFFE7EAF0)),
@@ -307,7 +301,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(11),
                       decoration: BoxDecoration(
-                        color: dark ? Colors.white10 : const Color(0xFFF0F6FF),
+                        color: dark ? Colors.white10 : const Color(0xFFF5F5F5),
                         borderRadius: BorderRadius.circular(13),
                       ),
                       child: Row(
@@ -370,7 +364,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                                   width: historyRange == 7 ? 37 : 15,
                                   decoration: BoxDecoration(
                                     color: totals[i] == 0
-                                        ? const Color(0xFFB9C7D9)
+                                        ? const Color(0xFFC5C5C5)
                                         : _azure,
                                     borderRadius: BorderRadius.circular(7),
                                   ),
@@ -428,11 +422,11 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                             decoration: BoxDecoration(
                               color: p.highestStreak >= milestone
                                   ? (dark
-                                        ? const Color(0xFF163B5F)
-                                        : const Color(0xFFD4EDFF))
+                                        ? const Color(0xFF363636)
+                                        : const Color(0xFFE9E9E9))
                                   : (dark
                                         ? Colors.white10
-                                        : const Color(0xFFE6EBF3)),
+                                        : const Color(0xFFEBEBEB)),
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Column(
@@ -452,7 +446,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                                   '$milestone-Day',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
                                     color: ink,
                                   ),
                                 ),
@@ -491,7 +485,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
         children: [
           const Text(
             'Recent Breaks',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 19),
           ),
           const SizedBox(height: 15),
           if (p.recentBreaks.isEmpty) const Text('No recorded breaks yet.'),
@@ -512,7 +506,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
         children: [
           const Text(
             'Study Milestones',
-            style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+            style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
           ),
           for (final milestone in [5, 7, 14, 30, 60, 100])
             ListTile(
@@ -552,7 +546,7 @@ class _StreakMetric extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: 17,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w600,
               color: ink,
             ),
           ),

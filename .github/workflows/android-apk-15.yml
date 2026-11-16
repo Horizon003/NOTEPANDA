@@ -1,4 +1,4 @@
-name: Build PHARM D WITH HYZEN 1.5.3 Universal APK
+name: Build PHARM D WITH HYZEN 1.5.5 Universal APK
 
 on:
   workflow_dispatch:
@@ -95,11 +95,11 @@ jobs:
             grep -Fxq "lib/$abi/libflutter.so" apk-entries.txt
           done
           sha256sum "$apk" > "$apk.sha256"
-          grep -q 'version: 1.5.3+12' pubspec.yaml
+          grep -q 'version: 1.5.5+14' pubspec.yaml
 
       - uses: actions/upload-artifact@v4
         with:
-          name: PharmD_With_Hyzen_1.5.3_Universal_signed
+          name: PharmD_With_Hyzen_1.5.5_Universal_signed
           path: |
             hyzen_flutter/build/app/outputs/flutter-apk/app-release.apk
             hyzen_flutter/build/app/outputs/flutter-apk/app-release.apk.sha256
@@ -112,7 +112,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: PharmD_With_Hyzen_1.5.3_Universal_signed
+          name: PharmD_With_Hyzen_1.5.5_Universal_signed
           path: apk
 
       - name: Enable KVM
@@ -138,6 +138,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Hyzen_1.5.3_install_smoke_logs
+          name: Hyzen_1.5.5_install_smoke_logs
           path: launch-logcat.txt
           if-no-files-found: ignore
