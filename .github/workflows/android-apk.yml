@@ -64,8 +64,8 @@ jobs:
         run: python tools/ci/prepare_gradle.py
       - name: Build signed release APK (retry native dependency downloads once)
         run: |
-          flutter build apk --release --no-pub --no-shrink --dart-define=PUSH_API_BASE="$PUSH_API_BASE" ||
-            flutter build apk --release --no-pub --no-shrink --dart-define=PUSH_API_BASE="$PUSH_API_BASE"
+          flutter build apk --release --no-shrink --dart-define=PUSH_API_BASE="$PUSH_API_BASE" ||
+            flutter build apk --release --no-shrink --dart-define=PUSH_API_BASE="$PUSH_API_BASE"
         working-directory: hyzen_flutter
       - name: Identify artifact
         run: sha256sum hyzen_flutter/build/app/outputs/flutter-apk/app-release.apk > hyzen_flutter/build/app/outputs/flutter-apk/app-release.apk.sha256

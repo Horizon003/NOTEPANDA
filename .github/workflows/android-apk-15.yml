@@ -79,7 +79,7 @@ jobs:
         working-directory: hyzen_flutter
       # One APK containing Flutter libraries for ARM32, ARM64 and x86_64.
       # Never add --split-per-abi to this universal release workflow.
-      - run: flutter build apk --release --no-pub --target-platform android-arm,android-arm64,android-x64
+      - run: flutter build apk --release --target-platform android-arm,android-arm64,android-x64
         working-directory: hyzen_flutter
 
       - name: Verify APK metadata and checksum

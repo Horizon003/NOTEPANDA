@@ -66,7 +66,7 @@ jobs:
       - name: Build universal release APK through Flutter
         working-directory: hyzen_flutter
         run: |
-          flutter build apk --release --no-pub --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.5+14
+          flutter build apk --release --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.5+14
       - name: Build release native instrumentation tests
         working-directory: hyzen_flutter/android
         run: |
