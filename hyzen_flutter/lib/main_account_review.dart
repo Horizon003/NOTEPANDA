@@ -12,6 +12,7 @@ import 'core/storage/local_store.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/domain/student_profile.dart';
 import 'features/content/data/content_source.dart';
+import 'features/admin/data/admin_repository.dart';
 import 'features/admin/domain/import_csv.dart';
 import 'features/academics/domain/models.dart';
 import 'features/downloads/data/downloads_controller.dart';
@@ -46,13 +47,27 @@ Future<void> main() async {
       ? Uri.base.fragment
       : const String.fromEnvironment(
           'HYZEN_REVIEW_ROUTE',
-          defaultValue: '/profile',
+          defaultValue: '/home',
         );
   final initialPath =
       const [
         '/welcome',
         '/login',
         '/forgot-password',
+        '/register/personal',
+        '/register/academic',
+        '/register/credentials',
+        '/lectures',
+        '/notifications',
+        '/cart',
+        '/orders',
+        '/about',
+        '/contact',
+        '/admin/stats',
+        '/admin/sections',
+        '/admin/import',
+        '/admin/content/notes',
+        '/admin/manage/settings',
         '/profile',
         '/profile/info',
         '/profile/edit',
@@ -74,13 +89,11 @@ Future<void> main() async {
         '/admin',
       ].contains(requestedPath)
       ? requestedPath
-      : '/profile';
+      : '/home';
   // Auth previews are signed out only in this isolated sample-data entrypoint.
-  final guestPreview = const [
-    '/welcome',
-    '/login',
-    '/forgot-password',
-  ].contains(initialPath);
+  final guestPreview =
+      const ['/welcome', '/login', '/forgot-password'].contains(initialPath) ||
+      initialPath.startsWith('/register/');
   final emptyHome = Uri.base.queryParameters['scenario'] == 'empty';
   final tree = <Map<String, dynamic>>[];
   var id = 0;
@@ -103,7 +116,8 @@ Future<void> main() async {
       overrides: [
         sharedPrefsProvider.overrideWithValue(prefs),
         // Isolated fixture app only; production authorization is unchanged.
-        isAdminProvider.overrideWithValue(requestedPath == '/admin'),
+        isAdminProvider.overrideWithValue(initialPath.startsWith('/admin')),
+        adminRepositoryProvider.overrideWithValue(_ReviewAdmin(tree)),
         downloadsProvider.overrideWith(() => _ReviewDownloads(emptyHome)),
         recentProvider.overrideWith(() => _ReviewRecent(emptyHome)),
         pdfStudioHistoryProvider.overrideWith(() => _ReviewOffice(emptyHome)),
@@ -208,7 +222,52 @@ class _ReviewUser implements User {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+// Administrative reads stay in memory. Preview edits never reach Firebase.
+class _ReviewAdmin implements AdminRepository {
+  _ReviewAdmin(this.notes);
+  final List<Map<String, dynamic>> notes;
+
+  Object? _value(String key) => switch (key) {
+    'pw_settings' => <String, dynamic>{},
+    'pw_credits' => {'cards': [], 'layout': 'stack'},
+    'pw_notes_tree' => notes,
+    'pw_products' ||
+    'pw_orders' ||
+    'pw_messages' ||
+    'pw_blogs' ||
+    'pw_social' ||
+    'pw_import_history' => [],
+    _ => <String, dynamic>{},
+  };
+  @override
+  Future<Object?> read(String key) async => _value(key);
+  @override
+  Stream<Object?> watch(String key) => Stream.value(_value(key));
+  @override
+  Future<List<Map<String, dynamic>>> tree(LibraryKind kind) async =>
+      copyTree(_value(kind.storageKey), kind);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => Future<Never>.error(
+    UnsupportedError('Preview only: administrative changes are not saved.'),
+  );
+}
+
 class _ReviewAuth implements AuthRepository {
+  @override
+  User? get currentUser => null;
+  @override
+  Stream<User?> authChanges() => Stream.value(null);
+  @override
+  Future<User> signIn(String email, String password) async =>
+      throw UnsupportedError(
+        'Open Home from the preview toolbar. No account is needed.',
+      );
+  @override
+  Future<User> createAccount(
+    String email,
+    String password, {
+    String? displayName,
+  }) async => throw UnsupportedError('Preview only: accounts are not created.');
   @override
   Future<void> sendReset(String email) async => throw UnsupportedError(
     'Use the normal app preview with your own account for authentication actions.',
