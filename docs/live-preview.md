@@ -1,5 +1,7 @@
 # Interactive Flutter UI preview
 
+[Open the live preview](https://hyzen-nude-ui-preview.deepparsnip16.chatgpt.site). The host is owner-private; use the same ChatGPT account that requested it.
+
 The live preview runs `hyzen_flutter/lib/main_account_review.dart`, using the
 actual application widgets, router, design system and local study tools. The
 surrounding HTML provides screen, theme, viewport and accessibility text-size
