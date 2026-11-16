@@ -62,9 +62,9 @@ claim is inferred from widget-test speed.
 
 - Flutter 3.35.4 / Dart 3.9.2, matching production CI.
 - `flutter analyze --no-pub`: no issues.
-- Full regression suite: 152 tests passed before the three new motion tests.
+- Full regression suite: 155 tests passed, including the three new motion tests.
 - Monochrome/reduced-motion tests: 3 passed.
-- Expanded responsive matrix: 13 screens × 6 sizes × 2 text scales × 2 themes;
+- Expanded responsive matrix: 14 screens × 6 sizes × 2 text scales × 2 themes;
   includes 320/360/390/430/768dp portrait and 844×390dp landscape, with no
   reported Flutter exceptions or RenderFlex overflow.
 - Actual Flutter captures: Home, Study, Office, Downloads, Profile, Settings,

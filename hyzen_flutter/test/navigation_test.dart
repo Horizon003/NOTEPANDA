@@ -1478,6 +1478,7 @@ void main() {
           for (final path in [
             '/home',
             '/study-goals',
+            '/study-progress',
             '/study-streak',
             '/campus-rank',
             '/study',

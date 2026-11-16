@@ -1,6 +1,11 @@
 name: Signed Android 1.5.5 release
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish after all validations succeed
+        type: boolean
+        default: false
   push:
     branches: [work/monochrome-motion-1.5.5]
     paths: ['hyzen_flutter/**', '.github/workflows/release-155.yml']
@@ -187,6 +192,7 @@ jobs:
             hyzen_flutter/build/integration_response_data.json
           if-no-files-found: warn
   publish:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish
     needs: [build, install-smoke, native-profile]
     runs-on: ubuntu-latest
     permissions:
