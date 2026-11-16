@@ -6,9 +6,6 @@ on:
         description: Publish after all validations succeed
         type: boolean
         default: false
-  push:
-    branches: [work/monochrome-motion-1.5.5]
-    paths: ['hyzen_flutter/**', '.github/workflows/release-155.yml']
 permissions:
   contents: read
   actions: read
@@ -182,7 +179,7 @@ jobs:
           profile: pixel_2
           disable-animations: false
           working-directory: hyzen_flutter
-          script: flutter drive --profile --driver=test_driver/monochrome_profile.dart --target=integration_test/monochrome_profile_test.dart --dart-define=HYZEN_REVIEW_ROUTE=/home
+          script: flutter drive --profile --no-dds --driver=test_driver/monochrome_profile.dart --target=integration_test/monochrome_profile_test.dart --dart-define=HYZEN_REVIEW_ROUTE=/home
       - uses: actions/upload-artifact@v4
         if: always()
         with:
