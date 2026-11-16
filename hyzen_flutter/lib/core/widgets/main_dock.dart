@@ -42,7 +42,9 @@ class MainDock extends ConsumerWidget {
     final dark =
         mode == 'dark' ||
         (mode == 'follow' && Theme.of(context).brightness == Brightness.dark);
-    final ink = dark ? Colors.white : Colors.black;
+    final ink = mode == 'follow'
+        ? Theme.of(context).colorScheme.onSurface
+        : (dark ? Colors.white : Colors.black);
 
     if (MediaQuery.viewInsetsOf(context).bottom > 0) {
       return const SizedBox.shrink();
@@ -56,7 +58,9 @@ class MainDock extends ConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 640),
           child: Material(
             key: const ValueKey('main-dock'),
-            color: dark ? Colors.black : Colors.white,
+            color: mode == 'follow'
+                ? Theme.of(context).colorScheme.surface
+                : (dark ? Colors.black : Colors.white),
             elevation: 0,
             shadowColor: Colors.black26,
             shape: RoundedRectangleBorder(

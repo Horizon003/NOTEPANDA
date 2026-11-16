@@ -1,8 +1,8 @@
-# PHARM D WITH HYZEN 1.5.5 — Monochrome Motion Edition
+# PHARM D WITH HYZEN 1.5.5 — Nude Motion Edition
 
 Version 1.5.5+14 · Android package `com.hyzen.pharmd`.
 
-- Pure white/black theme, neutral controls and compact shared components.
+- Owner-selected warm nude theme, quiet charcoal controls and compact shared components.
 - Content-driven study overview, quiet grey progress and preserved Hyzen panda.
 - Five equal navigation destinations with retained stacks and a compact indicator.
 - Finite state-driven mascot transitions, press feedback and reduced-motion support.

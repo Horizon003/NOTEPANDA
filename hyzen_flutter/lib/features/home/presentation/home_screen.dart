@@ -401,11 +401,15 @@ class _ReferenceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final ink = black ? Colors.white : t.colorScheme.onSurface;
+    final ink = t.colorScheme.onSurface;
     return HCard(
       onTap: onTap,
       semanticLabel: title,
-      color: black ? const Color(0xFF111111) : null,
+      color: black
+          ? (t.brightness == Brightness.dark
+                ? HColors.darkPeach
+                : HColors.nudePeach)
+          : null,
       shadow: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,7 +427,7 @@ class _ReferenceCard extends StatelessWidget {
           Text(
             subtitle,
             style: t.textTheme.bodySmall?.copyWith(
-              color: black ? Colors.white70 : t.colorScheme.onSurfaceVariant,
+              color: t.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

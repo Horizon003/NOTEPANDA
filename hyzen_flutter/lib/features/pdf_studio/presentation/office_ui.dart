@@ -19,19 +19,17 @@ class OfficeColors {
   static const navy = Color(0xFF333333);
   static bool dark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
   static Color canvas(BuildContext c) =>
-      dark(c) ? const Color(0xFF1B1B1D) : const Color(0xFFEEF0F3);
-  static Color page(BuildContext c) => dark(c) ? Colors.black : Colors.white;
-  static Color bar(BuildContext c) => dark(c) ? Colors.black : Colors.white;
-  static Color sheet(BuildContext c) =>
-      dark(c) ? const Color(0xFF1C1C1E) : Colors.white;
+      Theme.of(c).colorScheme.surfaceContainer;
+  static Color page(BuildContext c) => Theme.of(c).scaffoldBackgroundColor;
+  static Color bar(BuildContext c) => Theme.of(c).scaffoldBackgroundColor;
+  static Color sheet(BuildContext c) => Theme.of(c).colorScheme.surface;
   static Color raised(BuildContext c) =>
-      dark(c) ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F4);
-  static Color ink(BuildContext c) =>
-      dark(c) ? Colors.white : const Color(0xFF1C1C1E);
+      Theme.of(c).colorScheme.surfaceContainer;
+  static Color ink(BuildContext c) => Theme.of(c).colorScheme.onSurface;
   static Color muted(BuildContext c) =>
-      dark(c) ? const Color(0xFF9A9AA0) : const Color(0xFF6E6E73);
+      Theme.of(c).colorScheme.onSurfaceVariant;
   static Color divider(BuildContext c) =>
-      dark(c) ? const Color(0xFF2C2C2E) : const Color(0xFFE3E3E8);
+      Theme.of(c).colorScheme.outlineVariant;
 }
 
 const _months = [

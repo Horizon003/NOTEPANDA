@@ -207,4 +207,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.5.5-14 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.5 — Monochrome Motion Edition' --notes-file docs/release-1.5.5.md --latest
+          gh release create v1.5.5-14 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.5 — Nude Motion Edition' --notes-file docs/release-1.5.5.md --latest

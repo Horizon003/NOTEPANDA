@@ -281,8 +281,8 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
     final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 3.0);
     final dark = Theme.of(context).brightness == Brightness.dark;
     final ink = dark ? Colors.white : _navy;
-    final bg = dark ? Colors.black : const Color(0xFFF2F2F2);
-    final surface = dark ? const Color(0xFF1B1C20) : Colors.white;
+    final bg = Theme.of(context).scaffoldBackgroundColor;
+    final surface = Theme.of(context).colorScheme.surface;
     final board = ref.watch(campusBoardProvider(period));
     final verifiedYear = board.valueOrNull?.academicYear;
     Widget panel(Widget content) => Container(

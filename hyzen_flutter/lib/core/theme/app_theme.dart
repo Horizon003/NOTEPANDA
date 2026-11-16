@@ -108,8 +108,8 @@ class AppTheme {
     final dark = b == Brightness.dark;
     final ink = dark ? HColors.darkInk : HColors.ink;
     final ink2 = dark ? HColors.darkInk2 : HColors.ink2;
-    // Explicit neutral scheme: Material seed generation introduces hue even
-    // when the seed is grey. Legacy palette preferences remain stored.
+    // Explicit warm nude scheme chosen by the owner. Legacy palette preferences
+    // remain stored without overriding this coherent product identity.
     final bg = dark ? HColors.darkBackground : HColors.background;
     final surface = dark ? HColors.darkSurface : HColors.surface;
     final primary = dark ? HColors.darkPrimary : HColors.primary;
@@ -135,16 +135,16 @@ class AppTheme {
       surfaceContainerLow: surface,
       surfaceContainer: container,
       surfaceContainerHigh: dark
-          ? const Color(0xFF303030)
-          : const Color(0xFFEEEEEE),
+          ? const Color(0xFF3B322B)
+          : const Color(0xFFECE0D2),
       surfaceContainerHighest: dark
-          ? const Color(0xFF383838)
-          : const Color(0xFFE5E5E5),
+          ? const Color(0xFF44382E)
+          : const Color(0xFFE3D5C5),
       surfaceTint: Colors.transparent,
       error: dark ? const Color(0xFFFFB4AB) : HColors.error,
       onError: dark ? Colors.black : Colors.white,
-      outline: dark ? const Color(0xFF737373) : HColors.outlineStrong,
-      outlineVariant: dark ? const Color(0xFF333333) : HColors.outline,
+      outline: dark ? const Color(0xFF998976) : HColors.outlineStrong,
+      outlineVariant: dark ? const Color(0xFF493D32) : HColors.outline,
       inverseSurface: dark ? Colors.white : HColors.ink,
       onInverseSurface: dark ? Colors.black : Colors.white,
     );
@@ -194,7 +194,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: dark ? HColors.darkSurface : Colors.white,
+        fillColor: surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,

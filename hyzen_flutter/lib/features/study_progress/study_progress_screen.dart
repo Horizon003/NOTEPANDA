@@ -89,7 +89,7 @@ class StudyProgressScreen extends ConsumerWidget {
     final progress = ref.watch(studyTrackerProvider);
     final dark = Theme.of(context).brightness == Brightness.dark;
     final bg = Theme.of(context).scaffoldBackgroundColor;
-    final surface = dark ? const Color(0xFF1B1B1D) : Colors.white;
+    final surface = Theme.of(context).colorScheme.surface;
     final secondary = dark ? Colors.white70 : Colors.black54;
 
     Widget panel(String name, Widget body) => Container(

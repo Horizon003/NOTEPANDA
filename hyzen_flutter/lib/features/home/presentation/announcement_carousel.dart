@@ -19,7 +19,7 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
   Widget build(BuildContext context) {
     if (widget.slides.isEmpty) return const SizedBox.shrink();
     page = page.clamp(0, widget.slides.length - 1);
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
     final slide = widget.slides[page];
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -29,11 +29,9 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: dark ? const Color(0xFF272727) : const Color(0xFFEBEBEB),
+          color: scheme.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: dark ? const Color(0xFF404040) : const Color(0xFFC3C3C3),
-          ),
+          border: Border.all(color: scheme.outlineVariant),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

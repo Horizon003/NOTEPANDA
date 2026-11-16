@@ -7,26 +7,26 @@ import '../../../../core/theme/tokens.dart';
 /// Approved account geometry, with colors following the existing app theme.
 /// Dark constants remain unchanged; light surfaces use the supplied white UI.
 abstract final class AccountStyle {
-  static const background = Color(0xFF000000);
-  static const card = Color(0xFF181818);
-  static const raised = Color(0xFF262626);
-  static const secondary = Color(0xFFA7A7AE);
+  static const background = HColors.darkBackground;
+  static const card = HColors.darkSurface;
+  static const raised = HColors.darkSurfaceAlt;
+  static const secondary = HColors.darkInk2;
   static const destructive = Color(0xFFFF6053);
   static const link = Color(0xFFB2B2B2);
-  static const divider = Color(0xFF454549);
+  static const divider = Color(0xFF493D32);
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
   static Color backgroundOf(BuildContext context) =>
-      isDark(context) ? background : Colors.white;
+      isDark(context) ? background : HColors.background;
   static Color cardOf(BuildContext context, {bool elevated = false}) =>
-      isDark(context) ? (elevated ? raised : card) : Colors.white;
+      isDark(context) ? (elevated ? raised : card) : HColors.surface;
   static Color secondaryOf(BuildContext context) =>
-      isDark(context) ? secondary : const Color(0xFF626269);
+      isDark(context) ? secondary : HColors.ink2;
   static Color linkOf(BuildContext context) =>
       isDark(context) ? link : const Color(0xFF686868);
   static Color avatarOf(BuildContext context) =>
-      isDark(context) ? const Color(0xFF1D1D20) : const Color(0xFFE9EAED);
+      isDark(context) ? const Color(0xFF322B25) : const Color(0xFFE9DECF);
 
   static ThemeData theme(BuildContext context) {
     final base = Theme.of(context);
@@ -34,7 +34,7 @@ abstract final class AccountStyle {
     final ink = dark ? Colors.white : HColors.ink;
     final muted = secondaryOf(context);
     final surface = cardOf(context);
-    final line = dark ? divider : const Color(0xFFE6E6E8);
+    final line = dark ? divider : HColors.outline;
     final action = linkOf(context);
     final scheme = base.colorScheme.copyWith(
       primary: action,
@@ -95,7 +95,7 @@ abstract final class AccountStyle {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: dark ? card : const Color(0xFFF0F0F2),
+        fillColor: dark ? card : HColors.surfaceAlt,
         prefixIconColor: muted,
         suffixIconColor: muted,
         hintStyle: TextStyle(color: muted),
@@ -214,8 +214,8 @@ class CircularNavigationButton extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: AccountStyle.isDark(context)
-            ? [AccountStyle.raised, const Color(0xFF1D1D20)]
-            : [const Color(0xFFF0F0F2), const Color(0xFFF0F0F2)],
+            ? [AccountStyle.raised, const Color(0xFF322B25)]
+            : [HColors.surfaceAlt, HColors.surfaceAlt],
       ),
       border: AccountStyle.isDark(context)
           ? Border.all(color: const Color(0xFF464649))
@@ -248,7 +248,7 @@ class SettingsCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       side: AccountStyle.isDark(context)
           ? BorderSide.none
-          : const BorderSide(color: Color(0xFFE6E6E8)),
+          : const BorderSide(color: HColors.outline),
     ),
     elevation: 0,
     shadowColor: const Color(0x141C1C1E),

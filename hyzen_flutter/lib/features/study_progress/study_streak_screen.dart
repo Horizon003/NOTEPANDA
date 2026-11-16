@@ -22,8 +22,8 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
   Widget build(BuildContext context) {
     final p = ref.watch(studyTrackerProvider);
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = dark ? Colors.black : const Color(0xFFF1F1F1);
-    final card = dark ? const Color(0xFF181B20) : Colors.white;
+    final bg = Theme.of(context).scaffoldBackgroundColor;
+    final card = Theme.of(context).colorScheme.surface;
     final ink = dark ? Colors.white : _deep;
     final subtle = dark ? Colors.white60 : const Color(0xFF676767);
     final now = DateTime.now();

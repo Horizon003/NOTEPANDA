@@ -1,7 +1,16 @@
-# Monochrome Motion review
+# Nude Motion review
 
 Baseline: `a2efde557c4c0536cf95932488e68f505c6834d9` (latest successful 1.5.4+13).
 Native Flutter project: `hyzen_flutter/`. No historical source overlays applied.
+
+## Final palette (owner revision)
+
+The owner supplied mobile layout references and explicitly replaced the original
+strict monochrome request with **nude tones**. The final implementation uses warm
+cream `#FBF7F2`, paper `#FFFCF8`, sand `#F0E7DC`, muted peach `#E8CDBB` and charcoal
+`#43372F`, with warm dark equivalents. No saturated purple/blue theme or glowing
+background is reintroduced. Earlier monochrome commits are intermediate history;
+the `after/` captures show the final owner-directed palette.
 
 ## Unslop direction
 
@@ -22,7 +31,7 @@ Flutter raster captures, without an HTML recreation.
 | Area | Baseline finding | Implementation |
 |---|---|---|
 | Spacing | Tall landscape section, dense captions, large nested radii | Content-driven Home summary, 4dp rhythm, 12–16dp panels |
-| Color | Blue theme overrides, coloured categories and progress | Explicit neutral ColorScheme and presentation constants; semantic status colours retained |
+| Color | Blue theme overrides, coloured categories and progress | Explicit warm neutral ColorScheme and presentation constants; semantic status colours retained |
 | Icons | Coloured badges and large dock icons | Neutral role colours, 20dp dock icons and equal targets |
 | Copy | Uppercase greeting, long search prompt | Sentence-case greeting, shorter search label |
 | Type | Heavy 800/900 weights and fresh-install size 8 | 400/500/600 hierarchy; fresh-install default 13; saved preferences retained |
@@ -38,8 +47,7 @@ All current router paths and shell branch indices are retained. Existing regress
 coverage checks session persistence, daily/weekly/custom goals, reminders, streaks,
 ranking sync, academic fallback, OneSignal routes, CSV admin tools, download lifecycle,
 PDF scan/compose/merge/extract, OCR indexing and profile/account preferences.
-Legacy admin palette metadata remains stored; the displayed product palette is
-monochrome. Document annotation ink remains semantic user content.
+Legacy admin palette metadata remains stored; the displayed product palette follows the final nude direction. Document annotation ink remains semantic user content.
 
 Removed: time-dependent decorative landscape artwork, its timer/lifecycle observer,
 endless title scrolling, pulsing skeleton decoration and mascot idle controllers.
@@ -83,3 +91,18 @@ the Hyzen panda. The ring represents real progress toward the saved daily goal;
 it is not a fabricated Pomodoro countdown. Existing active-session start/pause/stop
 and persistence remain on the real tracker. No reference photos, 3D assets, logos,
 purple/blue palette or promotional claims were copied.
+
+## Capture index
+
+| Screen | Before (light / dark) | Final nude (light / dark) |
+|---|---|---|
+| Home | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_home.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_home.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_home.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_home.png) |
+| Study | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_study.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_study.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_study.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_study.png) |
+| Office | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_pdf-studio.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_pdf-studio.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_pdf-studio.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_pdf-studio.png) |
+| Downloads | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_downloads.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_downloads.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_downloads.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_downloads.png) |
+| Profile | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_profile.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_profile.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_profile.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_profile.png) |
+| Settings | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_settings.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_settings.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_settings.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_settings.png) |
+| Goals | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_study-goals.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_study-goals.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_study-goals.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_study-goals.png) |
+| Admin | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/light_admin.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/before/dark_admin.png) | [light](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_admin.png) / [dark](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/dark_admin.png) |
+
+[Final focus timer](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/hyzen_flutter/qa/monochrome/after/light_study-progress.png).

@@ -90,11 +90,7 @@ class HyzenBanner extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          colors: t.brightness == Brightness.dark
-              ? const [Color(0xFF29292D), Color(0xFF1D1D20)]
-              : const [Color(0xFFF0F0F2), Color(0xFFE7E7E9)],
-        ),
+        color: t.colorScheme.surfaceContainer,
       ),
       child: LayoutBuilder(
         builder: (context, c) {

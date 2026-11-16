@@ -598,9 +598,7 @@ void main() {
     }
     expect(
       tester.widget<Material>(dock).color,
-      Theme.of(tester.element(dock)).brightness == Brightness.dark
-          ? Colors.black
-          : Colors.white,
+      Theme.of(tester.element(dock)).colorScheme.surface,
     );
   });
 
@@ -926,7 +924,7 @@ void main() {
                 ? (path == '/profile' || path == '/settings'
                       ? AccountStyle.raised
                       : AccountStyle.card)
-                : Colors.white,
+                : HColors.surface,
           );
           expect(prefs.getString('theme_mode'), mode.name);
           expect(tester.takeException(), isNull);

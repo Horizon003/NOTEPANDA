@@ -70,6 +70,7 @@ void main() {
         'Pharm D profile fixture\nPharmacology revision',
       );
       expect(await StudioPdfEngine.pageCount(path), 1);
+      var pdfOpened = false;
       await binding.watchPerformance(() async {
         final context = tester.element(find.byType(HyzenApp));
         router.go('/pdf-studio');
@@ -84,7 +85,9 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.pump(const Duration(seconds: 2));
+        for (var attempt = 0; attempt < 15 && !pdfOpened; attempt++) {
+          await tester.pump(const Duration(seconds: 1));
+        }
         expect(context.mounted, isTrue);
         expect(
           pdfOpened,

@@ -5,30 +5,47 @@ import 'package:hyzen_pharmd/core/widgets/press_feedback.dart';
 import 'package:hyzen_pharmd/core/widgets/common.dart';
 
 void main() {
-  test('both themes stay achromatic even with a legacy palette seed', () {
-    for (final theme in [
-      AppTheme.light(Colors.purple),
-      AppTheme.dark(Colors.blue),
-    ]) {
-      final scheme = theme.colorScheme;
-      for (final color in [
-        theme.scaffoldBackgroundColor,
-        scheme.surface,
-        scheme.primary,
-        scheme.onPrimary,
-        scheme.onSurface,
-        scheme.onSurfaceVariant,
-        scheme.primaryContainer,
-        scheme.surfaceContainer,
-        scheme.outlineVariant,
-      ]) {
-        expect(color.r, color.g);
-        expect(color.g, color.b);
+  test(
+    'owner nude palette ignores legacy seeds and preserves readable contrast',
+    () {
+      double contrast(Color a, Color b) {
+        final light = a.computeLuminance();
+        final dark = b.computeLuminance();
+        return ((light > dark ? light : dark) + .05) /
+            ((light > dark ? dark : light) + .05);
       }
-    }
-    expect(AppTheme.light().scaffoldBackgroundColor, Colors.white);
-    expect(AppTheme.dark().scaffoldBackgroundColor, Colors.black);
-  });
+
+      expect(
+        AppTheme.light(Colors.purple).colorScheme,
+        AppTheme.light().colorScheme,
+      );
+      expect(
+        AppTheme.dark(Colors.blue).colorScheme,
+        AppTheme.dark().colorScheme,
+      );
+      for (final theme in [AppTheme.light(), AppTheme.dark()]) {
+        final scheme = theme.colorScheme;
+        for (final surface in [
+          theme.scaffoldBackgroundColor,
+          scheme.surface,
+          scheme.surfaceContainer,
+        ]) {
+          expect(
+            contrast(scheme.onSurface, surface),
+            greaterThanOrEqualTo(4.5),
+          );
+          expect(
+            contrast(scheme.onSurfaceVariant, surface),
+            greaterThanOrEqualTo(4.5),
+          );
+        }
+        expect(
+          contrast(scheme.primary, scheme.onPrimary),
+          greaterThanOrEqualTo(4.5),
+        );
+      }
+    },
+  );
   testWidgets('reduced motion retains taps and never scales pressed controls', (
     tester,
   ) async {

@@ -2,52 +2,57 @@ import 'package:flutter/material.dart';
 
 /// PHARM D WITH HYZEN design tokens.
 ///
-/// Graphite is the quiet product foundation. The selected palette is reserved
-/// for primary actions, status, and small category accents.
+/// Warm nude surfaces and charcoal ink, refined from the owner’s mobile references.
+/// Semantic status colors and document annotation ink remain meaningful.
 class HColors {
   HColors._();
   // Brand
-  static const primary = Color(0xFF111111);
-  static const primaryDeep = Color(0xFF171717);
-  static const primarySoft = Color(0xFFF2F2F2);
-  static const slate = Color(0xFF242424);
-  static const slateDeep = Color(0xFF101010);
-  static const teal = Color(0xFF363636);
-  static const mint = Color(0xFFD4D4D4);
+  static const primary = Color(0xFF43372F);
+  static const primaryDeep = Color(0xFF292522);
+  static const primarySoft = Color(0xFFEFE2D3);
+  static const slate = Color(0xFF352E29);
+  static const slateDeep = Color(0xFF211C18);
+  static const teal = Color(0xFF6D6256);
+  static const mint = Color(0xFFD7C3AE);
   static const onPrimary = Colors.white;
 
   // Ink
-  static const ink = Color(0xFF111111);
-  static const ink2 = Color(0xFF616161);
-  static const ink3 = Color(0xFF737373);
+  static const ink = Color(0xFF292522);
+  static const ink2 = Color(0xFF62584F);
+  static const ink3 = Color(0xFF786C60);
 
   // Surfaces (light)
-  static const background = Color(0xFFFFFFFF);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceAlt = Color(0xFFF5F5F5);
-  static const outline = Color(0xFFE5E5E5);
-  static const outlineStrong = Color(0xFFB3B3B3);
+  static const background = Color(0xFFFBF7F2);
+  static const surface = Color(0xFFFFFCF8);
+  static const surfaceAlt = Color(0xFFF0E7DC);
+  static const outline = Color(0xFFE0D5C9);
+  static const outlineStrong = Color(0xFFB4A492);
+
+  // Warm nude accents: confined to content surfaces, never text on pale ink.
+  static const nudePeach = Color(0xFFE8CDBB);
+  static const nudeSand = Color(0xFFE9DECF);
+  static const darkPeach = Color(0xFF49382D);
 
   // Status
   static const success = Color(0xFF15885A);
   static const warning = Color(0xFFB7791F);
   static const error = Color(0xFFC0392B);
-  static const info = Color(0xFF525252);
+  static const info = Color(0xFF6D6258);
 
   // Dark
-  static const darkBackground = Colors.black;
-  static const darkSurface = Color(0xFF181818);
-  static const darkSurfaceAlt = Color(0xFF262626);
-  static const darkInk = Color(0xFFFFFFFF);
-  static const darkInk2 = Color(0xFFB8B8B8);
-  static const darkPrimary = Color(0xFFF5F5F5);
+  static const darkBackground = Color(0xFF171411);
+  static const darkSurface = Color(0xFF231F1B);
+  static const darkSurfaceAlt = Color(0xFF322B25);
+  static const darkInk = Color(0xFFF7EFE5);
+  static const darkInk2 = Color(0xFFC3B6A7);
+  static const darkPrimary = Color(0xFFE7D2BC);
 
   /// Restrained module accents – used on small icon badges only.
-  static const notes = Color(0xFF111111);
-  static const mcqs = Color(0xFF525252);
-  static const papers = Color(0xFF525252);
-  static const special = Color(0xFF525252);
-  static const lectures = Color(0xFF525252);
+  static const notes = Color(0xFF43372F);
+  static const mcqs = Color(0xFF6D6258);
+  static const papers = Color(0xFF6D6258);
+  static const special = Color(0xFF6D6258);
+  static const lectures = Color(0xFF6D6258);
 }
 
 /// Four-point rhythm; touch targets remain at least 48dp.
