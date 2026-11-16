@@ -1,6 +1,9 @@
 name: Native Flutter 1.5.5 profile verification
 on:
   workflow_dispatch:
+  push:
+    branches: [work/monochrome-motion-1.5.5]
+    paths: ['.github/workflows/native-profile-155.yml']
 permissions:
   contents: read
 concurrency:
