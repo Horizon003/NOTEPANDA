@@ -79,13 +79,18 @@ void main() {
           MaterialPageRoute<void>(
             builder: (_) => Scaffold(
               appBar: AppBar(title: const Text('Profile PDF')),
-              body: OfflinePdf(path: path),
+              body: OfflinePdf(path: path, onOpened: () => pdfOpened = true),
             ),
           ),
         );
         await tester.pumpAndSettle();
         await tester.pump(const Duration(seconds: 2));
         expect(context.mounted, isTrue);
+        expect(
+          pdfOpened,
+          isTrue,
+          reason: 'PDF renderer must report a successfully opened document',
+        );
         nav.pop();
         await tester.pumpAndSettle();
       }, reportKey: 'pdf_open');

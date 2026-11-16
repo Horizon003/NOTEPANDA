@@ -8,8 +8,8 @@ import '../../../../core/theme/tokens.dart';
 /// Dark constants remain unchanged; light surfaces use the supplied white UI.
 abstract final class AccountStyle {
   static const background = Color(0xFF000000);
-  static const card = Color(0xFF29292D);
-  static const raised = Color(0xFF38383D);
+  static const card = Color(0xFF181818);
+  static const raised = Color(0xFF262626);
   static const secondary = Color(0xFFA7A7AE);
   static const destructive = Color(0xFFFF6053);
   static const link = Color(0xFFB2B2B2);
@@ -18,7 +18,7 @@ abstract final class AccountStyle {
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
   static Color backgroundOf(BuildContext context) =>
-      isDark(context) ? background : const Color(0xFFFAFAFC);
+      isDark(context) ? background : Colors.white;
   static Color cardOf(BuildContext context, {bool elevated = false}) =>
       isDark(context) ? (elevated ? raised : card) : Colors.white;
   static Color secondaryOf(BuildContext context) =>
@@ -89,7 +89,7 @@ abstract final class AccountStyle {
       cardTheme: CardThemeData(
         color: surface,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(30)),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
           side: dark ? BorderSide.none : BorderSide(color: line),
         ),
       ),
@@ -250,7 +250,7 @@ class SettingsCard extends StatelessWidget {
           ? BorderSide.none
           : const BorderSide(color: Color(0xFFE6E6E8)),
     ),
-    elevation: AccountStyle.isDark(context) ? 0 : 2,
+    elevation: 0,
     shadowColor: const Color(0x141C1C1E),
     clipBehavior: Clip.antiAlias,
     child: Column(
@@ -493,7 +493,7 @@ class RoundedPrimaryButton extends StatelessWidget {
     ),
     onPressed: loading ? null : onPressed,
     child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: loading
           ? const SizedBox(
               width: 22,

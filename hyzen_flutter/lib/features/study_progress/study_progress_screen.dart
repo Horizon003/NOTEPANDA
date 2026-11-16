@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'study_tracker.dart';
+import '../../core/widgets/rive_mascot.dart';
 
 class HomeStudyTracker extends ConsumerWidget {
   const HomeStudyTracker({super.key});
@@ -87,13 +88,13 @@ class StudyProgressScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(studyTrackerProvider);
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = dark ? const Color(0xFF09090A) : const Color(0xFFF4F4F5);
+    final bg = Theme.of(context).scaffoldBackgroundColor;
     final surface = dark ? const Color(0xFF1B1B1D) : Colors.white;
     final secondary = dark ? Colors.white70 : Colors.black54;
 
     Widget panel(String name, Widget body) => Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(16),
@@ -146,50 +147,86 @@ class StudyProgressScreen extends ConsumerWidget {
           panel(
             'Focus timer',
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: SizedBox(
+                    width: 144,
+                    height: 144,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox.expand(
+                          child: CircularProgressIndicator(
+                            value:
+                                (progress.todaySeconds /
+                                        (progress.dailyGoal * 60))
+                                    .clamp(0.0, 1.0),
+                            strokeWidth: 4,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainer,
+                          ),
+                        ),
+                        const HyzenRiveMascot(
+                          state: HyzenRiveState.studying,
+                          size: 72,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text(
                   formatStudyTime(progress.todaySeconds),
                   key: const ValueKey('study-time'),
-                  style: const TextStyle(
-                    fontSize: 38,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  progress.cloudStatus,
-                  style: TextStyle(fontSize: 12, color: secondary),
+                  'Today’s active study time',
+                  style: TextStyle(color: secondary),
                 ),
-                const SizedBox(height: 16),
-                if (progress.running)
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: progress.pause,
-                      icon: const Icon(Icons.pause_rounded),
-                      label: const Text('Pause study session'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: dark ? Colors.white : Colors.black,
-                        foregroundColor: dark ? Colors.black : Colors.white,
-                        minimumSize: const Size(0, 48),
+                const SizedBox(height: 12),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: progress.running
+                          ? progress.pause
+                          : progress.start,
+                      icon: Icon(
+                        progress.running
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                      ),
+                      label: Text(
+                        progress.running
+                            ? 'Pause study session'
+                            : 'Start study session',
                       ),
                     ),
-                  )
-                else
-                  Text(
-                    'Study time starts automatically when you open a file.',
-                    style: TextStyle(fontSize: 12, color: secondary),
-                  ),
-                if (progress.hasSession)
-                  TextButton.icon(
-                    onPressed: progress.stop,
-                    icon: const Icon(Icons.stop_rounded),
-                    label: const Text('Stop session'),
-                  ),
+                    if (progress.hasSession)
+                      TextButton.icon(
+                        onPressed: progress.stop,
+                        icon: const Icon(Icons.stop_rounded),
+                        label: const Text('Stop session'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  progress.cloudStatus,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: secondary),
+                ),
+                const SizedBox(height: 4),
                 const Text(
                   'Pauses in the background or after 5 minutes without interaction.',
-                  style: TextStyle(fontSize: 11),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12),
                 ),
                 if (progress.saveError != null) Text(progress.saveError!),
               ],

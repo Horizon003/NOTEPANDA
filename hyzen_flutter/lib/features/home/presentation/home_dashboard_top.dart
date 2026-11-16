@@ -5,6 +5,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/surfaces.dart';
 import '../../../core/widgets/rive_mascot.dart';
 import '../../study_progress/study_tracker.dart';
+import 'home_screen.dart' show homeClockProvider;
 import '../../study_progress/campus_rank_screen.dart';
 
 /// Content-driven study summary. The panda is the only decorative element.
@@ -101,6 +102,8 @@ class HomeDashboardTop extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 12),
+          _StudyWeek(now: ref.watch(homeClockProvider)(), days: p.days),
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -163,4 +166,74 @@ class _StatTile extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Reference-inspired week ribbon, driven by persisted study days.
+/// A single target opens Goals; dates are an overview, not fake filter controls.
+class _StudyWeek extends StatelessWidget {
+  const _StudyWeek({required this.now, required this.days});
+  final DateTime now;
+  final Map<String, int> days;
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
+    return HCard(
+      onTap: () => context.push('/study-goals'),
+      semanticLabel: 'This week’s study activity. Open goals',
+      shadow: false,
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          for (var i = 0; i < 7; i++)
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final date = monday.add(Duration(days: i));
+                  final today = i + 1 == now.weekday;
+                  final recorded = (days[studyDayKey(date)] ?? 0) >= 900;
+                  final ink = today
+                      ? t.colorScheme.onPrimary
+                      : t.colorScheme.onSurface;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: today ? t.colorScheme.primary : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+                          style: t.textTheme.bodySmall?.copyWith(color: ink),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${date.day}',
+                          style: t.textTheme.labelLarge?.copyWith(color: ink),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: recorded ? ink : Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

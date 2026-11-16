@@ -74,3 +74,12 @@ claim is inferred from widget-test speed.
 Open limits: no physical device or camera hardware in the coding environment.
 Widget rasterizations do not establish GPU frame rate. The CI profile job must
 produce native timings before any measured smoothness claim or release publication.
+
+## Owner-provided mobile references
+
+The additional references inform the native layout: an actual study-week ribbon
+with today's neutral pill, compact content cards, and a centered focus ring with
+the Hyzen panda. The ring represents real progress toward the saved daily goal;
+it is not a fabricated Pomodoro countdown. Existing active-session start/pause/stop
+and persistence remain on the real tracker. No reference photos, 3D assets, logos,
+purple/blue palette or promotional claims were copied.
