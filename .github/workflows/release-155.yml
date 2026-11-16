@@ -69,7 +69,9 @@ jobs:
           flutter build apk --release --no-pub --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.5+14
       - name: Build release native instrumentation tests
         working-directory: hyzen_flutter/android
-        run: gradle :app:assembleReleaseAndroidTest -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart
+        run: |
+          defines=$(python3 -c 'import os,base64; print(",".join(base64.b64encode(v.encode()).decode() for v in ["PUSH_API_BASE="+os.environ["PUSH_API_BASE"],"HYZEN_APP_VERSION=1.5.5+14"]))')
+          gradle :app:assembleReleaseAndroidTest -Pdart-defines="$defines" -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart
       - name: Verify and package
         run: |
           set -euo pipefail
