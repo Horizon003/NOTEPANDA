@@ -19,3 +19,15 @@ startup and profile checks before publishing.
 Physical Android device testing, camera/OCR hardware quality and representative
 low-end device/battery profiling remain pending. Emulator frame measurements
 are evidence for that runner only; they are not a universal 60 FPS guarantee.
+
+Validation: analyzer clean, 155 Flutter tests, 15 native scanner/document tests,
+1.5.4→1.5.5 private-data retention check and signed-app startup passed.
+
+**60 FPS remains unverified.** Native profile runs on the CPU-only emulator show
+UI-thread p90 1.1–4.6ms with the software-renderer comparison, but raster p90
+23–69ms exceeds the approximately 16.7ms budget. Production renderer settings
+are unchanged. See the [full evidence and limits](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/docs/qa/validation-1.5.5.md).
+
+Design review uses [Unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky
+([@heydamir](https://x.com/heydamir)), CC BY 4.0, adapted to native Flutter and the
+owner's nude palette. Interaction references: [Magic UI](https://github.com/magicuidesign/magicui), MIT.

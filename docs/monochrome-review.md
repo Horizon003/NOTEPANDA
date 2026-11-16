@@ -77,11 +77,12 @@ claim is inferred from widget-test speed.
   reported Flutter exceptions or RenderFlex overflow.
 - Actual Flutter captures: Home, Study, Office, Downloads, Profile, Settings,
   Goals and Admin in both themes. Fixture data is explicitly separate from production.
-- Android signing/emulator/profile results: pending CI; see linked PR checks.
+- Android signature/version/ABI/update/startup checks and 15 native tests passed;
+  see [actual native performance and validation](qa/validation-1.5.5.md).
 
 Open limits: no physical device or camera hardware in the coding environment.
-Widget rasterizations do not establish GPU frame rate. The CI profile job must
-produce native timings before any measured smoothness claim or release publication.
+Widget rasterizations do not establish GPU frame rate. Native timings are recorded in the linked report; the hosted emulator does not
+meet the 16.7ms raster budget. Physical GPU verification remains pending.
 
 ## Owner-provided mobile references
 
