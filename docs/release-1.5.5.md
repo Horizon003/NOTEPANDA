@@ -31,3 +31,7 @@ are unchanged. See the [full evidence and limits](https://github.com/Horizon003/
 Design review uses [Unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky
 ([@heydamir](https://x.com/heydamir)), CC BY 4.0, adapted to native Flutter and the
 owner's nude palette. Interaction references: [Magic UI](https://github.com/magicuidesign/magicui), MIT.
+
+APK build commit: `5b6e8bfac8d76f88f92d352b4993ca25df6d416e` (see provenance.txt).
+The release tag also includes later CI/evidence changes; the publisher verifies
+that application source, Android files, assets and dependencies are identical.

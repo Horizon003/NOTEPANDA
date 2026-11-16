@@ -104,4 +104,4 @@ jobs:
         run: |
           cp docs/qa/validation-1.5.5.md release/validation-1.5.5.md
           cp docs/qa/profile-{vulkan-swiftshader,skia-software}.json release/
-          gh release create v1.5.5-14 release/* --target "$BUILT_SOURCE" --title 'PHARM D WITH HYZEN 1.5.5 — Nude Motion Edition' --notes-file docs/release-1.5.5.md --latest
+          gh release create v1.5.5-14 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.5 — Nude Motion Edition' --notes-file docs/release-1.5.5.md --latest
