@@ -82,7 +82,9 @@ class _ProfilePromotionsState extends ConsumerState<ProfilePromotions> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AspectRatio(
-          aspectRatio: 16 / 9,
+          aspectRatio: slides.any((s) => s.image?.isNotEmpty == true)
+              ? 16 / 9
+              : 3.2 / MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
           child: PageView.builder(
             itemCount: slides.length,
             onPageChanged: (value) => setState(() => _page = value),

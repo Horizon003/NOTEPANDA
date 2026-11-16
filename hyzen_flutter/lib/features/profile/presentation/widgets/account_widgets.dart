@@ -489,7 +489,7 @@ class RoundedPrimaryButton extends StatelessWidget {
           ? Colors.black
           : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      textStyle: Theme.of(context).textTheme.labelLarge,
     ),
     onPressed: loading ? null : onPressed,
     child: Padding(
