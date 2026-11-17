@@ -92,14 +92,15 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       'Hello, $name',
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(
@@ -108,6 +109,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     Text(
                       'Today ${now.day} ${months[now.month - 1]}',
+                      textAlign: TextAlign.center,
                       key: const ValueKey('home-greeting'),
                       style: Theme.of(
                         context,
@@ -116,6 +118,7 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               IconButton(
                 tooltip: 'Search academic resources',
                 onPressed: () => context.go('/search', extra: true),
@@ -250,7 +253,7 @@ class _PlanCards extends StatelessWidget {
       onTap: () => context.go('/study'),
       padding: const EdgeInsets.all(16),
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: large ? 0 : 210),
+        constraints: BoxConstraints(minHeight: large ? 0 : 180),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -259,7 +262,8 @@ class _PlanCards extends StatelessWidget {
             Text(
               'Study\nlibrary',
               style: t.textTheme.headlineSmall?.copyWith(
-                fontSize: 23,
+                fontSize: 22,
+                fontWeight: FontWeight.w400,
                 height: 1.22,
               ),
             ),
@@ -294,36 +298,36 @@ class _PlanCards extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: large ? 0 : 122),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Positioned(
-              right: -8,
-              bottom: -4,
-              child: ExcludeSemantics(
-                child: Image.asset(
-                  'assets/mascot/mascot_peeking.png',
-                  width: 65,
-                  height: 65,
-                  cacheWidth: 180,
-                ),
+            const _PlanTag('Create'),
+            const SizedBox(height: 12),
+            Text(
+              'Office\nworkspace',
+              style: t.textTheme.headlineSmall?.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+                height: 1.25,
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 8),
+            Row(
               children: [
-                const _PlanTag('Create'),
-                const SizedBox(height: 12),
-                Text(
-                  'Office\nworkspace',
-                  style: t.textTheme.headlineSmall?.copyWith(
-                    fontSize: 18,
-                    height: 1.25,
+                Expanded(
+                  child: Text(
+                    'Scan · PDF',
+                    style: t.textTheme.bodySmall?.copyWith(color: HColors.ink),
                   ),
                 ),
-                const SizedBox(height: 14),
-                Text(
-                  'Scan · PDF',
-                  style: t.textTheme.bodySmall?.copyWith(color: HColors.ink),
+                const SizedBox(width: 4),
+                ExcludeSemantics(
+                  child: Image.asset(
+                    'assets/mascot/mascot_peeking.png',
+                    width: 36,
+                    height: 36,
+                    cacheWidth: 108,
+                  ),
                 ),
               ],
             ),
@@ -360,9 +364,10 @@ class _PlanCards extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: library()),
+        Expanded(flex: 6, child: library()),
         const SizedBox(width: 10),
         Expanded(
+          flex: 5,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [office(), const SizedBox(height: 10), goals()],

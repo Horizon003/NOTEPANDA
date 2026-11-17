@@ -91,8 +91,19 @@ flutter:
     - assets/mascot/
     - assets/reference/
     - assets/fonts/Poppins-OFL.txt
+    - assets/fonts/Outfit-OFL.txt
 
   fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-400.ttf
+          weight: 400
+        - asset: assets/fonts/Outfit-500.ttf
+          weight: 500
+        - asset: assets/fonts/Outfit-600.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-700.ttf
+          weight: 700
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-400.ttf

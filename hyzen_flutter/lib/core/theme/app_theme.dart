@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'tokens.dart';
+import 'page_transitions.dart';
 
 /// Light-only, reference-led education UI. Legacy preferences stay stored.
 class AppTheme {
   AppTheme._();
-  static const fontFamily = 'Poppins';
+  static const fontFamily = 'Outfit';
   static ThemeData light([Color seed = HColors.primary]) {
     const ink = HColors.ink, muted = HColors.ink2;
     TextStyle type(
@@ -239,28 +240,4 @@ class AppTheme {
 
   /// Compatibility for old callers; the product is light-only.
   static ThemeData dark([Color seed = HColors.primary]) => light(seed);
-}
-
-class HyzenPageTransitions extends PageTransitionsBuilder {
-  const HyzenPageTransitions();
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    if (MediaQuery.disableAnimationsOf(context)) return child;
-    final eased = animation.drive(CurveTween(curve: HMotion.curve));
-    return FadeTransition(
-      opacity: eased,
-      child: SlideTransition(
-        position: eased.drive(
-          Tween(begin: const Offset(.025, 0), end: Offset.zero),
-        ),
-        child: child,
-      ),
-    );
-  }
 }

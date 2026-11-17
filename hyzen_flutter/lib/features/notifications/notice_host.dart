@@ -184,7 +184,7 @@ class _NoticeCard extends StatelessWidget {
     final font = switch (n.raw['font']) {
       'serif' => 'serif',
       'system' => null,
-      _ => 'Poppins',
+      _ => 'Outfit',
     };
     return Dialog(
       backgroundColor: card,

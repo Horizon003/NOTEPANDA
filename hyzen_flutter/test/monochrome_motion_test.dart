@@ -19,7 +19,7 @@ void main() {
     );
     expect(AppTheme.dark(Colors.blue).colorScheme, AppTheme.dark().colorScheme);
     expect(AppTheme.dark().brightness, Brightness.light);
-    expect(AppTheme.light().textTheme.bodyMedium?.fontFamily, 'Poppins');
+    expect(AppTheme.light().textTheme.bodyMedium?.fontFamily, 'Outfit');
     for (final theme in [AppTheme.light(), AppTheme.dark()]) {
       final scheme = theme.colorScheme;
       for (final surface in [

@@ -84,58 +84,12 @@ class MainDock extends ConsumerWidget {
                               label: d.label,
                               onTap: () => onSelected(d),
                               child: ExcludeSemantics(
-                                child: InkWell(
+                                child: _DockButton(
+                                  destination: d,
+                                  selected: d == selected,
+                                  iconOnly: iconOnly,
+                                  iconSize: 19 * size,
                                   onTap: () => onSelected(d),
-                                  customBorder: const StadiumBorder(),
-                                  child: AnimatedContainer(
-                                    duration: HMotion.duration(context),
-                                    curve: HMotion.curve,
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: d == selected
-                                          ? HColors.ink
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(28),
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: d == selected && !iconOnly
-                                          ? 10
-                                          : 0,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          d.icon,
-                                          size: 19 * size,
-                                          color: d == selected
-                                              ? Colors.white
-                                              : HColors.ink,
-                                        ),
-                                        if (d == selected && !iconOnly) ...[
-                                          const SizedBox(width: 5),
-                                          Flexible(
-                                            child: Text(
-                                              d == DockDestination.office
-                                                  ? 'Office'
-                                                  : d.label,
-                                              maxLines: 1,
-                                              softWrap: false,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
                                 ),
                               ),
                             ),
@@ -151,6 +105,96 @@ class MainDock extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Animate only the compact control, never a retained tab's document/content.
+class _DockButton extends StatefulWidget {
+  const _DockButton({
+    required this.destination,
+    required this.selected,
+    required this.iconOnly,
+    required this.iconSize,
+    required this.onTap,
+  });
+  final DockDestination destination;
+  final bool selected, iconOnly;
+  final double iconSize;
+  final VoidCallback onTap;
+
+  @override
+  State<_DockButton> createState() => _DockButtonState();
+}
+
+class _DockButtonState extends State<_DockButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: widget.onTap,
+    onHighlightChanged: (pressed) => setState(() => _pressed = pressed),
+    customBorder: const StadiumBorder(),
+    child: AnimatedScale(
+      scale: _pressed && !MediaQuery.disableAnimationsOf(context) ? .97 : 1,
+      duration: HMotion.duration(context),
+      curve: HMotion.curve,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: widget.selected ? 1 : 0),
+        duration: HMotion.duration(context, const Duration(milliseconds: 200)),
+        curve: HMotion.curve,
+        builder: (context, selection, _) {
+          final foreground = Color.lerp(HColors.ink, Colors.white, selection)!;
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.white, HColors.ink, selection),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.iconOnly ? 0 : 10 * selection,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  widget.destination.icon,
+                  size: widget.iconSize,
+                  color: foreground,
+                ),
+                if (!widget.iconOnly)
+                  Flexible(
+                    child: ClipRect(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: selection,
+                        child: Opacity(
+                          opacity: selection,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 5),
+                            child: Text(
+                              widget.destination == DockDestination.office
+                                  ? 'Office'
+                                  : widget.destination.label,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: foreground,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    ),
+  );
 }
 
 Future<void> showStudyMenu(BuildContext context) {

@@ -220,7 +220,7 @@ ButtonStyle officePrimaryStyle() => FilledButton.styleFrom(
   minimumSize: const Size(0, 36),
   shape: const StadiumBorder(),
   textStyle: const TextStyle(
-    fontFamily: 'Poppins',
+    fontFamily: 'Outfit',
     fontSize: 12,
     fontWeight: FontWeight.w600,
   ),
@@ -236,7 +236,7 @@ ButtonStyle officeOutlineStyle(BuildContext context) =>
         width: 1.4,
       ),
       textStyle: const TextStyle(
-        fontFamily: 'Poppins',
+        fontFamily: 'Outfit',
         fontSize: 12,
         fontWeight: FontWeight.w600,
       ),

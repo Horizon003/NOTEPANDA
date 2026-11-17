@@ -34,9 +34,9 @@ class HColors {
   static const darkPeach = Color(0xFF49382D);
 
   static const lavender = Color(0xFFB99BFA);
-  static const blue = Color(0xFFAFCDFB);
-  static const pink = Color(0xFFF9CDE7);
-  static const apricot = Color(0xFFFFCE80);
+  static const blue = Color(0xFFA8CAFA);
+  static const pink = Color(0xFFF2B3F2);
+  static const apricot = Color(0xFFFFC568);
   static const sage = Color(0xFFB8DFCD);
 
   // Status
