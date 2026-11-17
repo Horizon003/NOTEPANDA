@@ -242,7 +242,7 @@ class _PlanCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    final large = MediaQuery.textScalerOf(context).scale(22) > 22 * 1.3;
     Widget library() => HCard(
       color: HColors.apricot,
       radius: 24,
@@ -267,7 +267,7 @@ class _PlanCards extends StatelessWidget {
             const _PlanTag('Learn'),
             const SizedBox(height: 16),
             Text(
-              'Study\nlibrary',
+              'Study library',
               style: t.textTheme.headlineSmall?.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
@@ -275,7 +275,7 @@ class _PlanCards extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text('Notes, MCQs &\npast papers', style: t.textTheme.bodyMedium),
+            Text('Notes, MCQs & past papers', style: t.textTheme.bodyMedium),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -320,7 +320,7 @@ class _PlanCards extends StatelessWidget {
             const _PlanTag('Create'),
             const SizedBox(height: 12),
             Text(
-              'Office\nworkspace',
+              'Office workspace',
               style: t.textTheme.headlineSmall?.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -352,21 +352,22 @@ class _PlanCards extends StatelessWidget {
       ),
     );
     Widget goals() => const _HomeQuickActions();
-    if (large) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          library(),
-          const SizedBox(height: 10),
-          office(),
-          const SizedBox(height: 10),
-          goals(),
-        ],
-      );
-    }
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Three independent 48dp targets must fit even on a 320dp phone.
+        if (large || constraints.maxWidth < 340) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              library(),
+              const SizedBox(height: 10),
+              office(),
+              const SizedBox(height: 10),
+              goals(),
+            ],
+          );
+        }
+
+        // Reserve space for the three 48dp controls in the side column.
         final rightWidth = (constraints.maxWidth * .45).clamp(156.0, 260.0);
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,

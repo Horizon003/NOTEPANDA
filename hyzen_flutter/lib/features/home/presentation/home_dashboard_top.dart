@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens.dart';
@@ -20,7 +21,8 @@ class HomeDashboardTop extends ConsumerWidget {
       children: [
         LayoutBuilder(
           builder: (context, c) {
-            final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+            final largeText =
+                MediaQuery.textScalerOf(context).scale(25) > 25 * 1.3;
             final artWidth = (c.maxWidth * .45).clamp(118.0, 200.0);
             return Container(
               key: const ValueKey('home-focus-card'),
@@ -38,6 +40,10 @@ class HomeDashboardTop extends ConsumerWidget {
                       bottom: 0,
                       child: ExcludeSemantics(
                         child: HSoftArt(
+                          loop: true,
+                          enabled: ref.watch(
+                            boolPrefProvider('pref_ambient_motion'),
+                          ),
                           child: Image.asset(
                             'assets/reference/focus-shapes.png',
                             key: const ValueKey('home-hero-art'),

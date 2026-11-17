@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'display_preferences.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
@@ -10,8 +11,8 @@ class HAssetIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Image.asset(
     'assets/reference/$name.png',
-    width: size,
-    height: size,
+    width: size * UiDensity.of(context),
+    height: size * UiDensity.of(context),
     cacheWidth: (size * 3).ceil(),
     excludeFromSemantics: true,
   );
@@ -76,10 +77,17 @@ class HGlassButton extends StatelessWidget {
   );
 }
 
-/// A finite, low-amplitude art entrance. No idle ticker or animated image decoding.
+/// Low-amplitude art motion that follows the route and app lifecycle.
 class HSoftArt extends StatefulWidget {
-  const HSoftArt({super.key, required this.child});
+  const HSoftArt({
+    super.key,
+    required this.child,
+    this.loop = false,
+    this.enabled = true,
+  });
   final Widget child;
+  final bool loop;
+  final bool enabled;
   @override
   State<HSoftArt> createState() => _HSoftArtState();
 }
@@ -91,18 +99,37 @@ class _HSoftArtState extends State<HSoftArt>
     duration: const Duration(milliseconds: 2400),
   );
   bool _started = false;
+  late bool _resumed;
   @override
   void initState() {
     super.initState();
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _resumed = lifecycle == null || lifecycle == AppLifecycleState.resumed;
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context) || !TickerMode.of(context)) {
+    _syncMotion();
+  }
+
+  void _syncMotion() {
+    final enabled =
+        widget.enabled &&
+        _resumed &&
+        TickerMode.of(context) &&
+        !MediaQuery.disableAnimationsOf(context);
+    if (!enabled) {
       _motion.stop();
       _motion.value = 1;
+      return;
+    }
+    if (widget.loop) {
+      if (!_motion.isAnimating) {
+        _motion.duration = const Duration(milliseconds: 6000);
+        _motion.repeat();
+      }
     } else if (!_started) {
       _started = true;
       _motion.forward();
@@ -110,11 +137,20 @@ class _HSoftArtState extends State<HSoftArt>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) {
+  void didUpdateWidget(covariant HSoftArt oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.loop != widget.loop || oldWidget.enabled != widget.enabled) {
       _motion.stop();
-      _motion.value = 1;
+      _started = false;
+      _motion.value = widget.enabled ? 0 : 1;
+      _syncMotion();
     }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _resumed = state == AppLifecycleState.resumed;
+    _syncMotion();
   }
 
   @override
@@ -129,7 +165,9 @@ class _HSoftArtState extends State<HSoftArt>
     animation: _motion,
     child: widget.child,
     builder: (_, child) {
-      final wave = math.sin(_motion.value * math.pi * 4) * (1 - _motion.value);
+      final wave = widget.loop
+          ? math.sin(_motion.value * math.pi * 2) * .6
+          : math.sin(_motion.value * math.pi * 4) * (1 - _motion.value);
       return Transform.translate(
         offset: Offset(0, wave * 5),
         child: Transform.rotate(angle: wave * .025, child: child),

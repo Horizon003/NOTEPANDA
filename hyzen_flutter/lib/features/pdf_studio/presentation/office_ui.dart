@@ -159,75 +159,6 @@ class OfficeBrandHeader extends ConsumerWidget {
   }
 }
 
-/// Bottom editing toolbar item (Retake / Crop / Rotate / Edit text / …).
-class OfficeToolButton extends StatelessWidget {
-  const OfficeToolButton({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.selected = false,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = onTap == null ? const Color(0xFF98949F) : Colors.white;
-    final glyph = switch (label.toLowerCase()) {
-      'crop' => WorkspaceGlyph.crop,
-      'retake' => WorkspaceGlyph.scan,
-      'annotate' || 'edit text' => WorkspaceGlyph.edit,
-      'filters' => WorkspaceGlyph.settings,
-      'signature' => WorkspaceGlyph.signature,
-      _ => null,
-    };
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: HMotion.duration(context, HMotion.fast),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          decoration: BoxDecoration(
-            color: selected ? const Color(0xFF484050) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Opacity(
-                opacity: onTap == null ? .4 : 1,
-                child: glyph == null
-                    ? Icon(icon, size: 22, color: color)
-                    : WorkspaceIcon(glyph, size: 26),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 ButtonStyle officePrimaryStyle() => FilledButton.styleFrom(
   backgroundColor: OfficeColors.blue,
   foregroundColor: Colors.white,
@@ -467,13 +398,17 @@ class OfficeSheetItem extends StatelessWidget {
     final color = destructive
         ? const Color(0xFFE5484D)
         : OfficeColors.ink(context);
+    final glyph = controlGlyphForIcon(icon);
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
         child: Row(
           children: [
-            Icon(icon, size: 21, color: color),
+            if (glyph == null)
+              Icon(icon, size: 23, color: color)
+            else
+              ControlIcon(glyph, size: 23),
             const SizedBox(width: 14),
             Expanded(
               child: Text(

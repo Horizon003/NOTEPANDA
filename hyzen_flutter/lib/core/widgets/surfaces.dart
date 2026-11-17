@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import 'press_feedback.dart';
+import 'display_preferences.dart';
 
 /// Opaque surfaces; deliberately inexpensive to compose on Android.
 class SurfacePanel extends StatelessWidget {
@@ -65,7 +66,7 @@ class HCard extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         borderRadius: br,
-        child: Padding(padding: padding, child: child),
+        child: Padding(padding: padding * UiDensity.of(context), child: child),
       ),
     );
     final decorated = DecoratedBox(

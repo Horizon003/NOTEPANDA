@@ -1,3 +1,6 @@
+import 'package:hyzen_pharmd/core/widgets/workspace_icons.dart';
+import 'package:hyzen_pharmd/core/widgets/display_preferences.dart';
+import 'package:hyzen_pharmd/core/widgets/profile_avatar.dart';
 import 'package:hyzen_pharmd/core/widgets/polish_ui.dart';
 import 'package:hyzen_pharmd/features/search/presentation/search_screen.dart';
 import 'package:hyzen_pharmd/core/widgets/ui_kit.dart';
@@ -50,6 +53,8 @@ import 'package:hyzen_pharmd/core/widgets/hyzen_art.dart';
 import 'package:hyzen_pharmd/features/auth/presentation/splash_welcome_screens.dart';
 
 class StudentUser extends Fake implements User {
+  StudentUser({this.photoURL});
+
   @override
   String get uid => 'student-test';
   @override
@@ -57,7 +62,7 @@ class StudentUser extends Fake implements User {
   @override
   String? get email => 'student@example.org';
   @override
-  String? get photoURL => null;
+  final String? photoURL;
 }
 
 void main() {
@@ -65,6 +70,7 @@ void main() {
   late SharedPreferences prefs;
   late ProviderContainer container;
   late List<Map<String, dynamic>> fixtureTree;
+  String? accountPhoto;
   var qaClock = DateTime(2026, 1, 1, 18);
   setUpAll(() async {
     final fonts = FontLoader('Outfit');
@@ -77,6 +83,7 @@ void main() {
     await icons.load();
   });
   setUp(() async {
+    accountPhoto = null;
     qaClock = DateTime(2026, 1, 1, 18);
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
@@ -104,11 +111,14 @@ void main() {
       () => 'id-${id++}',
     );
     fixtureTree = tree;
+    await prefs.setBool('pref_ambient_motion', false);
     container = ProviderContainer(
       overrides: [
         homeClockProvider.overrideWithValue(() => qaClock),
         sharedPrefsProvider.overrideWithValue(prefs),
-        authStateProvider.overrideWith((ref) => Stream.value(StudentUser())),
+        authStateProvider.overrideWith(
+          (ref) => Stream.value(StudentUser(photoURL: accountPhoto)),
+        ),
         profileProvider.overrideWith(
           (ref) => Stream.value(
             const StudentProfile(
@@ -180,6 +190,189 @@ void main() {
     container.read(routerProvider).go(path);
     await tester.pumpAndSettle();
   }
+
+  testWidgets(
+    'display sizes change, persist on rebuild, and reset to Android defaults',
+    (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await open(tester, '/settings');
+      final text = find.byKey(const ValueKey('ui_text_scale'));
+      final elements = find.byKey(const ValueKey('ui_element_scale'));
+      await tester.scrollUntilVisible(
+        text,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(text);
+      await tester.pumpAndSettle();
+
+      final reset = find.text('Reset sizes');
+      expect(tester.widget<Slider>(text).value, 1);
+      expect(tester.widget<Slider>(elements).value, 1);
+      expect(
+        MediaQuery.textScalerOf(tester.element(text)).scale(20),
+        closeTo(32, .01),
+      );
+      expect(UiDensity.of(tester.element(elements)), 1);
+
+      await tester.drag(text, const Offset(500, 0));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(elements);
+      await tester.pumpAndSettle();
+      await tester.drag(elements, const Offset(500, 0));
+      await tester.pumpAndSettle();
+      expect(prefs.getDouble('ui_text_scale'), 1.25);
+      expect(prefs.getDouble('ui_element_scale'), 1.15);
+      expect(
+        MediaQuery.textScalerOf(tester.element(elements)).scale(20),
+        closeTo(40, .01),
+      );
+      expect(UiDensity.of(tester.element(elements)), 1.15);
+
+      final restarted = ProviderContainer(
+        overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(restarted.dispose);
+      expect(restarted.read(displayScaleProvider('ui_text_scale')), 1.25);
+      expect(restarted.read(displayScaleProvider('ui_element_scale')), 1.15);
+
+      await tester.ensureVisible(reset);
+      await tester.pumpAndSettle();
+      await tester.tap(reset);
+      await tester.pumpAndSettle();
+      expect(prefs.getDouble('ui_text_scale'), 1);
+      expect(prefs.getDouble('ui_element_scale'), 1);
+      expect(
+        MediaQuery.textScalerOf(tester.element(elements)).scale(20),
+        closeTo(32, .01),
+      );
+      expect(UiDensity.of(tester.element(elements)), 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('Home plan cards keep words intact at 320 and 360dp', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    for (final width in [320.0, 360.0]) {
+      tester.view.physicalSize = Size(width, 844);
+      for (final scale in [1.0, 1.3, 2.0]) {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        container
+            .read(displayScaleProvider('ui_text_scale').notifier)
+            .set(scale == 1 ? 1 : 1.25);
+        container
+            .read(displayScaleProvider('ui_element_scale').notifier)
+            .set(1.15);
+        await open(tester, '/home');
+        final title = find.text('Study library');
+        await tester.scrollUntilVisible(
+          title,
+          160,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        for (final label in [
+          'Study library',
+          'Notes, MCQs & past papers',
+          'Office workspace',
+        ]) {
+          final finder = find.text(label);
+          await tester.ensureVisible(finder);
+          final paragraph = tester.renderObject<RenderParagraph>(finder);
+          for (final match in RegExp(r'\S+').allMatches(label)) {
+            final boxes = paragraph.getBoxesForSelection(
+              TextSelection(baseOffset: match.start, extentOffset: match.end),
+            );
+            expect(
+              boxes.length,
+              1,
+              reason: '${match.group(0)} at ${width}dp / $scale×',
+            );
+          }
+        }
+        if (const bool.fromEnvironment('HYZEN_CAPTURE_QA') &&
+            width == 360 &&
+            scale == 1.3) {
+          await Scrollable.ensureVisible(tester.element(title), alignment: .25);
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 150)),
+          );
+          await tester.pumpAndSettle();
+          await expectLater(
+            find.byType(HyzenApp),
+            matchesGoldenFile('../qa/reference/after/home-note8-large.png'),
+          );
+        }
+        expect(tester.takeException(), isNull);
+      }
+    }
+  });
+
+  testWidgets(
+    'core screens fit narrow phones with maximum app and Android sizes',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      container.read(displayScaleProvider('ui_text_scale').notifier).set(1.25);
+      container
+          .read(displayScaleProvider('ui_element_scale').notifier)
+          .set(1.15);
+
+      for (final width in [320.0, 360.0]) {
+        tester.view.physicalSize = Size(width, 844);
+        for (final path in [
+          '/settings',
+          '/study',
+          '/pdf-studio',
+          '/downloads',
+          '/study-progress',
+          '/notifications',
+          '/search',
+        ]) {
+          await open(tester, path);
+          expect(tester.takeException(), isNull, reason: '$path at ${width}dp');
+          final scrollable = find.byType(Scrollable).first;
+          for (var i = 0; i < 3; i++) {
+            await tester.drag(scrollable, const Offset(0, -580));
+            await tester.pumpAndSettle();
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '$path at ${width}dp after scroll',
+            );
+          }
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'Home, shared, and Office headers use the signed-in account photo',
+    (tester) async {
+      accountPhoto = 'https://example.org/avatar.png';
+      for (final route in ['/home', '/study', '/downloads', '/pdf-studio']) {
+        await open(tester, route);
+        final avatars = tester.widgetList<ProfileAvatar>(
+          find.byType(ProfileAvatar),
+        );
+        expect(
+          avatars.map((avatar) => avatar.photoUrl),
+          contains(accountPhoto),
+          reason: route,
+        );
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('push inbox deduplicates receipt and preserves read status', (
     tester,
@@ -557,13 +750,17 @@ void main() {
     'announcement toggle persists between settings and account info',
     (tester) async {
       await open(tester, '/settings');
+      final announcements = find.byWidgetPredicate(
+        (widget) =>
+            widget is AccountToggle && widget.label == 'Show announcements',
+      );
       await tester.scrollUntilVisible(
-        find.byType(AccountToggle),
+        announcements,
         250,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(AccountToggle));
+      await tester.tap(announcements);
       await tester.pumpAndSettle();
       expect(prefs.getBool('pref_announcements'), isFalse);
       container.read(routerProvider).go('/profile/info');
@@ -669,7 +866,14 @@ void main() {
         expect(rect.height, greaterThanOrEqualTo(48));
         previous = rect.left;
       }
-      expect(tester.widget<Material>(dock).color, const Color(0xFFF0F0F2));
+      final surface = find.descendant(
+        of: dock,
+        matching: find.byType(Material),
+      );
+      expect(
+        tester.widget<Material>(surface.first).color,
+        const Color(0xFFF0F0F2),
+      );
     },
   );
 
@@ -948,7 +1152,7 @@ void main() {
       await tester.ensureVisible(find.text('Already a user? Log in'));
       await tester.tap(find.text('Already a user? Log in'));
       await tester.pumpAndSettle();
-      expect(find.text('Welcome to PHARM D WITH HYZEN'), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
       expect(find.byKey(const ValueKey('login-panda-hero')), findsOneWidget);
       expect(find.byType(MainDock), findsNothing);
       await tester.enterText(
@@ -1320,9 +1524,7 @@ void main() {
       expect(find.byKey(const ValueKey('card-hold-preview')), findsNothing);
     }
   });
-  testWidgets('retired app size sliders cannot override Android text scaling', (
-    tester,
-  ) async {
+  testWidgets('display sliders retain Android text scaling', (tester) async {
     await container.read(textSizeProvider.notifier).set(6);
     tester.platformDispatcher.textScaleFactorTestValue = 1.5;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -1334,8 +1536,8 @@ void main() {
       21,
     );
     await open(tester, '/settings');
-    expect(find.text('Text size'), findsNothing);
-    expect(find.byType(Slider), findsNothing);
+    expect(find.byKey(const ValueKey('ui_text_scale')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ui_element_scale')), findsOneWidget);
   });
   testWidgets('notification unread filter and read-all update real inbox', (
     tester,
@@ -1405,9 +1607,7 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
-  testWidgets('reference onboarding portrait retains later mascot pages', (
-    tester,
-  ) async {
+  testWidgets('panda onboarding retains later mascot pages', (tester) async {
     await tester.pumpWidget(
       MaterialApp(theme: AppTheme.light(), home: const WelcomeScreen()),
     );
@@ -1415,7 +1615,19 @@ void main() {
       find.text('Thrilled to join\nyour learning\njourney!'),
       findsOneWidget,
     );
-    await tester.drag(find.byType(PageView), const Offset(-500, 0));
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is WorkspaceIcon && widget.glyph == WorkspaceGlyph.panda,
+      ),
+      findsOneWidget,
+    );
+    final slider = find.byKey(const ValueKey('onboarding-slide'));
+    final bounds = tester.getRect(slider);
+    await tester.dragFrom(
+      bounds.centerLeft + const Offset(27, 0),
+      Offset(bounds.width - 48, 0),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(HyzenRiveMascot), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -1455,7 +1667,7 @@ void main() {
       for (final mode in [ThemeMode.light, ThemeMode.dark]) {
         guest.read(themeModeProvider.notifier).set(mode);
         await tester.pumpAndSettle();
-        expect(find.text('Welcome back'), findsNothing);
+        expect(find.text('Welcome back'), findsOneWidget);
         expect(find.byType(HyzenBrandIcon), findsOneWidget);
         await tester.ensureVisible(find.text('Log in'));
         await tester.tap(find.text('Log in'));
@@ -1746,6 +1958,16 @@ void main() {
             '../qa/reference/after/light${route.replaceAll('/', '_')}.png',
           ),
         );
+        if (route == '/login') {
+          final login = find.text('Already a user? Log in');
+          await tester.ensureVisible(login);
+          await tester.tap(login);
+          await tester.pumpAndSettle();
+          await expectLater(
+            find.byType(HyzenApp),
+            matchesGoldenFile('../qa/reference/after/light_login_form.png'),
+          );
+        }
         expect(tester.takeException(), isNull);
       }
     });

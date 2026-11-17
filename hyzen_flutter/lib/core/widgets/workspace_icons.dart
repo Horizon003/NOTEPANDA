@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'display_preferences.dart';
 
 /// Equal-cell generated artwork; one cached sheet, no per-icon file decoding.
 enum WorkspaceGlyph {
@@ -27,15 +28,15 @@ class WorkspaceIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: SizedBox.square(
-      dimension: size,
+      dimension: size * UiDensity.of(context),
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
           Positioned(
-            left: -(glyph.index % 4) * size,
-            top: -(glyph.index ~/ 4) * size,
-            width: size * 4,
-            height: size * 4,
+            left: -(glyph.index % 4) * size * UiDensity.of(context),
+            top: -(glyph.index ~/ 4) * size * UiDensity.of(context),
+            width: size * 4 * UiDensity.of(context),
+            height: size * 4 * UiDensity.of(context),
             child: Image.asset(
               'assets/reference/workspace-icons.png',
               fit: BoxFit.fill,
@@ -73,3 +74,60 @@ WorkspaceGlyph? glyphForIcon(IconData icon) {
   }
   return null;
 }
+
+/// Equal-cell generated artwork; one cached sheet, no per-icon file decoding.
+enum ControlGlyph {
+  rotate,
+  delete,
+  back,
+  share,
+  download,
+  more,
+  timer,
+  goal,
+  reminder,
+  streak,
+  chart,
+  pause,
+  play,
+  notes,
+  calendar,
+  trophy,
+}
+
+class ControlIcon extends StatelessWidget {
+  const ControlIcon(this.glyph, {super.key, this.size = 28, this.color});
+  final ControlGlyph glyph;
+  final double size;
+  final Color? color;
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: SizedBox.square(
+      dimension: size * UiDensity.of(context),
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          Positioned(
+            left: -(glyph.index % 4) * size * UiDensity.of(context),
+            top: -(glyph.index ~/ 4) * size * UiDensity.of(context),
+            width: size * 4 * UiDensity.of(context),
+            height: size * 4 * UiDensity.of(context),
+            child: Image.asset(
+              'assets/reference/refined-controls.png',
+              color: color,
+              colorBlendMode: BlendMode.srcIn,
+              fit: BoxFit.fill,
+              cacheWidth: 1024,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+ControlGlyph? controlGlyphForIcon(IconData icon) => switch (icon) {
+  Icons.rotate_right_rounded => ControlGlyph.rotate,
+  Icons.delete_outline_rounded => ControlGlyph.delete,
+  _ => null,
+};

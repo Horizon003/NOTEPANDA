@@ -137,6 +137,7 @@ class BoolPref extends FamilyNotifier<bool, String> {
   static const _defaults = {
     'pref_wifi_only': false,
     'pref_announcements': true,
+    'pref_ambient_motion': true,
   };
   void set(bool v) {
     state = v;

@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 import 'package:flutter/material.dart';
+import '../../core/widgets/workspace_icons.dart';
+import '../../core/widgets/surfaces.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -89,7 +91,7 @@ class StudyProgressScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(studyTrackerProvider);
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = Theme.of(context).scaffoldBackgroundColor;
+    const bg = Colors.transparent;
     final surface = Theme.of(context).colorScheme.surface;
     final secondary = dark ? Colors.white70 : Colors.black54;
 
@@ -97,15 +99,37 @@ class StudyProgressScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: surface,
+        color: switch (name) {
+          'Focus timer' => const Color(0xFFE8DFF8),
+          'Daily & weekly goals' => const Color(0xFFFFE5CB),
+          'Streaks & breaks' => const Color(0xFFDDEEE2),
+          _ => surface,
+        },
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            name,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          Row(
+            children: [
+              ControlIcon(switch (name) {
+                'Focus timer' => ControlGlyph.timer,
+                'Daily & weekly goals' => ControlGlyph.goal,
+                'Streaks & breaks' => ControlGlyph.streak,
+                'Professional Rank' => ControlGlyph.trophy,
+                _ => ControlGlyph.notes,
+              }, size: 30),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           body,
@@ -121,300 +145,304 @@ class StudyProgressScreen extends ConsumerWidget {
       borderRadius: BorderRadius.circular(12),
     );
 
-    return Scaffold(
-      backgroundColor: bg,
-      appBar: AppBar(
+    return HBackground(
+      child: Scaffold(
         backgroundColor: bg,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'Study progress',
-          style: TextStyle(fontWeight: FontWeight.w600),
+        appBar: AppBar(
+          backgroundColor: bg,
+          surfaceTintColor: Colors.transparent,
+          title: const Text(
+            'Study progress',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          leading: IconButton(
+            tooltip: 'Back',
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/home');
+              }
+            },
+          ),
         ),
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/home');
-            }
-          },
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
-        children: [
-          panel(
-            'Focus timer',
-            Column(
-              children: [
-                Center(
-                  child: SizedBox(
-                    width: 144,
-                    height: 144,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox.expand(
-                          child: CircularProgressIndicator(
-                            value:
-                                (progress.todaySeconds /
-                                        (progress.dailyGoal * 60))
-                                    .clamp(0.0, 1.0),
-                            color: HColors.mcqs,
-                            strokeWidth: 4,
-                            strokeCap: StrokeCap.round,
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainer,
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
+          children: [
+            panel(
+              'Focus timer',
+              Column(
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: 144,
+                      height: 144,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox.expand(
+                            child: CircularProgressIndicator(
+                              value:
+                                  (progress.todaySeconds /
+                                          (progress.dailyGoal * 60))
+                                      .clamp(0.0, 1.0),
+                              color: HColors.mcqs,
+                              strokeWidth: 4,
+                              strokeCap: StrokeCap.round,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainer,
+                            ),
                           ),
-                        ),
-                        const HyzenRiveMascot(
-                          state: HyzenRiveState.studying,
-                          size: 72,
-                        ),
-                      ],
+                          const HyzenRiveMascot(
+                            state: HyzenRiveState.studying,
+                            size: 72,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  formatStudyTime(progress.todaySeconds),
-                  key: const ValueKey('study-time'),
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Today’s active study time',
-                  style: TextStyle(color: secondary),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: progress.running
-                          ? progress.pause
-                          : progress.start,
-                      icon: Icon(
-                        progress.running
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                      ),
-                      label: Text(
-                        progress.running
-                            ? 'Pause study session'
-                            : 'Start study session',
-                      ),
-                    ),
-                    if (progress.hasSession)
-                      TextButton.icon(
-                        onPressed: progress.stop,
-                        icon: const Icon(Icons.stop_rounded),
-                        label: const Text('Stop session'),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  progress.cloudStatus,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: secondary),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Pauses in the background or after 5 minutes without interaction.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12),
-                ),
-                if (progress.saveError != null) Text(progress.saveError!),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          panel(
-            'Daily & weekly goals',
-            Column(
-              children: [
-                Row(
-                  children: [
-                    const Expanded(child: Text('Daily goal')),
-                    Text(
-                      (progress.todaySeconds ~/ 60).toString() +
-                          ' / ' +
-                          progress.dailyGoal.toString() +
-                          ' min',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 9),
-                progressBar(progress.todaySeconds, progress.dailyGoal),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    const Expanded(child: Text('This week')),
-                    Text(
-                      (progress.weekSeconds ~/ 60).toString() +
-                          ' / ' +
-                          progress.weeklyGoal.toString() +
-                          ' min',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 9),
-                progressBar(progress.weekSeconds, progress.weeklyGoal),
-                const SizedBox(height: 14),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _editGoals(context, progress),
-                    icon: const Icon(Icons.tune_rounded, size: 18),
-                    label: const Text('Edit goals'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          panel(
-            'Streaks & recent breaks',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 18,
-                  runSpacing: 12,
-                  children: [
-                    _Stat(
-                      'Current streak',
-                      progress.currentStreak.toString() + ' days',
-                      Icons.local_fire_department_outlined,
-                    ),
-                    _Stat(
-                      'Highest streak',
-                      progress.highestStreak.toString() + ' days',
-                      Icons.emoji_events_outlined,
-                    ),
-                    _Stat(
-                      'This week',
-                      (progress.weekSeconds ~/ 60).toString() + ' min',
-                      Icons.calendar_today_outlined,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Recent breaks',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                if (progress.recentBreaks.isEmpty)
+                  const SizedBox(height: 12),
                   Text(
-                    'No breaks between tracked study days yet.',
+                    formatStudyTime(progress.todaySeconds),
+                    key: const ValueKey('study-time'),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Today’s active study time',
+                    style: TextStyle(color: secondary),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: progress.running
+                            ? progress.pause
+                            : progress.start,
+                        icon: ControlIcon(
+                          progress.running
+                              ? ControlGlyph.pause
+                              : ControlGlyph.play,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          progress.running
+                              ? 'Pause study session'
+                              : 'Start study session',
+                        ),
+                      ),
+                      if (progress.hasSession)
+                        TextButton.icon(
+                          onPressed: progress.stop,
+                          icon: const Icon(Icons.stop_rounded),
+                          label: const Text('Stop session'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    progress.cloudStatus,
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: secondary),
-                  )
-                else
-                  for (final item in progress.recentBreaks)
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Pauses in the background or after 5 minutes without interaction.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  if (progress.saveError != null) Text(progress.saveError!),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            panel(
+              'Daily & weekly goals',
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(child: Text('Daily goal')),
+                      Text(
+                        (progress.todaySeconds ~/ 60).toString() +
+                            ' / ' +
+                            progress.dailyGoal.toString() +
+                            ' min',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 9),
+                  progressBar(progress.todaySeconds, progress.dailyGoal),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      const Expanded(child: Text('This week')),
+                      Text(
+                        (progress.weekSeconds ~/ 60).toString() +
+                            ' / ' +
+                            progress.weeklyGoal.toString() +
+                            ' min',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 9),
+                  progressBar(progress.weekSeconds, progress.weeklyGoal),
+                  const SizedBox(height: 14),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _editGoals(context, progress),
+                      icon: const ControlIcon(ControlGlyph.goal, size: 24),
+                      label: const Text('Edit goals'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            panel(
+              'Streaks & recent breaks',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 18,
+                    runSpacing: 12,
+                    children: [
+                      _Stat(
+                        'Current streak',
+                        progress.currentStreak.toString() + ' days',
+                        Icons.local_fire_department_outlined,
+                      ),
+                      _Stat(
+                        'Highest streak',
+                        progress.highestStreak.toString() + ' days',
+                        Icons.emoji_events_outlined,
+                      ),
+                      _Stat(
+                        'This week',
+                        (progress.weekSeconds ~/ 60).toString() + ' min',
+                        Icons.calendar_today_outlined,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Recent breaks',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  if (progress.recentBreaks.isEmpty)
+                    Text(
+                      'No breaks between tracked study days yet.',
+                      style: TextStyle(fontSize: 12, color: secondary),
+                    )
+                  else
+                    for (final item in progress.recentBreaks)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          item,
+                          style: TextStyle(fontSize: 12, color: secondary),
+                        ),
+                      ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'At least 15 actively studied minutes count as a study day.',
+                    style: TextStyle(fontSize: 11, color: secondary),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            panel(
+              'Tasks & reminders',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Reminder alerts appear in the in-app inbox when the app runs.',
+                    style: TextStyle(fontSize: 12, color: secondary),
+                  ),
+                  const SizedBox(height: 12),
+                  for (final task in progress.tasks)
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Checkbox(
+                        value: task.done,
+                        onChanged: (_) => progress.toggleTask(task.id),
+                      ),
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          decoration: task.done
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                      ),
+                      subtitle: task.due == null
+                          ? null
+                          : Text(
+                              'Reminder: ' +
+                                  task.due!.day.toString() +
+                                  '/' +
+                                  task.due!.month.toString() +
+                                  ' at ' +
+                                  task.due!.hour.toString().padLeft(2, '0') +
+                                  ':' +
+                                  task.due!.minute.toString().padLeft(2, '0'),
+                              style: TextStyle(fontSize: 11, color: secondary),
+                            ),
+                      trailing: IconButton(
+                        tooltip: 'Delete task',
+                        icon: const Icon(Icons.close_rounded, size: 19),
+                        onPressed: () => progress.deleteTask(task.id),
+                      ),
+                    ),
+                  if (progress.tasks.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       child: Text(
-                        item,
-                        style: TextStyle(fontSize: 12, color: secondary),
+                        'No tasks yet. Add your first study task.',
+                        style: TextStyle(color: secondary),
                       ),
                     ),
-                const SizedBox(height: 10),
-                Text(
-                  'At least 15 actively studied minutes count as a study day.',
-                  style: TextStyle(fontSize: 11, color: secondary),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          panel(
-            'Tasks & reminders',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Reminder alerts appear in the in-app inbox when the app runs.',
-                  style: TextStyle(fontSize: 12, color: secondary),
-                ),
-                const SizedBox(height: 12),
-                for (final task in progress.tasks)
-                  ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Checkbox(
-                      value: task.done,
-                      onChanged: (_) => progress.toggleTask(task.id),
-                    ),
-                    title: Text(
-                      task.title,
-                      style: TextStyle(
-                        decoration: task.done
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                    ),
-                    subtitle: task.due == null
-                        ? null
-                        : Text(
-                            'Reminder: ' +
-                                task.due!.day.toString() +
-                                '/' +
-                                task.due!.month.toString() +
-                                ' at ' +
-                                task.due!.hour.toString().padLeft(2, '0') +
-                                ':' +
-                                task.due!.minute.toString().padLeft(2, '0'),
-                            style: TextStyle(fontSize: 11, color: secondary),
-                          ),
-                    trailing: IconButton(
-                      tooltip: 'Delete task',
-                      icon: const Icon(Icons.close_rounded, size: 19),
-                      onPressed: () => progress.deleteTask(task.id),
-                    ),
+                  OutlinedButton.icon(
+                    onPressed: () => _addTask(context, progress),
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Add task or reminder'),
                   ),
-                if (progress.tasks.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text(
-                      'No tasks yet. Add your first study task.',
-                      style: TextStyle(color: secondary),
-                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            panel(
+              'Professional Rank',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ControlIcon(ControlGlyph.trophy, size: 40),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Open Professional Rank for your verified leaderboard.',
                   ),
-                OutlinedButton.icon(
-                  onPressed: () => _addTask(context, progress),
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('Add task or reminder'),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  Text(
+                    'Students from all colleges compete within their verified professional year.',
+                    style: TextStyle(fontSize: 12, color: secondary),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 14),
-          panel(
-            'Professional Rank',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.groups_outlined, size: 28),
-                const SizedBox(height: 10),
-                const Text(
-                  'Open Professional Rank for your verified leaderboard.',
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Students from all colleges compete within their verified professional year.',
-                  style: TextStyle(fontSize: 12, color: secondary),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -575,7 +603,11 @@ class _Stat extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 21),
+        ControlIcon(switch (icon) {
+          Icons.local_fire_department_outlined => ControlGlyph.streak,
+          Icons.emoji_events_outlined => ControlGlyph.trophy,
+          _ => ControlGlyph.calendar,
+        }, size: 27),
         const SizedBox(height: 8),
         Text(
           value,

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/content/data/content_providers.dart';
 import '../theme/tokens.dart';
 import 'polish_ui.dart';
+import 'soft_pill_bar.dart';
+import 'display_preferences.dart';
 
 enum DockDestination {
   home('Home', '/home', 0, Icons.home_outlined),
@@ -25,7 +27,8 @@ class MainDock extends ConsumerWidget {
   const MainDock({super.key, required this.path, required this.onSelected});
   final String path;
   final ValueChanged<DockDestination> onSelected;
-  static double height(BuildContext context) => 60;
+  static double height(BuildContext context) =>
+      (48 * UiDensity.of(context)).clamp(48.0, 56.0) + 12;
   static double contentInset(BuildContext context) =>
       height(context) +
       16 +
@@ -35,7 +38,7 @@ class MainDock extends ConsumerWidget {
     if (MediaQuery.viewInsetsOf(context).bottom > 0) {
       return const SizedBox.shrink();
     }
-    const size = 1.0;
+    final selected = DockDestination.values.indexWhere((d) => d.matches(path));
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
@@ -43,160 +46,30 @@ class MainDock extends ConsumerWidget {
         heightFactor: 1,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 470),
-          child: Material(
+          child: SoftPillBar(
             key: const ValueKey('main-dock'),
-            color: const Color(0xFFF0F0F2),
-            elevation: 0,
-            shape: const StadiumBorder(
-              side: BorderSide(color: Color(0xFFE5E5E8)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: LayoutBuilder(
-                builder: (context, c) {
-                  final selected = DockDestination.values
-                      .where((d) => d.matches(path))
-                      .firstOrNull;
-                  final iconOnly =
-                      MediaQuery.textScalerOf(context).scale(1) > 1.4 ||
-                      c.maxWidth < 278;
-                  final activeWidth = iconOnly || selected == null
-                      ? c.maxWidth / 5
-                      : (c.maxWidth - 192).clamp(48.0, 124.0);
-                  final restWidth = (c.maxWidth - activeWidth) / 4;
-                  return Row(
-                    children: [
-                      for (final d in DockDestination.values)
-                        AnimatedContainer(
-                          duration: HMotion.duration(context),
-                          curve: HMotion.curve,
-                          width: selected == null || iconOnly
-                              ? c.maxWidth / 5
-                              : (d == selected ? activeWidth : restWidth),
-                          height: 48,
-                          child: Tooltip(
-                            message: d.label,
-                            excludeFromSemantics: true,
-                            child: Semantics(
-                              key: ValueKey('dock-${d.name}'),
-                              button: true,
-                              selected: d == selected,
-                              label: d.label,
-                              onTap: () => onSelected(d),
-                              child: ExcludeSemantics(
-                                child: _DockButton(
-                                  destination: d,
-                                  selected: d == selected,
-                                  iconOnly: iconOnly,
-                                  iconSize: 19 * size,
-                                  onTap: () => onSelected(d),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ),
+            selectedIndex: selected,
+            items: [
+              for (final d in DockDestination.values)
+                SoftPillItem(
+                  key: ValueKey('dock-${d.name}'),
+                  label: d.label,
+                  shortLabel: d == DockDestination.office ? 'Office' : null,
+                  icon: HAssetIcon(switch (d) {
+                    DockDestination.home => 'icon-home',
+                    DockDestination.study => 'action-notes',
+                    DockDestination.office => 'action-scan',
+                    DockDestination.shop => 'icon-shop',
+                    DockDestination.downloads => 'action-downloads',
+                  }, size: 24),
+                  onTap: () => onSelected(d),
+                ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-/// Animate only the compact control, never a retained tab's document/content.
-class _DockButton extends StatefulWidget {
-  const _DockButton({
-    required this.destination,
-    required this.selected,
-    required this.iconOnly,
-    required this.iconSize,
-    required this.onTap,
-  });
-  final DockDestination destination;
-  final bool selected, iconOnly;
-  final double iconSize;
-  final VoidCallback onTap;
-
-  @override
-  State<_DockButton> createState() => _DockButtonState();
-}
-
-class _DockButtonState extends State<_DockButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: widget.onTap,
-    onHighlightChanged: (pressed) => setState(() => _pressed = pressed),
-    customBorder: const StadiumBorder(),
-    child: AnimatedScale(
-      scale: _pressed && !MediaQuery.disableAnimationsOf(context) ? .97 : 1,
-      duration: HMotion.duration(context),
-      curve: HMotion.curve,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(end: widget.selected ? 1 : 0),
-        duration: HMotion.duration(context, const Duration(milliseconds: 200)),
-        curve: HMotion.curve,
-        builder: (context, selection, _) {
-          final foreground = Color.lerp(HColors.ink, Colors.white, selection)!;
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              color: Color.lerp(Colors.white, HColors.ink, selection),
-              borderRadius: BorderRadius.circular(28),
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: widget.iconOnly ? 0 : 10 * selection,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                HAssetIcon(switch (widget.destination) {
-                  DockDestination.home => 'icon-home',
-                  DockDestination.study => 'action-notes',
-                  DockDestination.office => 'action-scan',
-                  DockDestination.shop => 'icon-shop',
-                  DockDestination.downloads => 'action-downloads',
-                }, size: 27),
-                if (!widget.iconOnly)
-                  Flexible(
-                    child: ClipRect(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: selection,
-                        child: Opacity(
-                          opacity: selection,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 5),
-                            child: Text(
-                              widget.destination == DockDestination.office
-                                  ? 'Office'
-                                  : widget.destination.label,
-                              maxLines: 1,
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: foreground,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
-    ),
-  );
 }
 
 Future<void> showStudyMenu(BuildContext context) {

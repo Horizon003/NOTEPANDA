@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/utils/media_upload.dart';
+import '../../../core/widgets/soft_pill_bar.dart';
+import '../../../core/widgets/workspace_icons.dart';
 import '../../viewer/document_bytes.dart';
 import '../../viewer/document_flow.dart';
 import '../data/pdf_studio_repository.dart';
@@ -687,35 +688,32 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
     final sel = _sel;
     final idle = !_busy && has;
     final tools = [
-      (
-        Icons.crop_rounded,
-        'Crop',
-        idle && _android ? _toggleCrop : null,
-        _crop,
+      SoftPillItem(
+        label: 'Crop',
+        icon: const WorkspaceIcon(WorkspaceGlyph.crop, size: 26),
+        onTap: idle && _android ? _toggleCrop : null,
       ),
-      (
-        Icons.rotate_right_rounded,
-        'Rotate',
-        idle && !_crop && _android ? () => _rotate(_pages[sel]) : null,
-        false,
+      SoftPillItem(
+        label: 'Rotate',
+        icon: const ControlIcon(ControlGlyph.rotate, size: 26),
+        onTap: idle && !_crop && _android ? () => _rotate(_pages[sel]) : null,
       ),
-      (
-        Icons.tune_rounded,
-        'Filters',
-        idle && !_crop && _android ? _filters : null,
-        false,
+      SoftPillItem(
+        label: 'Filters',
+        icon: const WorkspaceIcon(WorkspaceGlyph.settings, size: 26),
+        onTap: idle && !_crop && _android ? _filters : null,
       ),
-      (
-        Icons.draw_outlined,
-        'Annotate',
-        idle && !_crop && _android ? _annotate : null,
-        false,
+      SoftPillItem(
+        label: 'Annotate',
+        icon: const WorkspaceIcon(WorkspaceGlyph.edit, size: 26),
+        onTap: idle && !_crop && _android ? _annotate : null,
       ),
-      (
-        Icons.delete_outline_rounded,
-        'Delete',
-        idle && !_crop ? () => _replace([..._pages]..removeAt(sel)) : null,
-        false,
+      SoftPillItem(
+        label: 'Delete',
+        icon: const ControlIcon(ControlGlyph.delete, size: 26),
+        onTap: idle && !_crop
+            ? () => _replace([..._pages]..removeAt(sel))
+            : null,
       ),
     ];
     return PopScope(
@@ -857,74 +855,58 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
                   setState(() => _selectedPage = to);
                 },
               ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: const Color(0xFF17161D),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final scale =
-                              MediaQuery.textScalerOf(context).scale(11) / 11;
-                          final width = (constraints.maxWidth / tools.length)
-                              .clamp(60.0 * scale, double.infinity);
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (final t in tools)
-                                  SizedBox(
-                                    width: width,
-                                    child: OfficeToolButton(
-                                      icon: t.$1,
-                                      label: t.$2,
-                                      onTap: t.$3,
-                                      selected: t.$4,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      if (_crop)
-                        Wrap(
-                          alignment: WrapAlignment.end,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            TextButton(
-                              onPressed: _busy
-                                  ? null
-                                  : () => setState(() => _crop = false),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Cancel crop'),
-                            ),
-                            FilledButton(
-                              onPressed: _busy ? null : _applyCrop,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFFE8DFF8),
-                                foregroundColor: Colors.black,
-                              ),
-                              child: const Text('Apply crop'),
-                            ),
-                          ],
+            SafeArea(
+              top: false,
+              minimum: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final labelScale =
+                          MediaQuery.textScalerOf(context).scale(9) / 9;
+                      final minSlot = (54 * labelScale).clamp(
+                        48.0,
+                        double.infinity,
+                      );
+                      final minWidth = 12 + minSlot * tools.length;
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: constraints.maxWidth.clamp(
+                            minWidth,
+                            double.infinity,
+                          ),
+                          child: SoftPillBar(
+                            items: tools,
+                            selectedIndex: _crop ? 0 : -1,
+                            showAllLabels: true,
+                          ),
                         ),
-                    ],
+                      );
+                    },
                   ),
-                ),
+                  if (_crop) ...[
+                    const SizedBox(height: 8),
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () => setState(() => _crop = false),
+                          child: const Text('Cancel crop'),
+                        ),
+                        FilledButton(
+                          onPressed: _busy ? null : _applyCrop,
+                          child: const Text('Apply crop'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

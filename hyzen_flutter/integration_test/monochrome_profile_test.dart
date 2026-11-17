@@ -6,6 +6,7 @@ import 'package:hyzen_pharmd/main_account_review.dart' as fixture;
 import 'package:hyzen_pharmd/app/app.dart';
 import 'package:hyzen_pharmd/app/router.dart';
 import 'package:hyzen_pharmd/app/providers.dart';
+import 'package:hyzen_pharmd/core/widgets/polish_ui.dart';
 import 'package:hyzen_pharmd/features/pdf_studio/data/studio_pdf_engine.dart';
 import 'package:hyzen_pharmd/features/viewer/offline_pdf.dart';
 
@@ -15,7 +16,14 @@ void main() {
     'native reference profile: home, retained tabs, scroll, routes and PDF',
     (tester) async {
       await fixture.main();
-      await tester.pumpAndSettle();
+      for (
+        var attempt = 0;
+        attempt < 30 && find.byType(HyzenApp).evaluate().isEmpty;
+        attempt++
+      ) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await pumpFrames(tester);
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HyzenApp)),
       );
@@ -30,12 +38,17 @@ void main() {
             '/shop',
           ]) {
             router.go(path);
-            await tester.pumpAndSettle();
+            await pumpFrames(tester);
           }
         }
       }, reportKey: 'tab_navigation');
       router.go('/home');
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
+      final art = tester.widget<HSoftArt>(find.byType(HSoftArt));
+      expect(art.loop && art.enabled, isTrue);
+      await binding.watchPerformance(() async {
+        await pumpFrames(tester, count: 375);
+      }, reportKey: 'ambient_hero');
       await binding.watchPerformance(() async {
         for (var i = 0; i < 5; i++) {
           await tester.fling(
@@ -43,13 +56,13 @@ void main() {
             const Offset(0, -450),
             900,
           );
-          await tester.pumpAndSettle();
+          await pumpFrames(tester, count: 60);
           await tester.fling(
             find.byType(CustomScrollView).first,
             const Offset(0, 450),
             900,
           );
-          await tester.pumpAndSettle();
+          await pumpFrames(tester, count: 60);
         }
       }, reportKey: 'home_scroll');
       await binding.watchPerformance(() async {
@@ -61,9 +74,9 @@ void main() {
           '/settings',
         ]) {
           router.push(path);
-          await tester.pumpAndSettle();
+          await pumpFrames(tester);
           router.pop();
-          await tester.pumpAndSettle();
+          await pumpFrames(tester);
         }
       }, reportKey: 'route_transitions');
       final path = await StudioPdfEngine.textToPdf(
@@ -74,7 +87,7 @@ void main() {
       await binding.watchPerformance(() async {
         final context = tester.element(find.byType(HyzenApp));
         router.go('/pdf-studio');
-        await tester.pumpAndSettle();
+        await pumpFrames(tester);
         final nav = Navigator.of(tester.element(find.byType(Scaffold).last));
         nav.push(
           MaterialPageRoute<void>(
@@ -84,7 +97,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await pumpFrames(tester);
         for (var attempt = 0; attempt < 15 && !pdfOpened; attempt++) {
           await tester.pump(const Duration(seconds: 1));
         }
@@ -95,7 +108,7 @@ void main() {
           reason: 'PDF renderer must report a successfully opened document',
         );
         nav.pop();
-        await tester.pumpAndSettle();
+        await pumpFrames(tester);
       }, reportKey: 'pdf_open');
       // Captures happen outside performance windows: readback affects timings.
       await binding.convertFlutterSurfaceToImage();
@@ -111,7 +124,7 @@ void main() {
           '/study-goals',
         ]) {
           router.go(path);
-          await tester.pumpAndSettle();
+          await pumpFrames(tester);
           await binding.takeScreenshot('${mode.name}-${path.substring(1)}');
         }
       }
@@ -119,4 +132,10 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 8)),
   );
+}
+
+Future<void> pumpFrames(WidgetTester tester, {int count = 24}) async {
+  for (var frame = 0; frame < count; frame++) {
+    await tester.pump(const Duration(milliseconds: 16));
+  }
 }

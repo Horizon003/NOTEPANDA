@@ -7,6 +7,8 @@ import 'package:hyzen_pharmd/features/pdf_studio/data/studio_file_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hyzen_pharmd/core/theme/app_theme.dart';
 import 'package:hyzen_pharmd/core/widgets/polish_ui.dart';
+import 'package:hyzen_pharmd/core/widgets/workspace_icons.dart';
+import 'package:hyzen_pharmd/features/pdf_studio/presentation/page_grid.dart';
 import 'package:hyzen_pharmd/features/viewer/reader_chrome.dart';
 import 'package:hyzen_pharmd/features/auth/presentation/login_screens.dart';
 
@@ -49,6 +51,17 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      final controls = tester.widgetList<ControlIcon>(find.byType(ControlIcon));
+      expect(controls.map((icon) => icon.glyph), [
+        ControlGlyph.back,
+        ControlGlyph.share,
+        ControlGlyph.download,
+        ControlGlyph.more,
+      ]);
+      expect(
+        controls.every((icon) => icon.color == const Color(0xFF25242A)),
+        isTrue,
+      );
       final page = find.byKey(const ValueKey('reader-page-surface'));
       final geometry = tester.getRect(page);
       await tester.tap(find.byTooltip('Share'));
@@ -87,6 +100,58 @@ void main() {
     await tester.tapAt(tester.getTopLeft(target) + const Offset(4, 24));
     expect(taps, 1);
   });
+  testWidgets(
+    'organize pages exposes generated rotate and remove controls at 320dp',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 760);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final actions = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PageGrid(
+              count: 2,
+              image: (_) => const ColoredBox(color: Colors.white),
+              identity: (i) => i,
+              onMove: (_, _) {},
+              onEdit: (i) => actions.add('crop $i'),
+              onRotate: (i) => actions.add('rotate $i'),
+              onRemove: (i) => actions.add('remove $i'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final rotate = find.byWidgetPredicate(
+        (widget) => widget is IconButton && widget.tooltip == 'Rotate page 2',
+      );
+      final remove = find.byWidgetPredicate(
+        (widget) => widget is IconButton && widget.tooltip == 'Remove page 1',
+      );
+      expect(
+        tester.widget<IconButton>(rotate).icon,
+        isA<ControlIcon>().having(
+          (icon) => icon.glyph,
+          'glyph',
+          ControlGlyph.rotate,
+        ),
+      );
+      expect(
+        tester.widget<IconButton>(remove).icon,
+        isA<ControlIcon>().having(
+          (icon) => icon.glyph,
+          'glyph',
+          ControlGlyph.delete,
+        ),
+      );
+      await tester.tap(rotate);
+      await tester.tap(remove);
+      expect(actions, ['rotate 1', 'remove 0']);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'editor dock retains every tool at narrow width with large text',
     (tester) async {
@@ -146,6 +211,13 @@ void main() {
       expect(find.text('Page 1 / 1'), findsOneWidget);
       await tester.tap(find.byTooltip('More edit tools'));
       await tester.pumpAndSettle();
+      final sheet = find.byType(BottomSheet);
+      final toolList = find.descendant(
+        of: sheet,
+        matching: find.byType(Scrollable),
+      );
+      Finder tool(String name) =>
+          find.descendant(of: sheet, matching: find.text(name));
       for (final name in [
         'select',
         'arrow',
@@ -159,9 +231,15 @@ void main() {
         'text',
         'signature',
       ]) {
-        expect(find.text(name), findsWidgets);
+        await tester.scrollUntilVisible(tool(name), 100, scrollable: toolList);
+        expect(tool(name), findsOneWidget);
       }
-      await tester.tap(find.text('highlight'));
+      await tester.scrollUntilVisible(
+        tool('highlight'),
+        -100,
+        scrollable: toolList,
+      );
+      await tester.tap(tool('highlight'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {

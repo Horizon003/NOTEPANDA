@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +9,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/surfaces.dart';
+import '../../../core/widgets/workspace_icons.dart';
 
 /// Shared scaffold for auth forms: persistent top bar with Back, keyboard-safe scroll.
 class AuthScaffold extends StatelessWidget {
@@ -169,14 +169,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         onLogin: () => setState(() => _showForm = true),
       );
     }
-    final heroHeight = (MediaQuery.sizeOf(context).height * .23).clamp(
-      140.0,
-      200.0,
+    final heroHeight = (MediaQuery.sizeOf(context).height * .24).clamp(
+      154.0,
+      205.0,
     );
+    final topInset = MediaQuery.paddingOf(context).top;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: t.colorScheme.surface,
+        backgroundColor: const Color(0xFFF3EEF9),
         resizeToAvoidBottomInset: true,
         body: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -186,16 +187,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Stack(
                 children: [
                   Container(
-                    height: heroHeight + 32,
+                    height: topInset + heroHeight + 40,
                     width: double.infinity,
-                    decoration: const BoxDecoration(gradient: hStudyGradient),
-                    child: Image.asset(
-                      'assets/mascot/mascot_idle_welcome.png',
+                    padding: EdgeInsets.only(top: topInset + 12, bottom: 48),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFE5D9F8), Color(0xFFFBE9DA)],
+                      ),
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(40),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: WorkspaceIcon(
+                      WorkspaceGlyph.panda,
                       key: const ValueKey('login-panda-hero'),
-                      fit: BoxFit.contain,
-                      cacheWidth: 600,
-                      semanticLabel:
-                          'Hyzen panda welcoming you to the pharmacy library',
+                      size: heroHeight * .79,
                     ),
                   ),
                   Positioned(
@@ -230,16 +239,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: heroHeight),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      heroHeight + topInset,
+                      16,
+                      20,
+                    ),
                     child: Container(
                       key: const ValueKey('login-form-panel'),
                       decoration: BoxDecoration(
                         color: t.colorScheme.surface,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(32),
-                        ),
+                        border: Border.all(color: t.colorScheme.outlineVariant),
+                        borderRadius: BorderRadius.circular(28),
                       ),
-                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
                       child: SafeArea(
                         top: false,
                         child: Form(
@@ -249,7 +262,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  'Welcome to PHARM D WITH HYZEN',
+                                  'Welcome back',
                                   style: t.textTheme.headlineSmall?.copyWith(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w600,
@@ -258,7 +271,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Log in to continue your Pharm-D journey.',
+                                  'Sign in to pick up where you left off.',
                                   style: t.textTheme.bodyMedium?.copyWith(
                                     color: t.colorScheme.onSurfaceVariant,
                                   ),
@@ -307,18 +320,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: HSpace.xs),
-                                HButton(
-                                  label: 'Log in',
-                                  loading: _busy,
-                                  onPressed: _submit,
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 48,
+                                  ),
+                                  child: HButton(
+                                    label: 'Log in',
+                                    icon: Icons.arrow_forward_rounded,
+                                    loading: _busy,
+                                    onPressed: _submit,
+                                  ),
                                 ),
-                                const SizedBox(height: HSpace.lg),
+                                const SizedBox(height: HSpace.md),
                                 Wrap(
                                   alignment: WrapAlignment.center,
                                   crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
                                     Text(
-                                      'New to PHARM D WITH HYZEN?',
+                                      'New to Hyzen?',
                                       style: t.textTheme.bodyMedium,
                                     ),
                                     TextButton(

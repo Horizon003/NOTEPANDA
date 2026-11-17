@@ -48,10 +48,16 @@ class AppShell extends ConsumerWidget {
           context: context,
           builder: (c) => AlertDialog(
             title: const Text('Close PHARM D WITH HYZEN?'),
-            content: const Column(
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ProfileAvatar(photoUrl: null, radius: 44),
+                ProfileAvatar(
+                  photoUrl: ProfileAvatar.resolveUrl(
+                    ref.read(profileProvider).valueOrNull?.photoUrl,
+                    ref.read(authStateProvider).valueOrNull?.photoURL,
+                  ),
+                  radius: 44,
+                ),
                 SizedBox(height: 16),
                 Text(
                   'Ready to take a break? Your study progress and downloads are saved.',
@@ -338,7 +344,13 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                             ),
                           ),
                           child: ProfileAvatar(
-                            photoUrl: profile?.photoUrl,
+                            photoUrl: ProfileAvatar.resolveUrl(
+                              profile?.photoUrl,
+                              ref
+                                  .watch(authStateProvider)
+                                  .valueOrNull
+                                  ?.photoURL,
+                            ),
                             radius: 16,
                             fallback: profile?.firstName ?? 'H',
                           ),

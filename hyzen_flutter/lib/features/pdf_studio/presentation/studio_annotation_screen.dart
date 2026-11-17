@@ -3,12 +3,12 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/common.dart';
+import '../../../core/widgets/soft_pill_bar.dart';
+import '../../../core/widgets/workspace_icons.dart';
 import '../data/pdf_studio_repository.dart';
 import '../data/studio_file_item.dart';
 import '../data/studio_pdf_engine.dart';
@@ -261,6 +261,14 @@ class _StudioAnnotationScreenState
 
   @override
   Widget build(BuildContext context) {
+    const quickTools = [
+      _MarkTool.select,
+      _MarkTool.ink,
+      _MarkTool.text,
+      _MarkTool.signature,
+    ];
+    final quickToolIndex = quickTools.indexOf(_tool);
+    final moreSelected = quickToolIndex < 0;
     final image = _image;
     final theme = Theme.of(context);
     return Scaffold(
@@ -284,7 +292,9 @@ class _StudioAnnotationScreenState
                     });
                     unawaited(_persist());
                   },
-            icon: const Icon(Icons.undo_rounded),
+            icon: _selected == null
+                ? const Icon(Icons.undo_rounded)
+                : const ControlIcon(ControlGlyph.delete, size: 28),
           ),
           IconButton(
             tooltip: 'Save edit layer',
@@ -311,83 +321,53 @@ class _StudioAnnotationScreenState
       bottomNavigationBar: SafeArea(
         top: false,
         minimum: const EdgeInsets.fromLTRB(12, 4, 12, 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFF17161D),
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: Row(
-            children: [
-              for (final tool in [
-                _MarkTool.select,
-                _MarkTool.ink,
-                _MarkTool.text,
-                _MarkTool.signature,
-              ])
-                Expanded(
-                  child: Semantics(
-                    selected: _tool == tool,
-                    child: Tooltip(
-                      message: tool.name,
-                      child: InkWell(
-                        onTap: () => setState(() => _tool = tool),
-                        borderRadius: BorderRadius.circular(24),
-                        child: AnimatedContainer(
-                          duration: HMotion.duration(context, HMotion.fast),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: _tool == tool
-                                ? const Color(0xFF51445E)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
+        child: SoftPillBar(
+          selectedIndex: moreSelected ? quickTools.length : quickToolIndex,
+          items: [
+            for (final tool in quickTools)
+              SoftPillItem(
+                label: tool.name,
+                icon: WorkspaceIcon(switch (tool) {
+                  _MarkTool.signature => WorkspaceGlyph.signature,
+                  _MarkTool.text => WorkspaceGlyph.word,
+                  _MarkTool.select => WorkspaceGlyph.crop,
+                  _ => WorkspaceGlyph.edit,
+                }, size: 24),
+                onTap: () => setState(() => _tool = tool),
+              ),
+            SoftPillItem(
+              label: 'More edit tools',
+              shortLabel: 'More',
+              icon: ControlIcon(
+                ControlGlyph.more,
+                size: 24,
+                color: moreSelected ? Colors.white : null,
+              ),
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                showDragHandle: true,
+                isScrollControlled: true,
+                builder: (sheet) => SafeArea(
+                  child: SizedBox(
+                    height: MediaQuery.sizeOf(sheet).height * .65,
+                    child: ListView(
+                      children: [
+                        for (final tool in _MarkTool.values)
+                          ListTile(
+                            title: Text(tool.name),
+                            selected: tool == _tool,
+                            onTap: () {
+                              Navigator.pop(sheet);
+                              setState(() => _tool = tool);
+                            },
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              WorkspaceIcon(switch (tool) {
-                                _MarkTool.signature => WorkspaceGlyph.signature,
-                                _MarkTool.text => WorkspaceGlyph.word,
-                                _MarkTool.select => WorkspaceGlyph.crop,
-                                _ => WorkspaceGlyph.edit,
-                              }, size: 25),
-                              const SizedBox(height: 3),
-                              Text(
-                                tool.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
-              PopupMenuButton<_MarkTool>(
-                tooltip: 'More edit tools',
-                onSelected: (tool) => setState(() => _tool = tool),
-                itemBuilder: (_) => [
-                  for (final tool in _MarkTool.values)
-                    CheckedPopupMenuItem(
-                      value: tool,
-                      checked: _tool == tool,
-                      child: Text(tool.name),
-                    ),
-                ],
-                icon: const Icon(
-                  Icons.more_horiz_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       body: Column(

@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+import '../../../core/widgets/workspace_icons.dart';
+import '../../../core/widgets/slide_continue.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens.dart';
@@ -117,13 +119,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           painter: _LearningArcs(),
                                         ),
                                       ),
-                                      Image.asset(
-                                        'assets/reference/student.png',
-                                        height: artHeight,
-                                        fit: BoxFit.contain,
-                                        cacheWidth: 900,
-                                        semanticLabel:
-                                            'Student holding textbooks, ready for her pharmacy learning journey',
+                                      WorkspaceIcon(
+                                        WorkspaceGlyph.panda,
+                                        size: artHeight * .82,
                                       ),
                                     ],
                                   )
@@ -205,50 +203,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 alignment: Alignment.center,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 280),
-                  child: Semantics(
-                    button: true,
-                    label: _index == 2 ? 'Log in' : 'Continue onboarding',
-                    child: Material(
-                      color: const Color(0xFFF0F0F2),
-                      borderRadius: BorderRadius.circular(32),
-                      child: InkWell(
-                        onTap: _continue,
-                        borderRadius: BorderRadius.circular(32),
-                        child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check_rounded,
-                                  size: 21,
-                                ),
-                              ),
-                              const SizedBox(width: 22),
-                              Text(
-                                _index == 2 ? 'Log in' : 'Continue',
-                                style: t.textTheme.labelLarge,
-                              ),
-                              const SizedBox(width: 22),
-                              const Icon(
-                                Icons.chevron_right_rounded,
-                                color: HColors.outlineStrong,
-                                size: 18,
-                              ),
-                              const Icon(Icons.chevron_right_rounded, size: 18),
-                              const SizedBox(width: 6),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                  child: SlideContinue(
+                    key: ValueKey('welcome-slide-$_index'),
+                    label: _index == 2
+                        ? 'Slide to log in'
+                        : 'Slide to continue',
+                    semanticLabel: _index == 2
+                        ? 'Log in'
+                        : 'Continue onboarding',
+                    onComplete: _continue,
                   ),
                 ),
               ),

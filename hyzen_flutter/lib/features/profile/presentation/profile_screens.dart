@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../core/widgets/display_preferences.dart';
 import 'profile_promotions.dart';
 import '../../academics/data/drive_gateway.dart';
 import 'package:flutter/foundation.dart';
@@ -801,6 +802,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
           ),
         ),
+        if (_matches('display text size elements appearance animation')) ...[
+          const AccountSectionHeader('Display & motion'),
+          SettingsCard(
+            children: [
+              const DisplayControls(),
+              SettingsRow(
+                title: 'Ambient hero animation',
+                trailing: AccountToggle(
+                  label: 'Ambient hero animation',
+                  value: ref.watch(boolPrefProvider('pref_ambient_motion')),
+                  onChanged: (value) => ref
+                      .read(boolPrefProvider('pref_ambient_motion').notifier)
+                      .set(value),
+                ),
+              ),
+            ],
+          ),
+        ],
         if (_matches(
           'personal academic professional year profile app updates release',
         )) ...[

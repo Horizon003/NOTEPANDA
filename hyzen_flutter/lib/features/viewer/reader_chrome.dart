@@ -1,8 +1,9 @@
 import 'dart:ui' as ui;
-import '../../core/widgets/workspace_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../core/widgets/workspace_icons.dart';
 
 class ReaderTools {
   VoidCallback? search, zoomIn, zoomOut, pages;
@@ -65,7 +66,10 @@ Future<void> showReaderActions(
                 ),
               ),
             ListTile(
-              leading: Icon(actions[i].icon),
+              leading: switch (controlGlyphForIcon(actions[i].icon)) {
+                final glyph? => ControlIcon(glyph),
+                null => Icon(actions[i].icon),
+              },
               title: Text(actions[i].label),
               onTap: () {
                 Navigator.pop(c);
@@ -192,9 +196,9 @@ class _ReaderScaffoldState extends State<ReaderScaffold> {
                                 children: [
                                   _ReaderButton(
                                     label: 'Close preview',
-                                    glyph: WorkspaceGlyph.back,
+                                    glyph: ControlGlyph.back,
                                     onTap: _back,
-                                    dark: true,
+                                    showCircle: true,
                                   ),
                                   const SizedBox(width: 4),
                                   Expanded(
@@ -222,7 +226,7 @@ class _ReaderScaffoldState extends State<ReaderScaffold> {
                                           child: Container(
                                             height: 34,
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF17161D),
+                                              color: const Color(0xDDE6E7EA),
                                               borderRadius:
                                                   BorderRadius.circular(24),
                                             ),
@@ -233,19 +237,22 @@ class _ReaderScaffoldState extends State<ReaderScaffold> {
                                           children: [
                                             _ReaderButton(
                                               label: 'Share',
-                                              glyph: WorkspaceGlyph.share,
+                                              glyph: ControlGlyph.share,
                                               onTap: widget.onShare,
                                             ),
                                             _ReaderButton(
                                               label: widget.downloadLabel,
+                                              glyph: widget.downloadVerified
+                                                  ? null
+                                                  : ControlGlyph.download,
                                               icon: widget.downloadVerified
                                                   ? Icons.check_rounded
-                                                  : Icons.download_rounded,
+                                                  : null,
                                               onTap: widget.onDownload,
                                             ),
                                             _ReaderButton(
                                               label: 'File options',
-                                              icon: Icons.more_horiz_rounded,
+                                              glyph: ControlGlyph.more,
                                               onTap: () => showReaderActions(
                                                 context,
                                                 widget.actions,
@@ -280,13 +287,13 @@ class _ReaderButton extends StatelessWidget {
     required this.onTap,
     this.icon,
     this.glyph,
-    this.dark = false,
+    this.showCircle = false,
   });
   final String label;
   final VoidCallback? onTap;
   final IconData? icon;
-  final WorkspaceGlyph? glyph;
-  final bool dark;
+  final ControlGlyph? glyph;
+  final bool showCircle;
   @override
   Widget build(BuildContext context) => Tooltip(
     message: label,
@@ -302,21 +309,21 @@ class _ReaderButton extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: dark ? const Color(0xFF17161D) : Colors.transparent,
+                color: showCircle
+                    ? const Color(0xDDE6E7EA)
+                    : Colors.transparent,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Opacity(
                   opacity: onTap == null ? .35 : 1,
                   child: glyph != null
-                      ? ColorFiltered(
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                          child: WorkspaceIcon(glyph!, size: 18),
+                      ? ControlIcon(
+                          glyph!,
+                          size: 22,
+                          color: const Color(0xFF25242A),
                         )
-                      : Icon(icon, size: 18, color: Colors.white),
+                      : Icon(icon, size: 18, color: Colors.black),
                 ),
               ),
             ),
