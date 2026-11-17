@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,6 +115,18 @@ class _LibraryCard extends ConsumerWidget {
     final n = lib.valueOrNull?.data.fileCount;
     return ResourceTile(
       icon: kindIcon(kind),
+      leading: WorkspaceIcon(switch (kind) {
+        LibraryKind.notes => WorkspaceGlyph.notes,
+        LibraryKind.papers => WorkspaceGlyph.papers,
+        LibraryKind.special => WorkspaceGlyph.books,
+        LibraryKind.mcqs => WorkspaceGlyph.mcqs,
+      }, size: 42),
+      surfaceColor: switch (kind) {
+        LibraryKind.notes => const Color(0xFFE8DFF8),
+        LibraryKind.papers => const Color(0xFFFFE5CB),
+        LibraryKind.special => const Color(0xFFDDEEE2),
+        LibraryKind.mcqs => const Color(0xFFDCE8FF),
+      },
       color: kindColor(kind),
       eyebrow: n == null
           ? (lib.isLoading ? 'Loading\u2026' : 'Library')
@@ -269,6 +282,10 @@ class _LibraryLevelScreenState extends ConsumerState<LibraryLevelScreen> {
                 (c, col) => ResourceTile(
                   icon: Icons.workspace_premium_rounded,
                   color: col,
+                  surfaceColor: Color.alphaBlend(
+                    col.withValues(alpha: .12),
+                    Colors.white,
+                  ),
                   title: y.label,
                   subtitle:
                       '${y.semesters.length} semesters \u00b7 ${y.subjectCount} subjects \u00b7 ${y.fileCount} files',
@@ -294,6 +311,10 @@ class _LibraryLevelScreenState extends ConsumerState<LibraryLevelScreen> {
                 (c, col) => ResourceTile(
                   icon: Icons.calendar_month_rounded,
                   color: col,
+                  surfaceColor: Color.alphaBlend(
+                    col.withValues(alpha: .12),
+                    Colors.white,
+                  ),
                   title: s.label,
                   subtitle:
                       '${s.subjects.length} subjects \u00b7 ${s.fileCount} files',
@@ -322,6 +343,10 @@ class _LibraryLevelScreenState extends ConsumerState<LibraryLevelScreen> {
                 (c, col) => ResourceTile(
                   icon: Icons.science_rounded,
                   color: col,
+                  surfaceColor: Color.alphaBlend(
+                    col.withValues(alpha: .12),
+                    Colors.white,
+                  ),
                   title: su.label,
                   subtitle:
                       '${su.sections.length} sections \u00b7 ${su.fileCount} files',
@@ -347,6 +372,10 @@ class _LibraryLevelScreenState extends ConsumerState<LibraryLevelScreen> {
                 (c, col) => ResourceTile(
                   icon: Icons.folder_copy_rounded,
                   color: col,
+                  surfaceColor: Color.alphaBlend(
+                    col.withValues(alpha: .12),
+                    Colors.white,
+                  ),
                   title: sec.title,
                   subtitle:
                       '${sec.topics.length} topics \u00b7 ${sec.fileCount} files',
@@ -376,6 +405,10 @@ class _LibraryLevelScreenState extends ConsumerState<LibraryLevelScreen> {
                 (c, col) => ResourceTile(
                   icon: Icons.topic_rounded,
                   color: col,
+                  surfaceColor: Color.alphaBlend(
+                    col.withValues(alpha: .12),
+                    Colors.white,
+                  ),
                   title: tp.title,
                   subtitle:
                       '${tp.files.length} file${tp.files.length == 1 ? '' : 's'}',

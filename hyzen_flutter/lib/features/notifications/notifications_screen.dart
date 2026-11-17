@@ -1,4 +1,5 @@
 import 'notification_inbox_view.dart';
+import '../../core/widgets/polish_ui.dart';
 import '../../core/widgets/surfaces.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -147,14 +148,11 @@ class NotificationBell extends ConsumerWidget {
         (l) => l.where((m) => m['read'] != true).length,
       ),
     );
-    return IconButton(
-      tooltip: 'Notifications',
-      onPressed: () => context.push('/notifications'),
-      icon: Badge(
-        isLabelVisible: n > 0,
-        label: Text(n > 9 ? '9+' : '$n'),
-        child: const Icon(Icons.notifications_none_rounded),
-      ),
+    return HGlassButton(
+      icon: 'icon-bell',
+      label: 'Notifications',
+      badge: n,
+      onTap: () => context.push('/notifications'),
     );
   }
 }

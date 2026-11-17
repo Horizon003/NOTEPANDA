@@ -32,33 +32,37 @@ class HGlassButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Tooltip(
     message: label,
+    excludeFromSemantics: true,
     child: Semantics(
       button: true,
       label: label,
-      onTap: onTap,
-      child: ExcludeSemantics(
-        child: SizedBox.square(
-          dimension: 48,
-          child: Center(
-            child: ClipOval(
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                child: Material(
-                  color: Colors.white.withValues(alpha: .55),
-                  shape: const CircleBorder(
-                    side: BorderSide(color: Color(0xE6FFFFFF), width: 1.5),
-                  ),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: onTap,
-                    child: SizedBox.square(
-                      dimension: 48,
-                      child: Center(
-                        child: Badge(
-                          isLabelVisible: badge > 0,
-                          label: Text(badge > 9 ? '9+' : '$badge'),
-                          child: HAssetIcon(icon, size: 25),
-                        ),
+      child: SizedBox.square(
+        dimension: 48,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Center(
+              child: ClipOval(
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: .65),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xE6FFFFFF),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Badge(
+                        isLabelVisible: badge > 0,
+                        label: Text(badge > 9 ? '9+' : '$badge'),
+                        child: HAssetIcon(icon, size: 19),
                       ),
                     ),
                   ),

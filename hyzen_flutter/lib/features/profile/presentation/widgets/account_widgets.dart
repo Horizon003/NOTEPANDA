@@ -35,8 +35,10 @@ class AccountTheme extends StatelessWidget {
   const AccountTheme({super.key, required this.child});
   final Widget child;
   @override
-  Widget build(BuildContext context) =>
-      Theme(data: AccountStyle.theme(context), child: child);
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(gradient: hPageGradient),
+    child: Theme(data: AccountStyle.theme(context), child: child),
+  );
 }
 
 class AccountPage extends StatelessWidget {
@@ -83,7 +85,7 @@ class AccountPage extends StatelessWidget {
                   CircularNavigationButton(onPressed: onBack, close: true),
               ],
             ),
-            SizedBox(height: close ? 32 : 28),
+            SizedBox(height: close ? 20 : 18),
             ...children,
           ],
         );
@@ -127,33 +129,32 @@ class CircularNavigationButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool close;
   @override
-  Widget build(BuildContext context) => Container(
-    width: 48,
-    height: 48,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: AccountStyle.isDark(context)
-            ? [AccountStyle.raised, const Color(0xFF322B25)]
-            : [HColors.surfaceAlt, HColors.surfaceAlt],
-      ),
-      border: AccountStyle.isDark(context)
-          ? Border.all(color: const Color(0xFF464649))
-          : null,
-    ),
-    child: IconButton(
-      tooltip: close ? 'Close account' : 'Back',
-      onPressed: onPressed,
-      color: Theme.of(context).colorScheme.onSurface,
-      padding: EdgeInsets.zero,
-      alignment: Alignment.center,
-      constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-      style: IconButton.styleFrom(backgroundColor: Colors.transparent),
-      icon: Icon(
-        close ? Icons.close_rounded : Icons.chevron_left_rounded,
-        size: 22,
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: 48,
+    child: Tooltip(
+      message: close ? 'Close account' : 'Back',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: Center(
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8DFF8),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFD4CBDF)),
+              ),
+              child: Icon(
+                close ? Icons.close_rounded : Icons.chevron_left_rounded,
+                size: 18,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
       ),
     ),
   );

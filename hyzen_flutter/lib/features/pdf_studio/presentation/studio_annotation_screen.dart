@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -50,15 +52,25 @@ class _StudioAnnotationScreenState
 
   void _selectMark(Offset point) {
     _selected = null;
-    for (var i = _marks.length-1; i >= 0; i--) {
+    for (var i = _marks.length - 1; i >= 0; i--) {
       final raw = _marks[i]['points'] as List? ?? const [];
-      final points = [for(final p in raw) if(p is List && p.length==2) Offset((p[0] as num).toDouble(),(p[1] as num).toDouble())];
-      if(points.isEmpty) continue;
-      final left=points.map((p)=>p.dx).reduce((a,b)=>a<b?a:b)-.04;
-      final top=points.map((p)=>p.dy).reduce((a,b)=>a<b?a:b)-.04;
-      final right=points.map((p)=>p.dx).reduce((a,b)=>a>b?a:b)+.15;
-      final bottom=points.map((p)=>p.dy).reduce((a,b)=>a>b?a:b)+.05;
-      if(Rect.fromLTRB(left,top,right,bottom).contains(point)){_selected=i;break;}
+      final points = [
+        for (final p in raw)
+          if (p is List && p.length == 2)
+            Offset((p[0] as num).toDouble(), (p[1] as num).toDouble()),
+      ];
+      if (points.isEmpty) continue;
+      final left =
+          points.map((p) => p.dx).reduce((a, b) => a < b ? a : b) - .04;
+      final top = points.map((p) => p.dy).reduce((a, b) => a < b ? a : b) - .04;
+      final right =
+          points.map((p) => p.dx).reduce((a, b) => a > b ? a : b) + .15;
+      final bottom =
+          points.map((p) => p.dy).reduce((a, b) => a > b ? a : b) + .05;
+      if (Rect.fromLTRB(left, top, right, bottom).contains(point)) {
+        _selected = i;
+        break;
+      }
     }
   }
 
@@ -256,11 +268,20 @@ class _StudioAnnotationScreenState
         title: Text('Annotate · ${widget.file.displayName}', maxLines: 1),
         actions: [
           IconButton(
-            tooltip: _selected == null ? 'Undo last mark' : 'Delete selected mark',
+            tooltip: _selected == null
+                ? 'Undo last mark'
+                : 'Delete selected mark',
             onPressed: _marks.isEmpty
                 ? null
                 : () {
-                    setState(() { if(_selected != null && _selected! < _marks.length) { _marks.removeAt(_selected!); _selected=null; } else { _marks.removeLast(); } });
+                    setState(() {
+                      if (_selected != null && _selected! < _marks.length) {
+                        _marks.removeAt(_selected!);
+                        _selected = null;
+                      } else {
+                        _marks.removeLast();
+                      }
+                    });
                     unawaited(_persist());
                   },
             icon: const Icon(Icons.undo_rounded),
@@ -287,27 +308,100 @@ class _StudioAnnotationScreenState
           ),
         ],
       ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(12, 4, 12, 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF17161D),
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Row(
+            children: [
+              for (final tool in [
+                _MarkTool.select,
+                _MarkTool.ink,
+                _MarkTool.text,
+                _MarkTool.signature,
+              ])
+                Expanded(
+                  child: Semantics(
+                    selected: _tool == tool,
+                    child: Tooltip(
+                      message: tool.name,
+                      child: InkWell(
+                        onTap: () => setState(() => _tool = tool),
+                        borderRadius: BorderRadius.circular(24),
+                        child: AnimatedContainer(
+                          duration: HMotion.duration(context, HMotion.fast),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: _tool == tool
+                                ? const Color(0xFF51445E)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              WorkspaceIcon(switch (tool) {
+                                _MarkTool.signature => WorkspaceGlyph.signature,
+                                _MarkTool.text => WorkspaceGlyph.word,
+                                _MarkTool.select => WorkspaceGlyph.crop,
+                                _ => WorkspaceGlyph.edit,
+                              }, size: 25),
+                              const SizedBox(height: 3),
+                              Text(
+                                tool.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              PopupMenuButton<_MarkTool>(
+                tooltip: 'More edit tools',
+                onSelected: (tool) => setState(() => _tool = tool),
+                itemBuilder: (_) => [
+                  for (final tool in _MarkTool.values)
+                    CheckedPopupMenuItem(
+                      value: tool,
+                      checked: _tool == tool,
+                      child: Text(tool.name),
+                    ),
+                ],
+                icon: const Icon(
+                  Icons.more_horiz_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
           if (_working) const LinearProgressIndicator(),
-          if(_tool==_MarkTool.select) Padding(padding:const EdgeInsets.all(8),child:Text(_selected==null?'Tap a mark to select it, then drag to move.':'Selected · drag to move, or delete using the top button.')),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                for (final tool in _MarkTool.values)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 5),
-                    child: ChoiceChip(
-                      label: Text(tool.name),
-                      selected: _tool == tool,
-                      onSelected: (_) => setState(() => _tool = tool),
-                    ),
-                  ),
-              ],
+          if (_tool == _MarkTool.select)
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                _selected == null
+                    ? 'Tap a mark to select it, then drag to move.'
+                    : 'Selected · drag to move, or delete using the top button.',
+              ),
             ),
-          ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -360,10 +454,22 @@ class _StudioAnnotationScreenState
                             behavior: HitTestBehavior.opaque,
                             onPanStart:
                                 (_tool == _MarkTool.text ||
-                                    _tool == _MarkTool.signature || _tool == _MarkTool.note)
+                                    _tool == _MarkTool.signature ||
+                                    _tool == _MarkTool.note)
                                 ? null
                                 : (d) {
-                                    if(_tool==_MarkTool.select) {setState((){_selectMark(_normalized(d.localPosition,size));_dragPoint=_normalized(d.localPosition,size);});return;}
+                                    if (_tool == _MarkTool.select) {
+                                      setState(() {
+                                        _selectMark(
+                                          _normalized(d.localPosition, size),
+                                        );
+                                        _dragPoint = _normalized(
+                                          d.localPosition,
+                                          size,
+                                        );
+                                      });
+                                      return;
+                                    }
                                     setState(
                                       () => _pending
                                         ..clear()
@@ -374,18 +480,44 @@ class _StudioAnnotationScreenState
                                   },
                             onPanUpdate:
                                 (_tool == _MarkTool.text ||
-                                    _tool == _MarkTool.signature || _tool == _MarkTool.note)
+                                    _tool == _MarkTool.signature ||
+                                    _tool == _MarkTool.note)
                                 ? null
                                 : (d) {
                                     final point = _normalized(
                                       d.localPosition,
                                       size,
                                     );
-                                    if(_tool==_MarkTool.select) {
-                                      if(_selected!=null && _dragPoint!=null) { final delta=point-_dragPoint!;setState((){final mark=Map<String,dynamic>.from(_marks[_selected!]);mark['points']=[for(final p in mark['points'] as List) [((p[0] as num).toDouble()+delta.dx).clamp(0.0,1.0),((p[1] as num).toDouble()+delta.dy).clamp(0.0,1.0)]];_marks[_selected!]=mark;_dragPoint=point;});}return;
+                                    if (_tool == _MarkTool.select) {
+                                      if (_selected != null &&
+                                          _dragPoint != null) {
+                                        final delta = point - _dragPoint!;
+                                        setState(() {
+                                          final mark =
+                                              Map<String, dynamic>.from(
+                                                _marks[_selected!],
+                                              );
+                                          mark['points'] = [
+                                            for (final p
+                                                in mark['points'] as List)
+                                              [
+                                                ((p[0] as num).toDouble() +
+                                                        delta.dx)
+                                                    .clamp(0.0, 1.0),
+                                                ((p[1] as num).toDouble() +
+                                                        delta.dy)
+                                                    .clamp(0.0, 1.0),
+                                              ],
+                                          ];
+                                          _marks[_selected!] = mark;
+                                          _dragPoint = point;
+                                        });
+                                      }
+                                      return;
                                     }
                                     setState(() {
-                                      if (_tool == _MarkTool.rectangle || _tool==_MarkTool.arrow ||
+                                      if (_tool == _MarkTool.rectangle ||
+                                          _tool == _MarkTool.arrow ||
                                           _tool == _MarkTool.circle ||
                                           _tool == _MarkTool.underline ||
                                           _tool == _MarkTool.strike) {
@@ -402,14 +534,27 @@ class _StudioAnnotationScreenState
                                       }
                                     });
                                   },
-                            onPanEnd: (_) { if(_tool==_MarkTool.select){unawaited(_persist());}else{_finishStroke();} },
+                            onPanEnd: (_) {
+                              if (_tool == _MarkTool.select) {
+                                unawaited(_persist());
+                              } else {
+                                _finishStroke();
+                              }
+                            },
                             onTapDown:
                                 (_tool == _MarkTool.text ||
-                                    _tool == _MarkTool.signature || _tool == _MarkTool.note)
+                                    _tool == _MarkTool.signature ||
+                                    _tool == _MarkTool.note)
                                 ? (details) => _placeText(
                                     _normalized(details.localPosition, size),
                                   )
-                                : _tool==_MarkTool.select ? (d)=>setState(()=>_selectMark(_normalized(d.localPosition,size))) : null,
+                                : _tool == _MarkTool.select
+                                ? (d) => setState(
+                                    () => _selectMark(
+                                      _normalized(d.localPosition, size),
+                                    ),
+                                  )
+                                : null,
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -563,11 +708,21 @@ class _MarksPainter extends CustomPainter {
         path.lineTo(point.dx, point.dy);
       }
       canvas.drawPath(path, paint);
-      if(type=='arrow') {
-        final angle=math.atan2(last.dy-first.dy,last.dx-first.dx);
-        final head=math.max(10.0,paint.strokeWidth*4);
-        canvas.drawLine(last,last-Offset(math.cos(angle-.5)*head,math.sin(angle-.5)*head),paint);
-        canvas.drawLine(last,last-Offset(math.cos(angle+.5)*head,math.sin(angle+.5)*head),paint);
+      if (type == 'arrow') {
+        final angle = math.atan2(last.dy - first.dy, last.dx - first.dx);
+        final head = math.max(10.0, paint.strokeWidth * 4);
+        canvas.drawLine(
+          last,
+          last -
+              Offset(math.cos(angle - .5) * head, math.sin(angle - .5) * head),
+          paint,
+        );
+        canvas.drawLine(
+          last,
+          last -
+              Offset(math.cos(angle + .5) * head, math.sin(angle + .5) * head),
+          paint,
+        );
       }
     }
   }

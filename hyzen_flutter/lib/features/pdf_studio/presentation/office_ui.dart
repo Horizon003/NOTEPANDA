@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../../../core/widgets/workspace_icons.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -174,11 +175,15 @@ class OfficeToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected
-        ? Colors.white
-        : onTap == null
-        ? OfficeColors.muted(context)
-        : OfficeColors.ink(context);
+    final color = onTap == null ? const Color(0xFF98949F) : Colors.white;
+    final glyph = switch (label.toLowerCase()) {
+      'crop' => WorkspaceGlyph.crop,
+      'retake' => WorkspaceGlyph.scan,
+      'annotate' || 'edit text' => WorkspaceGlyph.edit,
+      'filters' => WorkspaceGlyph.settings,
+      'signature' => WorkspaceGlyph.signature,
+      _ => null,
+    };
     return Semantics(
       button: true,
       selected: selected,
@@ -188,16 +193,21 @@ class OfficeToolButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
+          duration: HMotion.duration(context, HMotion.fast),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
-            color: selected ? OfficeColors.blue : Colors.transparent,
+            color: selected ? const Color(0xFF484050) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 22, color: color),
+              Opacity(
+                opacity: onTap == null ? .4 : 1,
+                child: glyph == null
+                    ? Icon(icon, size: 22, color: color)
+                    : WorkspaceIcon(glyph, size: 26),
+              ),
               const SizedBox(height: 5),
               Text(
                 label,
@@ -373,10 +383,13 @@ class _OfficeFileThumbnailState extends State<OfficeFileThumbnail> {
               final data = snap.data;
               if (data == null) {
                 return Center(
-                  child: Icon(
-                    widget.fallbackIcon,
-                    size: (box.maxWidth * .32).clamp(18, 48),
-                    color: const Color(0xFF9A9AA0),
+                  child: WorkspaceIcon(
+                    widget.path.toLowerCase().endsWith('.pdf')
+                        ? WorkspaceGlyph.pdf
+                        : widget.path.toLowerCase().contains('.ppt')
+                        ? WorkspaceGlyph.slides
+                        : WorkspaceGlyph.word,
+                    size: (box.maxWidth * .65).clamp(24.0, 64.0),
                   ),
                 );
               }

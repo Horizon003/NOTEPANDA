@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/workspace_icons.dart';
+import '../../../core/widgets/surfaces.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/providers.dart';
@@ -6,8 +8,6 @@ import '../../../app/providers.dart';
 import '../../../core/utils/media_upload.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/ui_kit.dart';
-import '../../../core/widgets/hyzen_art.dart';
-import '../../../core/theme/tokens.dart';
 import '../../downloads/domain/download_record.dart';
 import '../../viewer/external_files.dart';
 import '../../viewer/offline_pdf.dart';
@@ -109,12 +109,35 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const HyzenBanner(
-                  title: 'Your workspace',
-                  subtitle: 'Scan, edit and organise documents',
-                  art: 'office-kit',
-                  eyebrow: 'Office Workspace',
-                  gradient: hLessonGradient,
+                HCard(
+                  color: const Color(0xFFE8DFF8),
+                  radius: 26,
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Your workspace',
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text('Scan, edit and organise documents'),
+                            const SizedBox(height: 12),
+                            Text(
+                              '${all.length} saved documents',
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const WorkspaceIcon(WorkspaceGlyph.scan, size: 86),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -124,11 +147,17 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
                     FilledButton.icon(
                       onPressed: () =>
                           context.push('/create-pdf?source=camera'),
-                      icon: const Icon(
-                        Icons.document_scanner_outlined,
-                        size: 16,
-                      ),
+                      icon: const WorkspaceIcon(WorkspaceGlyph.scan, size: 22),
                       label: const Text('Scan pages'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          context.push('/create-pdf?source=gallery'),
+                      icon: const WorkspaceIcon(
+                        WorkspaceGlyph.gallery,
+                        size: 22,
+                      ),
+                      label: const Text('Gallery'),
                     ),
                     OutlinedButton.icon(
                       onPressed: () => showOfficeToolsSheet(context),
@@ -138,6 +167,73 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
                   ],
                 ),
               ],
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          sliver: SliverToBoxAdapter(
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final columns =
+                    box.maxWidth < 340 ||
+                        MediaQuery.textScalerOf(context).scale(1) > 1.3
+                    ? 1
+                    : 2;
+                return Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final tool in [StudioTool.organize, StudioTool.merge])
+                      SizedBox(
+                        width: (box.maxWidth - (columns - 1) * 10) / columns,
+                        child: HCard(
+                          color: tool == StudioTool.organize
+                              ? const Color(0xFFDCE8FF)
+                              : const Color(0xFFFFE5CB),
+                          radius: 22,
+                          padding: const EdgeInsets.all(14),
+                          onTap: () => openStudioTool(context, tool),
+                          child: Row(
+                            children: [
+                              WorkspaceIcon(
+                                tool == StudioTool.organize
+                                    ? WorkspaceGlyph.edit
+                                    : WorkspaceGlyph.books,
+                                size: 34,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      tool == StudioTool.organize
+                                          ? 'Organise pages'
+                                          : 'Combine PDFs',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleSmall,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      tool == StudioTool.organize
+                                          ? 'Reorder, rotate, remove'
+                                          : 'Bring your notes together',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -434,14 +530,10 @@ class _EmptyWorkspace extends StatelessWidget {
   const _EmptyWorkspace();
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(24, 40, 24, 12),
+    padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
     child: Column(
       children: [
-        Icon(
-          Icons.description_outlined,
-          size: 64,
-          color: OfficeColors.muted(context),
-        ),
+        const WorkspaceIcon(WorkspaceGlyph.pdf, size: 60),
         const SizedBox(height: 16),
         Text(
           'No recent documents',

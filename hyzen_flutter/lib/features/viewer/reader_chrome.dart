@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+import '../../core/widgets/workspace_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -45,6 +47,7 @@ Future<void> showReaderActions(
   useRootNavigator: true,
   isScrollControlled: true,
   showDragHandle: true,
+  backgroundColor: const Color(0xFFF0EBFA),
   builder: (c) => SafeArea(
     child: ConstrainedBox(
       constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(c).height * .85),
@@ -125,110 +128,9 @@ class _ReaderScaffoldState extends State<ReaderScaffold> {
       child: Scaffold(
         backgroundColor: theme.colorScheme.surfaceContainerHighest,
         body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Stack(
             children: [
-              AnimatedSize(
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 180),
-                alignment: Alignment.topCenter,
-                curve: Curves.easeOutCubic,
-                child: _visible
-                    ? Material(
-                        color: theme.colorScheme.surface,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: 58,
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 6),
-                                    child: IconButton(
-                                      tooltip: 'Close preview',
-                                      onPressed: _back,
-                                      icon: const Icon(
-                                        Icons.close_rounded,
-                                        size: 21,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.picture_as_pdf_rounded,
-                                    size: 20,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      widget.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    decoration: BoxDecoration(
-                                      color: theme
-                                          .colorScheme
-                                          .surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: theme.colorScheme.outlineVariant,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          tooltip: 'Share',
-                                          onPressed: widget.onShare,
-                                          icon: const Icon(
-                                            Icons.ios_share_rounded,
-                                            size: 19,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          tooltip: widget.downloadLabel,
-                                          onPressed: widget.onDownload,
-                                          icon: Icon(
-                                            widget.downloadVerified
-                                                ? Icons.check_rounded
-                                                : Icons.download_rounded,
-                                            size: 20,
-                                            color: widget.downloadVerified
-                                                ? Colors.green.shade700
-                                                : null,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          tooltip: 'File options',
-                                          onPressed: () => showReaderActions(
-                                            context,
-                                            widget.actions,
-                                          ),
-                                          icon: const Icon(
-                                            Icons.more_horiz_rounded,
-                                            size: 21,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (widget.banner != null) widget.banner!,
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              Expanded(
+              Positioned.fill(
                 child: Listener(
                   key: const ValueKey('reader-page-surface'),
                   behavior: HitTestBehavior.translucent,
@@ -264,10 +166,163 @@ class _ReaderScaffoldState extends State<ReaderScaffold> {
                   child: RepaintBoundary(child: widget.child),
                 ),
               ),
+              if (_visible)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(sigmaX: 9, sigmaY: 9),
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xE6F0EBFA), Color(0xE6FFF4E9)],
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              child: Row(
+                                children: [
+                                  _ReaderButton(
+                                    label: 'Close preview',
+                                    glyph: WorkspaceGlyph.back,
+                                    onTap: _back,
+                                    dark: true,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      widget.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  SizedBox(
+                                    height: 48,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Positioned(
+                                          left: 2,
+                                          right: 2,
+                                          child: Container(
+                                            height: 34,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF17161D),
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                            ),
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            _ReaderButton(
+                                              label: 'Share',
+                                              glyph: WorkspaceGlyph.share,
+                                              onTap: widget.onShare,
+                                            ),
+                                            _ReaderButton(
+                                              label: widget.downloadLabel,
+                                              icon: widget.downloadVerified
+                                                  ? Icons.check_rounded
+                                                  : Icons.download_rounded,
+                                              onTap: widget.onDownload,
+                                            ),
+                                            _ReaderButton(
+                                              label: 'File options',
+                                              icon: Icons.more_horiz_rounded,
+                                              onTap: () => showReaderActions(
+                                                context,
+                                                widget.actions,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (widget.banner != null) widget.banner!,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _ReaderButton extends StatelessWidget {
+  const _ReaderButton({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.glyph,
+    this.dark = false,
+  });
+  final String label;
+  final VoidCallback? onTap;
+  final IconData? icon;
+  final WorkspaceGlyph? glyph;
+  final bool dark;
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: label,
+    child: SizedBox.square(
+      dimension: 48,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Center(
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: dark ? const Color(0xFF17161D) : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Opacity(
+                  opacity: onTap == null ? .35 : 1,
+                  child: glyph != null
+                      ? ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                          child: WorkspaceIcon(glyph!, size: 18),
+                        )
+                      : Icon(icon, size: 18, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

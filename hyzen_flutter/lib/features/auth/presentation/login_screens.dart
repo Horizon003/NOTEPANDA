@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,6 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/surfaces.dart';
-import '../../../core/widgets/hyzen_art.dart';
 
 /// Shared scaffold for auth forms: persistent top bar with Back, keyboard-safe scroll.
 class AuthScaffold extends StatelessWidget {
@@ -517,53 +517,74 @@ class AccountChoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/welcome'),
+    return HBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          leading: BackButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/welcome'),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(24),
-              children: [
-                const HyzenBanner(
-                  title: 'Learn with Hyzen',
-                  subtitle: 'Your pharmacy study companion',
-                  art: 'library',
-                  eyebrow: 'Pharm D',
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Welcome to PHARM D WITH HYZEN',
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Choose how you want to continue.',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 24),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    FilledButton(
-                      onPressed: onLogin,
-                      child: const Text('Already a user? Log in'),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(24),
+                children: [
+                  HCard(
+                    color: const Color(0xFFE8DFF8),
+                    radius: 28,
+                    child: Column(
+                      children: [
+                        const WorkspaceIcon(WorkspaceGlyph.panda, size: 150),
+                        const SizedBox(height: 12),
+                        Text(
+                          'A little focus.\nA brighter future.',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Your pharmacy study companion',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    OutlinedButton(
-                      onPressed: () => context.push('/register/personal'),
-                      child: const Text('Create account'),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Make yourself at home',
+                    style: theme.textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Choose how you want to continue.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton(
+                        onPressed: onLogin,
+                        child: const Text('Already a user? Log in'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => context.push('/register/personal'),
+                        child: const Text('Create account'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

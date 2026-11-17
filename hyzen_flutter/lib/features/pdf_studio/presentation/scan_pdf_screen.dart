@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/workspace_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -636,11 +637,7 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.document_scanner_outlined,
-            size: 64,
-            color: OfficeColors.muted(context),
-          ),
+          const WorkspaceIcon(WorkspaceGlyph.scan, size: 90),
           const SizedBox(height: 16),
           Text(
             'Add your first page',
@@ -657,11 +654,23 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
             style: TextStyle(color: OfficeColors.muted(context)),
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(
-            key: const ValueKey('scan-more'),
-            onPressed: _busy ? null : (_android ? _scan : _gallery),
-            icon: const Icon(Icons.add),
-            label: Text(_android ? 'Scan' : 'Add images'),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                key: const ValueKey('scan-more'),
+                onPressed: _busy ? null : (_android ? _scan : _gallery),
+                icon: const WorkspaceIcon(WorkspaceGlyph.scan, size: 24),
+                label: Text(_android ? 'Scan' : 'Add images'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _gallery,
+                icon: const WorkspaceIcon(WorkspaceGlyph.gallery, size: 24),
+                label: const Text('Gallery'),
+              ),
+            ],
           ),
         ],
       ),
@@ -715,8 +724,9 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
         if (!didPop) _back();
       },
       child: Scaffold(
-        backgroundColor: OfficeColors.canvas(context),
+        backgroundColor: const Color(0xFFF0EBFA),
         appBar: AppBar(
+          backgroundColor: const Color(0xFFFFF4E9),
           title: Text(
             _crop ? 'Adjust corners' : 'Review scan',
             maxLines: 1,
@@ -849,9 +859,9 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
               ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: OfficeColors.bar(context),
-                border: Border(
-                  top: BorderSide(color: OfficeColors.divider(context)),
+                color: const Color(0xFF17161D),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
                 ),
               ),
               child: SafeArea(
@@ -897,10 +907,17 @@ class _ScanPdfScreenState extends ConsumerState<ScanPdfScreen>
                               onPressed: _busy
                                   ? null
                                   : () => setState(() => _crop = false),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                              ),
                               child: const Text('Cancel crop'),
                             ),
                             FilledButton(
                               onPressed: _busy ? null : _applyCrop,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFE8DFF8),
+                                foregroundColor: Colors.black,
+                              ),
                               child: const Text('Apply crop'),
                             ),
                           ],

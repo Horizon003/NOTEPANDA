@@ -1490,8 +1490,14 @@ void main() {
           await open(tester, path);
           expect(
             find.byType(HyzenBanner),
-            path == '/study/notes' ? findsNothing : findsOneWidget,
+            (path == '/study/notes' || path == '/pdf-studio')
+                ? findsNothing
+                : findsOneWidget,
           );
+          if (path == '/pdf-studio') {
+            expect(find.text('Gallery'), findsOneWidget);
+            expect(find.text('Your workspace'), findsOneWidget);
+          }
           expect(find.byType(HomeAtmosphere), findsWidgets);
           expect(find.byTooltip('Profile & settings'), findsOneWidget);
           expect(tester.takeException(), isNull);

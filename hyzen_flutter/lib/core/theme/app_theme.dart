@@ -165,9 +165,10 @@ class AppTheme {
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          minimumSize: const Size(48, 48),
-          iconSize: 20,
-          padding: const EdgeInsets.all(12),
+          minimumSize: const Size(34, 34),
+          iconSize: 18,
+          padding: const EdgeInsets.all(8),
+          tapTargetSize: MaterialTapTargetSize.padded,
           backgroundColor: Colors.white.withValues(alpha: .72),
           foregroundColor: ink,
           side: const BorderSide(color: HColors.outline),

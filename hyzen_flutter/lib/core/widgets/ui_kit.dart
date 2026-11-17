@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_icons.dart';
 
 import 'package:flutter/material.dart';
 
@@ -68,8 +69,12 @@ class ResourceTile extends StatelessWidget {
     this.eyebrow,
     this.badge,
     this.compact = false,
+    this.leading,
+    this.surfaceColor,
   });
   final bool compact;
+  final Widget? leading;
+  final Color? surfaceColor;
   final IconData icon;
   final Color color;
   final String title;
@@ -85,7 +90,8 @@ class ResourceTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: HCard(
-        radius: 32,
+        radius: 24,
+        color: surfaceColor,
         shadow: false,
         onTap: onTap,
         semanticLabel: title,
@@ -95,7 +101,17 @@ class ResourceTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            IconBadge(icon: icon, color: color, size: compact ? 36 : 42),
+            leading ??
+                (glyphForIcon(icon) != null
+                    ? WorkspaceIcon(
+                        glyphForIcon(icon)!,
+                        size: compact ? 34 : 40,
+                      )
+                    : IconBadge(
+                        icon: icon,
+                        color: color,
+                        size: compact ? 36 : 42,
+                      )),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -104,7 +120,7 @@ class ResourceTile extends StatelessWidget {
                   HMarqueeText(
                     title,
                     style: t.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   if (subtitle != null && subtitle!.isNotEmpty)
