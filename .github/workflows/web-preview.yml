@@ -40,6 +40,30 @@ jobs:
         working-directory: hyzen_flutter
       - name: Add SPA fallback
         run: cp hyzen_flutter/build/web/index.html hyzen_flutter/build/web/404.html
+      - name: Checkout PR 18 source at its tested revision
+        uses: actions/checkout@v4
+        with:
+          ref: 926208fa7965017a203bdf8d50f214d54423c3ec
+          path: preview-source
+          persist-credentials: false
+      - name: Build isolated PR 18 Flutter Web review
+        working-directory: preview-source/hyzen_flutter
+        run: |
+          flutter pub get
+          version=$(sed -n 's/^version: //p' pubspec.yaml)
+          flutter build web --release --pwa-strategy=none --no-web-resources-cdn \
+            --target lib/main_account_review.dart \
+            --base-href "/pharm-d-with-hyzen/preview/app/" \
+            --dart-define=HYZEN_REVIEW_ROUTE=/home \
+            --dart-define=HYZEN_APP_VERSION="$version"
+      - name: Bundle PR 18 preview alongside existing production site
+        run: |
+          mkdir -p hyzen_flutter/build/web/preview/app
+          cp -a preview-source/hyzen_flutter/build/web/. hyzen_flutter/build/web/preview/app/
+          cp preview-source/tools/live_preview/index.html hyzen_flutter/build/web/preview/index.html
+          printf '%s\n' 926208fa7965017a203bdf8d50f214d54423c3ec > hyzen_flutter/build/web/preview/source-commit.txt
+          test -s hyzen_flutter/build/web/preview/app/main.dart.js
+          test -s hyzen_flutter/build/web/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
