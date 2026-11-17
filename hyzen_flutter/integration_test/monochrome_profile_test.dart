@@ -8,7 +8,17 @@ import 'package:hyzen_pharmd/app/app.dart';
 import 'package:hyzen_pharmd/app/providers.dart';
 import 'package:hyzen_pharmd/app/router.dart';
 import 'package:hyzen_pharmd/core/widgets/polish_ui.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hyzen_pharmd/features/academics/presentation/library_screens.dart';
+import 'package:hyzen_pharmd/features/downloads/presentation/downloads_screen.dart';
+import 'package:hyzen_pharmd/features/home/presentation/home_screen.dart';
 import 'package:hyzen_pharmd/features/pdf_studio/data/studio_pdf_engine.dart';
+import 'package:hyzen_pharmd/features/pdf_studio/presentation/pdf_studio_screen.dart';
+import 'package:hyzen_pharmd/features/profile/presentation/profile_screens.dart';
+import 'package:hyzen_pharmd/features/shop/presentation/shop_screens.dart';
+import 'package:hyzen_pharmd/features/study_progress/campus_rank_screen.dart';
+import 'package:hyzen_pharmd/features/study_progress/study_goals_screen.dart';
+import 'package:hyzen_pharmd/features/study_progress/study_streak_screen.dart';
 import 'package:hyzen_pharmd/features/viewer/offline_pdf.dart';
 import 'package:hyzen_pharmd/main_account_review.dart' as fixture;
 import 'package:integration_test/integration_test.dart';
@@ -63,14 +73,12 @@ void main() {
             '/downloads',
             '/shop',
           ]) {
-            router.go(path);
-            await _wait();
+            await _showRoute(router, path);
           }
         }
       });
 
-      router.go('/home');
-      await _wait();
+      await _showRoute(router, '/home');
       await _sample(binding, 'home_scroll', () async {
         for (var i = 0; i < 5; i++) {
           for (final dy in [-450.0, 450.0]) {
@@ -89,10 +97,17 @@ void main() {
           '/profile',
           '/settings',
         ]) {
-          unawaited(router.push<void>(path));
-          await _wait();
-          router.pop();
-          await _wait();
+          _checkpoint('opening transition $path');
+          await _showRoute(router, path, push: true);
+          if (router.canPop()) {
+            _checkpoint('popping transition $path');
+            router.pop();
+            await _waitFor(() => _routeVisible('/home'), 'return after $path');
+            await _wait();
+          } else {
+            _checkpoint('returning Home from root $path');
+            await _showRoute(router, '/home');
+          }
         }
       });
 
@@ -107,9 +122,8 @@ void main() {
         1,
       );
       await _sample(binding, 'pdf_open', () async {
-        router.go('/pdf-studio');
-        await _wait();
-        final nav = Navigator.of(tester.element(find.byType(Scaffold).last));
+        await _showRoute(router, '/pdf-studio');
+        final nav = Navigator.of(tester.element(find.byType(PdfStudioScreen)));
         var pdfOpened = false;
         unawaited(
           nav.push<void>(
@@ -143,8 +157,7 @@ void main() {
         '/settings',
         '/study-goals',
       ]) {
-        router.go(path);
-        await _wait();
+        await _showRoute(router, path);
         final name = 'light-${path.substring(1)}';
         _checkpoint('capturing $name');
         final bytes = await binding
@@ -175,6 +188,38 @@ Future<void> _waitFor(bool Function() predicate, String description) async {
   }
 }
 
+const _screens = {
+  '/home': HomeScreen,
+  '/study': StudyHubScreen,
+  '/pdf-studio': PdfStudioScreen,
+  '/downloads': DownloadsScreen,
+  '/shop': ShopScreen,
+  '/study-goals': StudyGoalsScreen,
+  '/study-streak': StudyStreakScreen,
+  '/campus-rank': CampusRankScreen,
+  '/profile': ProfileScreen,
+  '/settings': SettingsScreen,
+};
+
+bool _routeVisible(String path) => find
+    .byType(_screens[path]!)
+    .evaluate()
+    .any((element) => ModalRoute.of(element)?.isCurrent == true);
+
+Future<void> _showRoute(
+  GoRouter router,
+  String path, {
+  bool push = false,
+}) async {
+  if (push) {
+    unawaited(router.push<void>(path));
+  } else {
+    router.go(path);
+  }
+  await _waitFor(() => _routeVisible(path), 'rendered route $path');
+  await _wait();
+}
+
 Future<void> _sample(
   IntegrationTestWidgetsFlutterBinding binding,
   String name,
@@ -188,7 +233,7 @@ Future<void> _sample(
   final collect = frames.addAll;
   binding.addTimingsCallback(collect);
   try {
-    await action().timeout(const Duration(seconds: 25));
+    await action().timeout(const Duration(seconds: 45));
     await _wait(const Duration(milliseconds: 1200));
   } finally {
     binding.removeTimingsCallback(collect);
