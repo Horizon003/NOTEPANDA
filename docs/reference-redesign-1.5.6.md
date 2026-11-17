@@ -68,5 +68,4 @@ animation was added. Motion remains finite and respects reduced motion.
 Android build 15 / version 1.5.6 is used so the new design can update the already
 published 1.5.5+14 app with its original package ID and signing certificate.
 Physical GPU smoothness, camera/OCR quality, battery and live account/push flows
-require separate device verification. Native profile measurements and release
-verification are recorded after the CI checks complete.
+require separate device verification. The [release validation report](https://github.com/Horizon003/pharm-d-with-hyzen/releases/download/v1.5.6-15/validation-1.5.6.md) records native frame timings, checksum, certificate and update/install checks after validation.

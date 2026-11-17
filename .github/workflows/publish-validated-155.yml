@@ -1,27 +1,25 @@
-name: Publish validated Android 1.5.5
+name: Publish validated Android 1.5.6
 on:
   workflow_dispatch:
     inputs:
       build_run:
         description: Successful signed build and install-validation run
-        default: '43920554527'
         required: true
       profile_run:
         description: Successful native frame-timing run
-        default: '43921169790'
         required: true
       publish:
         description: Publish the verified APK and evidence
         type: boolean
         default: false
   push:
-    branches: [work/monochrome-motion-1.5.5]
+    branches: [work/monochrome-motion-1.5.6]
     paths: ['.github/workflows/publish-validated-155.yml']
 permissions:
   contents: write
   actions: read
 concurrency:
-  group: publish-validated-155
+  group: publish-validated-156
   cancel-in-progress: false
 jobs:
   publish:
@@ -52,8 +50,10 @@ jobs:
           jobs = get('/actions/runs/' + os.environ['BUILD_RUN'] + '/jobs?per_page=100')['jobs']
           results = {j['name']: j['conclusion'] for j in jobs}
           assert results.get('build') == results.get('install-smoke') == 'success', results
+          assert build['conclusion'] == 'success', build['conclusion']
           profile = get('/actions/runs/' + os.environ['PROFILE_RUN'])
           assert profile['conclusion'] == 'success', profile['conclusion']
+          assert profile['head_sha'] == build['head_sha'], 'Profile must measure the signed application source'
           assert build['path'].startswith('.github/workflows/release-155.yml')
           assert profile['path'].startswith('.github/workflows/native-profile-155.yml')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
@@ -62,15 +62,21 @@ jobs:
           PY
       - uses: actions/download-artifact@v4
         with:
-          name: signed-release-155
+          name: signed-release-156
           path: release
           run-id: ${{ inputs.build_run }}
           github-token: ${{ github.token }}
       - uses: actions/download-artifact@v4
         with:
-          name: monochrome-native-profile
+          name: reference-native-profile
           path: native-profile
           run-id: ${{ inputs.profile_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-156-install-logs
+          path: install-validation
+          run-id: ${{ inputs.build_run }}
           github-token: ${{ github.token }}
       - name: Verify the exact binary and unchanged application source
         env:
@@ -81,14 +87,16 @@ jobs:
           grep -Fxq "Source commit: $BUILT_SOURCE" release/provenance.txt
           git diff --exit-code "$BUILT_SOURCE" HEAD -- hyzen_flutter/lib hyzen_flutter/android hyzen_flutter/assets hyzen_flutter/pubspec.yaml hyzen_flutter/pubspec.lock
           signer=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
-          "$signer" verify --print-certs release/PharmD-With-Hyzen-1.5.5.apk > verified-signature.txt
+          "$signer" verify --print-certs release/PharmD-With-Hyzen-1.5.6.apk > verified-signature.txt
           grep -qi '3fd902d131ae56d8de4792c9f5953759e2b375e32bcad8f57f7ef5c0ab887f83' verified-signature.txt
-          grep -q "name='com.hyzen.pharmd' versionCode='14' versionName='1.5.5'" release/apk-metadata.txt
+          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -1)
+          "$aapt" dump badging release/PharmD-With-Hyzen-1.5.6.apk > release/apk-metadata.txt
+          grep -q "name='com.hyzen.pharmd' versionCode='15' versionName='1.5.6'" release/apk-metadata.txt
           python3 - <<'PY'
           import json
           from pathlib import Path
           from zipfile import ZipFile
-          with ZipFile('release/PharmD-With-Hyzen-1.5.5.apk') as apk:
+          with ZipFile('release/PharmD-With-Hyzen-1.5.6.apk') as apk:
               for abi in ['armeabi-v7a','arm64-v8a','x86_64']:
                   assert f'lib/{abi}/libflutter.so' in apk.namelist(), abi
           paths = list(Path('native-profile').rglob('frame-timings.json'))
@@ -102,6 +110,5 @@ jobs:
         env:
           BUILT_SOURCE: ${{ steps.validation.outputs.source }}
         run: |
-          cp docs/qa/validation-1.5.5.md release/validation-1.5.5.md
-          cp docs/qa/profile-{vulkan-swiftshader,skia-software}.json release/
-          gh release create v1.5.5-14 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.5 — Nude Motion Edition' --notes-file docs/release-1.5.5.md --latest
+          python3 tools/ci/reference_release_report.py native-profile release "$BUILT_SOURCE" "$BUILD_RUN" "$PROFILE_RUN"
+          gh release create v1.5.6-15 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.6 — Pastel Reference Edition' --notes-file docs/release-1.5.6.md --latest

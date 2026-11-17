@@ -40,3 +40,6 @@ hyzen_flutter/qa/reference/native/
 # Uncurated reference QA matrices/native readbacks.
 hyzen_flutter/qa/reference/matrix/
 hyzen_flutter/qa/reference/native/
+
+# Python QA helpers
+**/__pycache__/
