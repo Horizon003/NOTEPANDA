@@ -14,7 +14,7 @@ const path = require('node:path');
     if (response.status() !== 200) throw Error('Preview shell did not load');
     await page.selectOption('#width', '390');
     const screens = ['/home', '/study', '/pdf-studio', '/settings', '/notifications', '/study-goals'];
-    const output = path.resolve('hyzen_flutter/qa/pages-preview');
+    const output = path.resolve(process.env.HYZEN_QA_OUTPUT || 'hyzen_flutter/qa/pages-preview');
     fs.mkdirSync(output, {recursive: true});
     for (const route of screens) {
       await page.selectOption('#screen', route);
@@ -33,7 +33,7 @@ const path = require('node:path');
     await page.waitForTimeout(1000);
     await page.selectOption('#width', '320');
     if (await page.locator('#app').evaluate(node => node.getBoundingClientRect().width) !== 320) throw Error('Preview width control failed');
-    const evidence = {screens, errors, baseHref: '/pharm-d-with-hyzen/app/', textScale: 2, width: 320, source: fs.readFileSync('hyzen_flutter/build/live-preview/source-commit.txt', 'utf8').trim(), published: false};
+    const evidence = {screens, errors, baseHref: '/pharm-d-with-hyzen/app/', textScale: 2, width: 320, source: (await page.evaluate(async () => (await fetch('source-commit.txt', {cache: 'no-store'})).text())).trim(), published: root.startsWith('https://horizon003.github.io/')};
     fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2));
     console.log(JSON.stringify(evidence));
     if (errors.length) process.exitCode = 1;
