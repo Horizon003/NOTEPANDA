@@ -21,7 +21,7 @@ class SurfacePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      color: tint?.withAlpha(255) ?? Theme.of(context).colorScheme.surface,
+      color: tint ?? Theme.of(context).colorScheme.surface,
       borderRadius: borderRadius ?? BorderRadius.circular(radius),
     ),
     child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
@@ -34,7 +34,7 @@ class HCard extends StatelessWidget {
     required this.child,
     this.onTap,
     this.padding = const EdgeInsets.all(12),
-    this.radius = HRadius.md,
+    this.radius = HRadius.lg,
     this.color,
     this.shadow = true,
     this.semanticLabel,
@@ -95,8 +95,8 @@ class HBackground extends StatelessWidget {
   final Widget child;
   final bool intense;
   @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: Theme.of(context).scaffoldBackgroundColor,
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(gradient: hPageGradient),
     child: child,
   );
 }

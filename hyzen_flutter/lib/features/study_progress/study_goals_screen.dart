@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'study_tracker.dart';
 import 'study_forms.dart';
+import '../../core/theme/tokens.dart';
 
 /// The full Goals screen from the uploaded reference, using real local data.
 class StudyGoalsScreen extends ConsumerStatefulWidget {
@@ -20,7 +21,7 @@ class _StudyGoalsScreenState extends ConsumerState<StudyGoalsScreen> {
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(24),
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: child,
@@ -41,7 +42,7 @@ class _StudyGoalsScreenState extends ConsumerState<StudyGoalsScreen> {
             child: Text(
               name,
               style: TextStyle(
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
@@ -144,7 +145,7 @@ class _StudyGoalsScreenState extends ConsumerState<StudyGoalsScreen> {
           children: [
             Text(
               'Study Goals',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             Text(
               'Set goals, track progress & stay consistent',
@@ -175,14 +176,14 @@ class _StudyGoalsScreenState extends ConsumerState<StudyGoalsScreen> {
           Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(26),
               border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: ColoredBox(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(gradient: hStudyGradient),
                   ),
                 ),
 
@@ -192,7 +193,7 @@ class _StudyGoalsScreenState extends ConsumerState<StudyGoalsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '▣  This Week’s Goal',
+                        'This Week’s Goal',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -753,7 +754,7 @@ class _LinkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: Theme.of(context).colorScheme.surface,
-    borderRadius: BorderRadius.circular(12),
+    borderRadius: BorderRadius.circular(24),
     clipBehavior: Clip.antiAlias,
     child: InkWell(
       onTap: onTap,
@@ -807,7 +808,7 @@ class _Insight extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         Text(
           label,

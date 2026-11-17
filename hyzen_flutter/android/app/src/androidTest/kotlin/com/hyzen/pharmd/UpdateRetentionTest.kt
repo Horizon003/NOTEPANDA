@@ -16,10 +16,10 @@ class UpdateRetentionTest {
         val prefs = context.getSharedPreferences("hyzen_update_qa", 0)
         val file = File(context.filesDir, "hyzen-update-qa.txt")
         if (InstrumentationRegistry.getArguments().getString("phase") == "seed") {
-            assertTrue(prefs.edit().putString("sentinel", "1.5.4-to-1.5.5").commit())
+            assertTrue(prefs.edit().putString("sentinel", "upgrade-persistence-sentinel").commit())
             file.writeText("private offline data retained")
         } else {
-            assertEquals("1.5.4-to-1.5.5", prefs.getString("sentinel", null))
+            assertEquals("upgrade-persistence-sentinel", prefs.getString("sentinel", null))
             assertEquals("private offline data retained", file.readText())
             prefs.edit().clear().commit()
             file.delete()

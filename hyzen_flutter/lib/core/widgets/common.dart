@@ -118,8 +118,8 @@ class HButton extends StatelessWidget {
       child: loading
           ? SizedBox(
               key: const ValueKey('l'),
-              width: 22,
-              height: 22,
+              width: 16,
+              height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2.4,
                 color: outlined
@@ -132,7 +132,7 @@ class HButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 20),
+                  Icon(icon, size: 16),
                   const SizedBox(width: 8),
                 ],
                 Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
@@ -178,6 +178,7 @@ class HTopBar extends StatelessWidget implements PreferredSizeWidget {
     final canPop = Navigator.of(context).canPop();
     return SurfacePanel(
       radius: 0,
+      tint: Colors.transparent,
       child: SafeArea(
         bottom: false,
         child: SizedBox(
@@ -393,7 +394,7 @@ class IconBadge extends StatelessWidget {
         color: adaptiveAccent(context, color).withValues(
           alpha: Theme.of(context).brightness == Brightness.dark ? .18 : .11,
         ),
-        borderRadius: BorderRadius.circular(size * 0.30),
+        shape: BoxShape.circle,
       ),
       child: Icon(
         icon,

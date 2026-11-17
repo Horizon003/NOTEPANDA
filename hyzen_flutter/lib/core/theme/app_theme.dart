@@ -1,175 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'tokens.dart';
 
+/// Light-only, reference-led education UI. Legacy preferences stay stored.
 class AppTheme {
   AppTheme._();
-  static const fontFamily = 'Manrope';
-
-  static TextTheme _text(Color ink, Color ink2) {
-    const f = fontFamily;
-    return TextTheme(
-      displaySmall: TextStyle(
-        fontFamily: f,
-        fontSize: 26,
-        height: 1.15,
-        fontWeight: FontWeight.w600,
-        color: ink,
-        letterSpacing: -0.6,
-      ),
-      headlineMedium: TextStyle(
-        fontFamily: f,
-        fontSize: 21,
-        height: 1.2,
-        fontWeight: FontWeight.w600,
-        color: ink,
-        letterSpacing: -0.4,
-      ),
-      headlineSmall: TextStyle(
-        fontFamily: f,
-        fontSize: 18,
-        height: 1.25,
-        fontWeight: FontWeight.w600,
-        color: ink,
-        letterSpacing: -0.2,
-      ),
-      titleLarge: TextStyle(
-        fontFamily: f,
-        fontSize: 15,
-        height: 1.3,
-        fontWeight: FontWeight.w600,
-        color: ink,
-      ),
-      titleMedium: TextStyle(
-        fontFamily: f,
-        fontSize: 13,
-        height: 1.35,
-        fontWeight: FontWeight.w600,
-        color: ink,
-      ),
-      titleSmall: TextStyle(
-        fontFamily: f,
-        fontSize: 13,
-        height: 1.35,
-        fontWeight: FontWeight.w600,
-        color: ink,
-      ),
-      bodyLarge: TextStyle(
-        fontFamily: f,
-        fontSize: 13,
-        height: 1.45,
-        fontWeight: FontWeight.w500,
-        color: ink,
-      ),
-      bodyMedium: TextStyle(
-        fontFamily: f,
-        fontSize: 13,
-        height: 1.4,
-        fontWeight: FontWeight.w400,
-        color: ink,
-      ),
-      bodySmall: TextStyle(
-        fontFamily: f,
-        fontSize: 13,
-        height: 1.45,
-        fontWeight: FontWeight.w500,
-        color: ink2,
-      ),
-      labelLarge: TextStyle(
-        fontFamily: f,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: ink,
-        letterSpacing: 0.1,
-      ),
-      labelMedium: TextStyle(
-        fontFamily: f,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: ink2,
-      ),
-      labelSmall: TextStyle(
-        fontFamily: f,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: ink2,
-        letterSpacing: 0,
-      ),
+  static const fontFamily = 'Poppins';
+  static ThemeData light([Color seed = HColors.primary]) {
+    const ink = HColors.ink, muted = HColors.ink2;
+    TextStyle type(
+      double size,
+      FontWeight weight, {
+      Color color = ink,
+      double height = 1.4,
+    }) => TextStyle(
+      fontFamily: fontFamily,
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
     );
-  }
-
-  static ThemeData light([Color seed = HColors.primary]) =>
-      _build(Brightness.light, seed);
-  static ThemeData dark([Color seed = HColors.primary]) =>
-      _build(Brightness.dark, seed);
-
-  static ThemeData _build(Brightness b, Color seed) {
-    final dark = b == Brightness.dark;
-    final ink = dark ? HColors.darkInk : HColors.ink;
-    final ink2 = dark ? HColors.darkInk2 : HColors.ink2;
-    // Explicit warm nude scheme chosen by the owner. Legacy palette preferences
-    // remain stored without overriding this coherent product identity.
-    final bg = dark ? HColors.darkBackground : HColors.background;
-    final surface = dark ? HColors.darkSurface : HColors.surface;
-    final primary = dark ? HColors.darkPrimary : HColors.primary;
-    final container = dark ? HColors.darkSurfaceAlt : HColors.surfaceAlt;
-    final scheme = ColorScheme(
-      brightness: b,
-      primary: primary,
-      onPrimary: dark ? Colors.black : Colors.white,
-      primaryContainer: container,
+    final text = TextTheme(
+      displaySmall: type(30, FontWeight.w600, height: 1.18),
+      headlineMedium: type(24, FontWeight.w600, height: 1.22),
+      headlineSmall: type(20, FontWeight.w500, height: 1.3),
+      titleLarge: type(16, FontWeight.w600),
+      titleMedium: type(14, FontWeight.w500),
+      titleSmall: type(13, FontWeight.w500),
+      bodyLarge: type(14, FontWeight.w400),
+      bodyMedium: type(12, FontWeight.w400, height: 1.5),
+      bodySmall: type(11, FontWeight.w400, color: muted),
+      labelLarge: type(12, FontWeight.w500),
+      labelMedium: type(11, FontWeight.w500, color: muted),
+      labelSmall: type(10, FontWeight.w400, color: muted),
+    );
+    const scheme = ColorScheme.light(
+      primary: HColors.primary,
+      onPrimary: Colors.white,
+      primaryContainer: HColors.primarySoft,
       onPrimaryContainer: ink,
-      secondary: ink2,
-      onSecondary: dark ? Colors.black : Colors.white,
-      secondaryContainer: container,
+      secondary: HColors.ink2,
+      onSecondary: Colors.white,
+      secondaryContainer: HColors.surfaceAlt,
       onSecondaryContainer: ink,
-      tertiary: ink2,
-      onTertiary: dark ? Colors.black : Colors.white,
-      tertiaryContainer: container,
+      tertiary: HColors.lectures,
+      onTertiary: Colors.white,
+      tertiaryContainer: HColors.pink,
       onTertiaryContainer: ink,
-      surface: surface,
+      surface: HColors.surface,
       onSurface: ink,
-      onSurfaceVariant: ink2,
-      surfaceContainerLowest: bg,
-      surfaceContainerLow: surface,
-      surfaceContainer: container,
-      surfaceContainerHigh: dark
-          ? const Color(0xFF3B322B)
-          : const Color(0xFFECE0D2),
-      surfaceContainerHighest: dark
-          ? const Color(0xFF44382E)
-          : const Color(0xFFE3D5C5),
+      onSurfaceVariant: muted,
+      surfaceContainerLowest: HColors.background,
+      surfaceContainerLow: HColors.surface,
+      surfaceContainer: HColors.surfaceAlt,
+      surfaceContainerHigh: Color(0xFFECECF0),
+      surfaceContainerHighest: Color(0xFFE4E4EA),
       surfaceTint: Colors.transparent,
-      error: dark ? const Color(0xFFFFB4AB) : HColors.error,
-      onError: dark ? Colors.black : Colors.white,
-      outline: dark ? const Color(0xFF998976) : HColors.outlineStrong,
-      outlineVariant: dark ? const Color(0xFF493D32) : HColors.outline,
-      inverseSurface: dark ? Colors.white : HColors.ink,
-      onInverseSurface: dark ? Colors.black : Colors.white,
+      outline: HColors.outlineStrong,
+      outlineVariant: HColors.outline,
+      error: HColors.error,
+      onError: Colors.white,
+      inverseSurface: HColors.ink,
+      onInverseSurface: Colors.white,
     );
-    final text = _text(ink, ink2);
     final border = OutlineInputBorder(
-      borderRadius: HRadius.all(HRadius.md),
-      borderSide: BorderSide(color: scheme.outlineVariant),
+      borderRadius: BorderRadius.circular(24),
+      borderSide: const BorderSide(color: HColors.outline),
+    );
+    ButtonStyle button({bool outlined = false}) => FilledButton.styleFrom(
+      minimumSize: const Size(0, 36),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      tapTargetSize: MaterialTapTargetSize.padded,
+      foregroundColor: outlined ? ink : Colors.white,
+      backgroundColor: outlined ? Colors.transparent : ink,
+      textStyle: text.labelLarge,
+      elevation: 0,
+      shape: const StadiumBorder(),
     );
     return ThemeData(
       useMaterial3: true,
-      brightness: b,
+      brightness: Brightness.light,
       colorScheme: scheme,
       fontFamily: fontFamily,
-      scaffoldBackgroundColor: bg,
       textTheme: text,
-      iconTheme: IconThemeData(size: 20, color: ink2),
-      listTileTheme: ListTileThemeData(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        minLeadingWidth: 24,
-        horizontalTitleGap: 12,
-        minVerticalPadding: 8,
-        iconColor: ink2,
-        titleTextStyle: text.bodyLarge,
-        subtitleTextStyle: text.bodyMedium,
-      ),
+      scaffoldBackgroundColor: Colors.transparent,
+      canvasColor: HColors.background,
+      iconTheme: const IconThemeData(size: 20, color: ink),
       splashFactory: InkRipple.splashFactory,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -179,22 +95,32 @@ class AppTheme {
         centerTitle: false,
         foregroundColor: ink,
         titleTextStyle: text.titleLarge,
-        systemOverlayStyle: dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+        systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+        ),
       ),
       cardTheme: CardThemeData(
-        color: surface,
+        color: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: HRadius.all(HRadius.lg),
-          side: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(HRadius.lg),
+          side: const BorderSide(color: HColors.outline),
         ),
+      ),
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        minLeadingWidth: 36,
+        horizontalTitleGap: 12,
+        minVerticalPadding: 8,
+        iconColor: ink,
+        titleTextStyle: text.titleMedium,
+        subtitleTextStyle: text.bodyMedium,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface,
+        fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
@@ -202,133 +128,105 @@ class AppTheme {
         border: border,
         enabledBorder: border,
         focusedBorder: border.copyWith(
-          borderSide: BorderSide(color: scheme.primary, width: 1.6),
+          borderSide: const BorderSide(color: ink, width: 1.2),
         ),
         errorBorder: border.copyWith(
           borderSide: const BorderSide(color: HColors.error),
         ),
         focusedErrorBorder: border.copyWith(
-          borderSide: const BorderSide(color: HColors.error, width: 1.6),
+          borderSide: const BorderSide(color: HColors.error),
         ),
+        hintStyle: text.bodyMedium?.copyWith(color: muted),
         labelStyle: text.bodyMedium,
-        floatingLabelStyle: text.labelMedium?.copyWith(color: scheme.primary),
-        hintStyle: text.bodyMedium?.copyWith(
-          color: dark ? HColors.darkInk2 : HColors.ink3,
-        ),
-        errorStyle: text.bodySmall?.copyWith(
-          color: HColors.error,
-          fontWeight: FontWeight.w600,
-        ),
-        prefixIconColor: ink2,
-        suffixIconColor: ink2,
+        floatingLabelStyle: text.labelMedium,
+        errorStyle: text.bodySmall?.copyWith(color: HColors.error),
+        prefixIconColor: ink,
+        suffixIconColor: muted,
       ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(0, 48),
-          textStyle: text.labelLarge?.copyWith(fontSize: 14),
-          elevation: 0,
-          shadowColor: dark ? Colors.black87 : Colors.black26,
-          shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.md)),
-        ),
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.lg)),
-      ),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? scheme.onPrimary : null,
-        ),
-        trackColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? scheme.primary : null,
-        ),
-        trackOutlineColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? Colors.transparent : null,
-        ),
-      ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: scheme.primary,
-        linearTrackColor: scheme.primaryContainer,
-        circularTrackColor: Colors.transparent,
-      ),
-      tabBarTheme: TabBarThemeData(
-        labelColor: scheme.primary,
-        unselectedLabelColor: ink2,
-        indicatorColor: scheme.primary,
-        dividerColor: scheme.outlineVariant,
-        labelStyle: text.labelLarge,
-        unselectedLabelStyle: text.labelMedium,
-      ),
+      filledButtonTheme: FilledButtonThemeData(style: button()),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: button()),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size(0, 48),
-          foregroundColor: ink,
-          textStyle: text.labelLarge,
-          elevation: 0,
-          shadowColor: dark ? Colors.black87 : Colors.black26,
-          side: BorderSide(color: scheme.outline),
-          shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.md)),
+        style: button(outlined: true).copyWith(
+          side: const WidgetStatePropertyAll(
+            BorderSide(color: HColors.outlineStrong),
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          minimumSize: const Size(48, 48),
-          textStyle: text.labelLarge?.copyWith(fontSize: 14),
+          foregroundColor: ink,
+          minimumSize: const Size(0, 36),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          textStyle: text.labelLarge,
+          shape: const StadiumBorder(),
         ),
       ),
-      chipTheme: ChipThemeData(
-        backgroundColor: surface,
-        selectedColor: scheme.primaryContainer,
-        checkmarkColor: scheme.primary,
-        labelStyle: text.labelMedium,
-        side: BorderSide(color: scheme.outlineVariant),
-        shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.pill)),
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        labelTextStyle: WidgetStateProperty.resolveWith(
-          (s) => text.labelSmall!.copyWith(
-            color: s.contains(WidgetState.selected) ? scheme.primary : ink2,
-            fontWeight: s.contains(WidgetState.selected)
-                ? FontWeight.w600
-                : FontWeight.w500,
-          ),
-        ),
-        iconTheme: WidgetStateProperty.resolveWith(
-          (s) => IconThemeData(
-            size: 20,
-            color: s.contains(WidgetState.selected) ? scheme.primary : ink2,
-          ),
-        ),
-      ),
-      dividerTheme: DividerThemeData(color: scheme.outlineVariant, space: 1),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          backgroundColor: dark ? HColors.darkSurfaceAlt : Colors.white,
-          foregroundColor: ink,
           minimumSize: const Size(48, 48),
+          iconSize: 20,
+          padding: const EdgeInsets.all(12),
+          backgroundColor: Colors.white.withValues(alpha: .72),
+          foregroundColor: ink,
+          side: const BorderSide(color: HColors.outline),
           shape: const CircleBorder(),
         ),
       ),
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-        showDragHandle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(HRadius.xl)),
-        ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: ink,
+        foregroundColor: Colors.white,
+        elevation: 1,
+        shape: StadiumBorder(),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: HColors.surfaceAlt,
+        selectedColor: HColors.primarySoft,
+        labelStyle: text.labelMedium?.copyWith(color: ink),
+        checkmarkColor: ink,
+        side: BorderSide.none,
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: ink,
+        unselectedLabelColor: muted,
+        indicatorColor: ink,
+        dividerColor: HColors.outline,
+        labelStyle: text.labelLarge,
+        unselectedLabelStyle: text.labelMedium,
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: ink,
+        linearTrackColor: Color(0x55FFFFFF),
+        circularTrackColor: HColors.surfaceAlt,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: HColors.outline,
+        space: 1,
+        thickness: .8,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: surface,
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.xl)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        titleTextStyle: text.titleLarge,
+        contentTextStyle: text.bodyLarge,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        modalBackgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: HColors.slate,
+        backgroundColor: ink,
         contentTextStyle: text.bodyMedium?.copyWith(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: HRadius.all(HRadius.md)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -338,9 +236,11 @@ class AppTheme {
       ),
     );
   }
+
+  /// Compatibility for old callers; the product is light-only.
+  static ThemeData dark([Color seed = HColors.primary]) => light(seed);
 }
 
-/// Small route transform, with no work on the child subtree during a frame.
 class HyzenPageTransitions extends PageTransitionsBuilder {
   const HyzenPageTransitions();
   @override

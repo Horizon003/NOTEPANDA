@@ -32,3 +32,11 @@ private-signing/
 hyzen_flutter/qa/monochrome/matrix/
 hyzen_flutter/qa/monochrome/native/
 hyzen_flutter/qa/pr9/
+
+# Generated profiling/matrix evidence; selected reference screenshots are tracked.
+hyzen_flutter/qa/reference/matrix/
+hyzen_flutter/qa/reference/native/
+
+# Uncurated reference QA matrices/native readbacks.
+hyzen_flutter/qa/reference/matrix/
+hyzen_flutter/qa/reference/native/

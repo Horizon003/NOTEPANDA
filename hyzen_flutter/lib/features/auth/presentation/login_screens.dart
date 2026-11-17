@@ -9,6 +9,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/surfaces.dart';
+import '../../../core/widgets/hyzen_art.dart';
 
 /// Shared scaffold for auth forms: persistent top bar with Back, keyboard-safe scroll.
 class AuthScaffold extends StatelessWidget {
@@ -168,12 +169,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         onLogin: () => setState(() => _showForm = true),
       );
     }
-    final heroHeight = (MediaQuery.sizeOf(context).height * .32).clamp(
-      220.0,
-      310.0,
+    final heroHeight = (MediaQuery.sizeOf(context).height * .23).clamp(
+      140.0,
+      200.0,
     );
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: t.colorScheme.surface,
         resizeToAvoidBottomInset: true,
@@ -184,13 +185,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               constraints: const BoxConstraints(maxWidth: 520),
               child: Stack(
                 children: [
-                  SizedBox(
+                  Container(
                     height: heroHeight + 32,
                     width: double.infinity,
+                    decoration: const BoxDecoration(gradient: hStudyGradient),
                     child: Image.asset(
-                      'assets/auth/login_panda.webp',
+                      'assets/mascot/mascot_idle_welcome.png',
                       key: const ValueKey('login-panda-hero'),
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
+                      cacheWidth: 600,
                       semanticLabel:
                           'Hyzen panda welcoming you to the pharmacy library',
                     ),
@@ -529,13 +532,11 @@ class AccountChoiceScreen extends StatelessWidget {
               shrinkWrap: true,
               padding: const EdgeInsets.all(24),
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/auth/login_panda.webp',
-                    height: 210,
-                    fit: BoxFit.cover,
-                  ),
+                const HyzenBanner(
+                  title: 'Learn with Hyzen',
+                  subtitle: 'Your pharmacy study companion',
+                  art: 'library',
+                  eyebrow: 'Pharm D',
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -548,14 +549,19 @@ class AccountChoiceScreen extends StatelessWidget {
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: onLogin,
-                  child: const Text('Already a user? Log in'),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => context.push('/register/personal'),
-                  child: const Text('Create account'),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton(
+                      onPressed: onLogin,
+                      child: const Text('Already a user? Log in'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => context.push('/register/personal'),
+                      child: const Text('Create account'),
+                    ),
+                  ],
                 ),
               ],
             ),

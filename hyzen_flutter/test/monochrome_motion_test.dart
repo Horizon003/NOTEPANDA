@@ -5,47 +5,40 @@ import 'package:hyzen_pharmd/core/widgets/press_feedback.dart';
 import 'package:hyzen_pharmd/core/widgets/common.dart';
 
 void main() {
-  test(
-    'owner nude palette ignores legacy seeds and preserves readable contrast',
-    () {
-      double contrast(Color a, Color b) {
-        final light = a.computeLuminance();
-        final dark = b.computeLuminance();
-        return ((light > dark ? light : dark) + .05) /
-            ((light > dark ? dark : light) + .05);
-      }
+  test('reference palette remains light and preserves readable contrast', () {
+    double contrast(Color a, Color b) {
+      final light = a.computeLuminance();
+      final dark = b.computeLuminance();
+      return ((light > dark ? light : dark) + .05) /
+          ((light > dark ? dark : light) + .05);
+    }
 
-      expect(
-        AppTheme.light(Colors.purple).colorScheme,
-        AppTheme.light().colorScheme,
-      );
-      expect(
-        AppTheme.dark(Colors.blue).colorScheme,
-        AppTheme.dark().colorScheme,
-      );
-      for (final theme in [AppTheme.light(), AppTheme.dark()]) {
-        final scheme = theme.colorScheme;
-        for (final surface in [
-          theme.scaffoldBackgroundColor,
-          scheme.surface,
-          scheme.surfaceContainer,
-        ]) {
-          expect(
-            contrast(scheme.onSurface, surface),
-            greaterThanOrEqualTo(4.5),
-          );
-          expect(
-            contrast(scheme.onSurfaceVariant, surface),
-            greaterThanOrEqualTo(4.5),
-          );
-        }
+    expect(
+      AppTheme.light(Colors.purple).colorScheme,
+      AppTheme.light().colorScheme,
+    );
+    expect(AppTheme.dark(Colors.blue).colorScheme, AppTheme.dark().colorScheme);
+    expect(AppTheme.dark().brightness, Brightness.light);
+    expect(AppTheme.light().textTheme.bodyMedium?.fontFamily, 'Poppins');
+    for (final theme in [AppTheme.light(), AppTheme.dark()]) {
+      final scheme = theme.colorScheme;
+      for (final surface in [
+        const Color(0xFFFAFAFC),
+        scheme.surface,
+        scheme.surfaceContainer,
+      ]) {
+        expect(contrast(scheme.onSurface, surface), greaterThanOrEqualTo(4.5));
         expect(
-          contrast(scheme.primary, scheme.onPrimary),
+          contrast(scheme.onSurfaceVariant, surface),
           greaterThanOrEqualTo(4.5),
         );
       }
-    },
-  );
+      expect(
+        contrast(scheme.primary, scheme.onPrimary),
+        greaterThanOrEqualTo(4.5),
+      );
+    }
+  });
   testWidgets('reduced motion retains taps and never scales pressed controls', (
     tester,
   ) async {

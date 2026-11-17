@@ -20,8 +20,11 @@ final dockThemeProvider = NotifierProvider<DockThemePreference, String>(
 
 class DockSizePreference extends Notifier<double> {
   @override
-  double build() => (ref.watch(sharedPrefsProvider).getDouble('dock_size') ?? .9)
-      .clamp(.85, 1.25);
+  double build() =>
+      (ref.watch(sharedPrefsProvider).getDouble('dock_size') ?? .9).clamp(
+        .85,
+        1.25,
+      );
   void set(double value) {
     state = value.clamp(.85, 1.25);
     ref.read(sharedPrefsProvider).setDouble('dock_size', state);
@@ -43,7 +46,6 @@ class _AppearanceControlsState extends ConsumerState<AppearanceControls> {
   @override
   Widget build(BuildContext context) {
     final font = ref.watch(textSizeProvider),
-        mode = ref.watch(dockThemeProvider),
         size = ref.watch(dockSizeProvider);
     return SafeArea(
       child: ListView(
@@ -68,20 +70,6 @@ class _AppearanceControlsState extends ConsumerState<AppearanceControls> {
           Text(
             'Bottom navigation',
             style: Theme.of(context).textTheme.titleLarge,
-          ),
-          RadioGroup<String>(
-            groupValue: mode,
-            onChanged: (v) => ref.read(dockThemeProvider.notifier).set(v!),
-            child: Column(
-              children: [
-                for (final m in [
-                  ('follow', 'Follow App / System'),
-                  ('light', 'Light Navigation'),
-                  ('dark', 'Dark Navigation'),
-                ])
-                  RadioListTile<String>(title: Text(m.$2), value: m.$1),
-              ],
-            ),
           ),
           Text('Navigation size · ${(size * 100).round()}%'),
           Slider(

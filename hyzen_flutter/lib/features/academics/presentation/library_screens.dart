@@ -8,6 +8,7 @@ import '../../auth/domain/reference_data.dart';
 import '../../../core/utils/links.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/ui_kit.dart';
+import '../../../core/widgets/hyzen_art.dart';
 import '../../content/data/content_providers.dart';
 import '../../downloads/data/downloads_controller.dart';
 import '../../downloads/domain/download_record.dart';
@@ -51,16 +52,35 @@ class StudyHubScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: HSpace.screen),
           sliver: SliverList.list(
             children: [
-              Text(
-                'Your libraries',
-                style: Theme.of(context).textTheme.titleLarge,
+              if (kinds.isNotEmpty) ...[
+                HyzenBanner(
+                  title: "Today's study",
+                  subtitle: 'Notes, MCQs & past papers',
+                  art: 'study-kit',
+                  eyebrow: ReferenceData.yearLabel(
+                    ref.watch(professionalYearProvider),
+                  ),
+                  actionLabel: 'Open library',
+                  action: () => context.push('/study/${kinds.first.name}'),
+                ),
+                const Gap(18),
+              ],
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Your libraries',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => context.open('/profile/edit'),
+                    icon: const Icon(Icons.tune_rounded, size: 14),
+                    label: const Text('Change year'),
+                  ),
+                ],
               ),
-              TextButton.icon(
-                onPressed: () => context.open('/profile/edit'),
-                icon: const Icon(Icons.tune_rounded),
-                label: const Text('Change professional year'),
-              ),
-              const Gap(HSpace.lg),
+              const Gap(8),
               for (final k in kinds) _LibraryCard(kind: k),
               if (lectures)
                 ResourceTile(

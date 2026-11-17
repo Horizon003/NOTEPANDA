@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'study_tracker.dart';
+import '../../core/theme/tokens.dart';
 
 const _deep = Color(0xFF151515);
 const _azure = Color(0xFF5B5B5B);
@@ -51,7 +52,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: dark ? const Color(0xFF343434) : const Color(0xFFDADADA),
         ),
@@ -140,7 +141,7 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
         children: [
           Container(
             clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
             child: Stack(
               children: [
                 Positioned.fill(
@@ -149,7 +150,9 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                   ),
                 ),
                 const Positioned.fill(
-                  child: ColoredBox(color: Color(0xFF202020)),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(gradient: hFocusGradient),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(18),
@@ -159,14 +162,14 @@ class _StudyStreakScreenState extends ConsumerState<StudyStreakScreen> {
                       Text(
                         '${p.currentStreak} Days',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: HColors.ink,
                           fontWeight: FontWeight.w600,
                           fontSize: 34,
                         ),
                       ),
                       const Text(
                         'Current Study Streak',
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(color: HColors.ink, fontSize: 14),
                       ),
                       const SizedBox(height: 12),
                       FilledButton.icon(

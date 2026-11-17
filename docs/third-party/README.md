@@ -5,7 +5,7 @@ https://github.com/heydamir/unslop, licensed under [CC BY 4.0](https://creativec
 The original skill, references and license are installed in `.agents/skills/unslop`.
 Its audit and nine-pass workflow were applied to native Flutter, adapting its
 web spacing recommendations to Android's 48dp minimum touch targets and the
-owner's explicit pure black/white palette. No endorsement is implied.
+owner's supplied mobile references. No endorsement is implied.
 
 Magic UI: https://github.com/magicuidesign/magicui, MIT (copyright Magic UI).
 Reviewed `dock.tsx` and `blur-fade.tsx` and their component documentation.
@@ -19,3 +19,12 @@ alongside this file.
 Reviewed revisions:
 - unslop: `620163eedb3529d9cd23a3994ed8d287d06f760d`
 - magicui: `6f7b531e77659855d4bc1bec8e20fdb0c8199b20`
+
+Poppins: Copyright 2020 The Poppins Project Authors, SIL Open Font License 1.1.
+Bundled unmodified font files; full license is in [Poppins-OFL.txt](Poppins-OFL.txt).
+
+The owner explicitly requested the reference gradients, pastel cards, bold geometric
+type, photographic onboarding and 3D illustrations in the 1.5.6 revision. These
+preferences override Unslop defaults that discourage those particular choices.
+The four assets in `hyzen_flutter/assets/reference/` were generated for this app;
+the student portrait depicts a fictional person. Existing Hyzen panda artwork is retained.

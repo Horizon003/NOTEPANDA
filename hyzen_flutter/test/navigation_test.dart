@@ -8,6 +8,7 @@ import 'package:hyzen_pharmd/features/home/data/recent_controller.dart';
 import 'package:hyzen_pharmd/features/viewer/offline_pdf.dart';
 import 'package:hyzen_pharmd/features/academics/presentation/discovery_widgets.dart';
 import 'package:hyzen_pharmd/core/theme/tokens.dart';
+import 'package:hyzen_pharmd/core/theme/app_theme.dart';
 import 'package:hyzen_pharmd/core/widgets/surfaces.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,9 +57,9 @@ void main() {
   late List<Map<String, dynamic>> fixtureTree;
   var qaClock = DateTime(2026, 1, 1, 18);
   setUpAll(() async {
-    final fonts = FontLoader('Manrope');
-    for (final weight in [400, 500, 600, 700, 800]) {
-      fonts.addFont(rootBundle.load('assets/fonts/Manrope-$weight.ttf'));
+    final fonts = FontLoader('Poppins');
+    for (final weight in [400, 500, 600, 700]) {
+      fonts.addFont(rootBundle.load('assets/fonts/Poppins-$weight.ttf'));
     }
     await fonts.load();
     final icons = FontLoader('MaterialIcons')
@@ -208,32 +209,29 @@ void main() {
     expect(homeGreeting(DateTime(2026, 1, 1, 17)), 'Good evening');
   });
   testWidgets(
-    'HOME-01/02/03/04/05/17 adaptive atmosphere, personalized monochrome greeting',
+    'HOME-01 reference artwork, real date and personalized light-only header',
     (tester) async {
       for (final mode in [ThemeMode.dark, ThemeMode.light]) {
         container.read(themeModeProvider.notifier).set(mode);
         await open(tester, '/home');
-        expect(find.byType(HomeAtmosphere), findsNWidgets(2));
+        expect(find.byType(HomeAtmosphere), findsOneWidget);
         final greeting = tester.widget<Text>(
           find.byKey(const ValueKey('home-greeting')),
         );
-        expect(greeting.data, 'Good evening');
+        expect(greeting.data, 'Today 1 Jan');
         expect(greeting.style!.color, isNot(HColors.mint));
-        expect(find.text('Welcome back, Ali'), findsOneWidget);
+        expect(find.text('Hello, Ali'), findsOneWidget);
         final accountAction = tester.getSize(
           find.byTooltip('Profile & settings'),
         );
         expect(accountAction.width, greaterThanOrEqualTo(48));
         expect(accountAction.height, greaterThanOrEqualTo(48));
-        expect(find.byKey(const ValueKey('home-hero-art')), findsNothing);
+        expect(find.byKey(const ValueKey('home-hero-art')), findsOneWidget);
         expect(find.text('More from Hyzen'), findsNothing);
         expect(find.text('About Hyzen'), findsNothing);
         expect(find.text('Contact us'), findsNothing);
-        final search = find.text('Search academic resources');
-        expect(
-          Theme.of(tester.element(search)).brightness,
-          mode == ThemeMode.dark ? Brightness.dark : Brightness.light,
-        );
+        final search = find.byTooltip('Search academic resources');
+        expect(Theme.of(tester.element(search)).brightness, Brightness.light);
         expect(tester.takeException(), isNull);
       }
     },
@@ -256,6 +254,11 @@ void main() {
     tester,
   ) async {
     await open(tester, '/home');
+    await tester.scrollUntilVisible(
+      find.text('Test academic announcement'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Test academic announcement'), findsOneWidget);
     container.read(boolPrefProvider('pref_announcements').notifier).set(false);
     await tester.pumpAndSettle();
@@ -291,6 +294,11 @@ void main() {
       });
       await open(tester, '/home');
       final clear = find.text('Clear');
+      await tester.scrollUntilVisible(
+        clear,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await Scrollable.ensureVisible(tester.element(clear), alignment: .5);
       await tester.pumpAndSettle();
       await tester.tap(clear);
@@ -313,12 +321,22 @@ void main() {
       'Shop': '/shop',
     }.entries) {
       await open(tester, '/home');
-      final target = find
-          .descendant(
-            of: find.byType(HomeScreen),
-            matching: find.text(entry.key),
-          )
-          .first;
+      final Finder target;
+      if (entry.key == 'Search academic resources') {
+        target = find.byTooltip(entry.key);
+      } else if (entry.key == 'Study Library' ||
+          entry.key == 'Office Workspace') {
+        target = find.byWidgetPredicate(
+          (w) => w is HCard && w.semanticLabel == entry.key,
+        );
+      } else {
+        target = find
+            .descendant(
+              of: find.byType(HomeScreen),
+              matching: find.text(entry.key),
+            )
+            .first;
+      }
       await Scrollable.ensureVisible(tester.element(target), alignment: .5);
       await tester.pumpAndSettle();
       await tester.tap(target);
@@ -372,12 +390,22 @@ void main() {
         () => Future<void>.delayed(const Duration(milliseconds: 40)),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('1 Saved'),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('1 Saved'), findsOneWidget);
       expect(find.text('1 New'), findsOneWidget);
       expect(
         find.text('1 Downloading'),
         findsNothing,
         reason: 'Interrupted transfers restore as paused',
+      );
+      await tester.scrollUntilVisible(
+        find.text('Actual recent notes'),
+        200,
+        scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Actual recent notes'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -410,6 +438,11 @@ void main() {
             ),
       );
       await open(tester, '/home');
+      await tester.scrollUntilVisible(
+        find.byType(SubjectDiscovery),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
       final subjects = tester.widget<SubjectDiscovery>(
         find.byType(SubjectDiscovery),
       );
@@ -534,27 +567,20 @@ void main() {
     }
   });
 
-  testWidgets('Downloads keeps one empty-state panda and compact file count', (
+  testWidgets('Downloads shows one pastel panda card and saved-file count', (
     tester,
   ) async {
     await open(tester, '/downloads');
     expect(
       find.byWidgetPredicate(
-        (widget) =>
-            widget is Image &&
-            widget.semanticLabel ==
-                'Hyzen panda waving from the offline library card',
-      ),
-      findsNothing,
-    );
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is HyzenRiveMascot &&
-            widget.state == HyzenRiveState.downloading,
+        (w) =>
+            w is Image &&
+            w.semanticLabel == 'Hyzen panda with an offline download tablet',
       ),
       findsOneWidget,
     );
+    expect(find.byType(HyzenRiveMascot), findsNothing);
+    expect(find.text('0 saved files · 0 B'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -572,35 +598,33 @@ void main() {
       expect(find.textContaining('Screen coming soon'), findsNothing);
     }
   });
-  testWidgets('NAV-01/02 five equal destinations in the requested order', (
-    tester,
-  ) async {
-    await open(tester, '/home');
-    final dock = find.byKey(const ValueKey('main-dock'));
-    expect(find.byType(NavigationBar), findsNothing);
-    final buttons = find.descendant(of: dock, matching: find.byType(InkWell));
-    expect(buttons, findsNWidgets(5));
-    expect(DockDestination.values.map((d) => d.label).toList(), [
-      'Home',
-      'Study',
-      'Office Workspace',
-      'Shop',
-      'Downloads',
-    ]);
-    double previous = -1;
-    for (final destination in DockDestination.values) {
-      final target = find.byKey(ValueKey('dock-${destination.name}'));
-      final rect = tester.getRect(target);
-      expect(rect.left, greaterThan(previous));
-      expect(rect.width, greaterThanOrEqualTo(48));
-      expect(rect.height, greaterThanOrEqualTo(48));
-      previous = rect.left;
-    }
-    expect(
-      tester.widget<Material>(dock).color,
-      Theme.of(tester.element(dock)).colorScheme.surface,
-    );
-  });
+  testWidgets(
+    'NAV-01/02 compact pill dock keeps five accessible destinations',
+    (tester) async {
+      await open(tester, '/home');
+      final dock = find.byKey(const ValueKey('main-dock'));
+      expect(find.byType(NavigationBar), findsNothing);
+      final buttons = find.descendant(of: dock, matching: find.byType(InkWell));
+      expect(buttons, findsNWidgets(5));
+      expect(DockDestination.values.map((d) => d.label).toList(), [
+        'Home',
+        'Study',
+        'Office Workspace',
+        'Shop',
+        'Downloads',
+      ]);
+      double previous = -1;
+      for (final destination in DockDestination.values) {
+        final target = find.byKey(ValueKey('dock-${destination.name}'));
+        final rect = tester.getRect(target);
+        expect(rect.left, greaterThan(previous));
+        expect(rect.width, greaterThanOrEqualTo(48));
+        expect(rect.height, greaterThanOrEqualTo(48));
+        previous = rect.left;
+      }
+      expect(tester.widget<Material>(dock).color, const Color(0xFFF0F0F2));
+    },
+  );
 
   testWidgets(
     'NAV-03/04/05 Study hub, independent Downloads and center workspace',
@@ -903,29 +927,19 @@ void main() {
   );
 
   testWidgets(
-    'account surfaces follow persisted Light and Dark without changing layout',
+    'account remains light while preserving legacy theme preferences',
     (tester) async {
       for (final mode in [ThemeMode.light, ThemeMode.dark]) {
         container.read(themeModeProvider.notifier).set(mode);
         for (final path in ['/profile', '/profile/info', '/settings']) {
           await open(tester, path);
           final context = tester.element(find.byType(AccountPage));
-          expect(
-            Theme.of(context).brightness,
-            mode == ThemeMode.dark ? Brightness.dark : Brightness.light,
-          );
+          expect(Theme.of(context).brightness, Brightness.light);
           final cards = find.descendant(
             of: find.byType(SettingsCard).first,
             matching: find.byType(Material),
           );
-          expect(
-            tester.widget<Material>(cards.first).color,
-            mode == ThemeMode.dark
-                ? (path == '/profile' || path == '/settings'
-                      ? AccountStyle.raised
-                      : AccountStyle.card)
-                : HColors.surface,
-          );
+          expect(tester.widget<Material>(cards.first).color, HColors.surface);
           expect(prefs.getString('theme_mode'), mode.name);
           expect(tester.takeException(), isNull);
         }
@@ -1102,8 +1116,8 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await open(tester, '/home');
-    expect(find.byKey(const ValueKey('home-hero-art')), findsNothing);
-    expect(find.text('Others'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-hero-art')), findsOneWidget);
+    expect(find.text('Your plan'), findsOneWidget);
     expect(
       tester.getRect(find.byTooltip('Profile & settings')).left,
       lessThan(40),
@@ -1120,11 +1134,16 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
-  testWidgets('onboarding mounts a semantic mascot state for every page', (
+  testWidgets('reference onboarding portrait retains later mascot pages', (
     tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
-    expect(find.byType(HyzenRiveMascot), findsOneWidget);
+    await tester.pumpWidget(
+      MaterialApp(theme: AppTheme.light(), home: const WelcomeScreen()),
+    );
+    expect(
+      find.text('Thrilled to join\nyour learning\njourney!'),
+      findsOneWidget,
+    );
     await tester.drag(find.byType(PageView), const Offset(-500, 0));
     await tester.pumpAndSettle();
     expect(find.byType(HyzenRiveMascot), findsOneWidget);
@@ -1198,7 +1217,10 @@ void main() {
           '/downloads',
         ]) {
           await open(tester, path);
-          expect(find.byType(HyzenBanner), findsNothing);
+          expect(
+            find.byType(HyzenBanner),
+            path == '/study/notes' ? findsNothing : findsOneWidget,
+          );
           expect(find.byType(HomeAtmosphere), findsWidgets);
           expect(find.byTooltip('Profile & settings'), findsOneWidget);
           expect(tester.takeException(), isNull);
@@ -1402,7 +1424,7 @@ void main() {
           await tester.pumpAndSettle();
           await expectLater(
             find.byType(HyzenApp),
-            matchesGoldenFile('../qa/monochrome/after/${mode.name}_admin.png'),
+            matchesGoldenFile('../qa/reference/after/${mode.name}_admin.png'),
           );
         }
         admin.read(themeModeProvider.notifier).set(ThemeMode.system);
@@ -1412,12 +1434,52 @@ void main() {
     expect(find.text('2nd Professional'), findsOneWidget);
   });
   if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
+    testWidgets('onboarding reference visual QA', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final guest = ProviderContainer(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          authStateProvider.overrideWith((ref) => Stream.value(null)),
+          profileProvider.overrideWith((ref) => Stream.value(null)),
+          contentProvider.overrideWith(
+            (ref, key) => Stream.value(
+              const ContentSnapshot(value: {}, fromCache: false),
+            ),
+          ),
+        ],
+      );
+      addTearDown(guest.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(container: guest, child: const HyzenApp()),
+      );
+      await tester.pumpAndSettle();
+      for (final route in ['/welcome', '/login', '/register/personal']) {
+        guest.read(routerProvider).go(route);
+        await tester.pumpAndSettle();
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 200)),
+        );
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(HyzenApp),
+          matchesGoldenFile(
+            '../qa/reference/after/light${route.replaceAll('/', '_')}.png',
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      }
+    });
+  }
+  if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
     testWidgets('representative screens visual QA', (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      for (final mode in [ThemeMode.dark, ThemeMode.light]) {
+      for (final mode in [ThemeMode.light]) {
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pumpAndSettle();
         container.read(themeModeProvider.notifier).set(mode);
@@ -1446,7 +1508,7 @@ void main() {
           await expectLater(
             find.byType(HyzenApp),
             matchesGoldenFile(
-              '../qa/monochrome/after/${mode.name}${path.replaceAll('/', '_')}.png',
+              '../qa/reference/after/${mode.name}${path.replaceAll('/', '_')}.png',
             ),
           );
           expect(tester.takeException(), isNull);
@@ -1454,7 +1516,7 @@ void main() {
       }
     });
   }
-  testWidgets('monochrome responsive matrix', (tester) async {
+  testWidgets('reference responsive matrix', (tester) async {
     final errorHandler = FlutterError.onError;
     FlutterError.onError = (details) {
       debugPrint(details.toString());
@@ -1499,21 +1561,30 @@ void main() {
               final button = tester.getRect(
                 find.byKey(const ValueKey('home-continue-study')),
               );
+              final documentBottom = button.bottom + scrollable.position.pixels;
+              await tester.scrollUntilVisible(
+                find.byKey(const ValueKey('home-professional-badge')),
+                250,
+                scrollable: find.byType(Scrollable).first,
+              );
               final badge = tester.getRect(
                 find.byKey(const ValueKey('home-professional-badge')),
               );
+              final documentTop = badge.top + scrollable.position.pixels;
               expect(
-                button.bottom,
-                lessThan(badge.top),
+                documentBottom,
+                lessThan(documentTop),
                 reason: 'Home actions must not overlap at $width / $scale',
               );
+              scrollable.position.jumpTo(scrollable.position.minScrollExtent);
+              await tester.pumpAndSettle();
             }
             if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
               await tester.pumpAndSettle();
               await expectLater(
                 find.byKey(const ValueKey('qa-app')),
                 matchesGoldenFile(
-                  '../qa/monochrome/matrix/${path.substring(1)}-${mode.name}-${width.toInt()}-${scale.toInt()}.png',
+                  '../qa/reference/matrix/${path.substring(1)}-${mode.name}-${width.toInt()}-${scale.toInt()}.png',
                 ),
               );
             }
@@ -1556,7 +1627,7 @@ void main() {
           await expectLater(
             find.byKey(const ValueKey('qa-app')),
             matchesGoldenFile(
-              '../qa/monochrome/matrix/form-${reminder ? 'reminder' : 'task'}-${mode.name}.png',
+              '../qa/reference/matrix/form-${reminder ? 'reminder' : 'task'}-${mode.name}.png',
             ),
           );
           Navigator.pop(tester.element(find.byType(TextFormField).first));

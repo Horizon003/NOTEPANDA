@@ -189,7 +189,7 @@ class _ReviewAppState extends ConsumerState<_ReviewApp> {
                   'UI PREVIEW · SAMPLE DATA',
                   style: TextStyle(
                     color: Colors.white,
-                    fontFamily: 'Manrope',
+                    fontFamily: 'Poppins',
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                   ),

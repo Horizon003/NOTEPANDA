@@ -769,7 +769,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final p = ref.watch(profileProvider).valueOrNull;
     final user = ref.watch(authStateProvider).valueOrNull;
-    final mode = ref.watch(themeModeProvider);
     final notif = ref.watch(boolPrefProvider('pref_announcements'));
     final used = ref
         .watch(downloadsProvider)
@@ -828,19 +827,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
         ],
-        if (_matches('appearance theme light dark auto text size font')) ...[
+        if (_matches('appearance text size font')) ...[
           const AccountSectionHeader('Appearance'),
           SettingsCard(
             children: [
-              SettingsRow(
-                title: 'App theme',
-                value: switch (mode) {
-                  ThemeMode.light => 'Light',
-                  ThemeMode.dark => 'Dark',
-                  ThemeMode.system => 'Auto',
-                },
-                onTap: () => _chooseTheme(context, ref, mode),
-              ),
               SettingsRow(
                 title: 'Text size',
                 value: '${ref.watch(textSizeProvider)}',
@@ -957,46 +947,5 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ],
     );
-  }
-}
-
-Future<void> _chooseTheme(
-  BuildContext context,
-  WidgetRef ref,
-  ThemeMode mode,
-) async {
-  final next = await showModalBottomSheet<ThemeMode>(
-    context: context,
-    backgroundColor: AccountStyle.cardOf(context),
-    showDragHandle: true,
-    builder: (context) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AccountSectionHeader('App theme'),
-            for (final item in const [
-              (ThemeMode.light, 'Light'),
-              (ThemeMode.dark, 'Dark'),
-              (ThemeMode.system, 'Auto'),
-            ])
-              SettingsRow(
-                title: item.$2,
-                trailing: mode == item.$1
-                    ? Icon(
-                        Icons.check_rounded,
-                        color: AccountStyle.linkOf(context),
-                      )
-                    : null,
-                onTap: () => Navigator.pop(context, item.$1),
-              ),
-          ],
-        ),
-      ),
-    ),
-  );
-  if (next != null && context.mounted) {
-    ref.read(themeModeProvider.notifier).set(next);
   }
 }

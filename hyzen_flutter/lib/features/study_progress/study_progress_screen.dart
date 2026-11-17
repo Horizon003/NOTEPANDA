@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'study_tracker.dart';
+import '../../core/theme/tokens.dart';
 import '../../core/widgets/rive_mascot.dart';
 
 class HomeStudyTracker extends ConsumerWidget {
@@ -15,7 +16,7 @@ class HomeStudyTracker extends ConsumerWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: dark ? const Color(0xFF202023) : Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/study-progress'),
@@ -97,14 +98,14 @@ class StudyProgressScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             name,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 14),
           body,
@@ -161,6 +162,7 @@ class StudyProgressScreen extends ConsumerWidget {
                                 (progress.todaySeconds /
                                         (progress.dailyGoal * 60))
                                     .clamp(0.0, 1.0),
+                            color: HColors.mcqs,
                             strokeWidth: 4,
                             strokeCap: StrokeCap.round,
                             backgroundColor: Theme.of(

@@ -37,7 +37,9 @@ class _NoticeHostState extends ConsumerState<NoticeHost> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _router = ref.read(routerProvider);
-      setState(() => _routePath = _router!.routeInformationProvider.value.uri.path);
+      setState(
+        () => _routePath = _router!.routeInformationProvider.value.uri.path,
+      );
       _router!.routerDelegate.addListener(_routeChanged);
     });
   }
@@ -182,7 +184,7 @@ class _NoticeCard extends StatelessWidget {
     final font = switch (n.raw['font']) {
       'serif' => 'serif',
       'system' => null,
-      _ => 'Manrope',
+      _ => 'Poppins',
     };
     return Dialog(
       backgroundColor: card,

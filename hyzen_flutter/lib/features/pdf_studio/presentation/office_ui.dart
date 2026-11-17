@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/providers.dart';
+import '../../../core/theme/tokens.dart';
 import '../../../core/config/brand.dart';
 import '../../../core/widgets/profile_avatar.dart';
 import '../../notifications/notifications_screen.dart';
@@ -20,7 +21,7 @@ class OfficeColors {
   static bool dark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
   static Color canvas(BuildContext c) =>
       Theme.of(c).colorScheme.surfaceContainer;
-  static Color page(BuildContext c) => Theme.of(c).scaffoldBackgroundColor;
+  static Color page(BuildContext c) => HColors.background;
   static Color bar(BuildContext c) => Theme.of(c).scaffoldBackgroundColor;
   static Color sheet(BuildContext c) => Theme.of(c).colorScheme.surface;
   static Color raised(BuildContext c) =>
@@ -216,11 +217,11 @@ ButtonStyle officePrimaryStyle() => FilledButton.styleFrom(
   foregroundColor: Colors.white,
   disabledBackgroundColor: OfficeColors.blue.withValues(alpha: .35),
   disabledForegroundColor: Colors.white70,
-  minimumSize: const Size.fromHeight(44),
+  minimumSize: const Size(0, 36),
   shape: const StadiumBorder(),
   textStyle: const TextStyle(
-    fontFamily: 'Manrope',
-    fontSize: 14,
+    fontFamily: 'Poppins',
+    fontSize: 12,
     fontWeight: FontWeight.w600,
   ),
 );
@@ -228,15 +229,15 @@ ButtonStyle officePrimaryStyle() => FilledButton.styleFrom(
 ButtonStyle officeOutlineStyle(BuildContext context) =>
     OutlinedButton.styleFrom(
       foregroundColor: OfficeColors.ink(context),
-      minimumSize: const Size.fromHeight(44),
+      minimumSize: const Size(0, 36),
       shape: const StadiumBorder(),
       side: BorderSide(
         color: OfficeColors.ink(context).withValues(alpha: .55),
         width: 1.4,
       ),
       textStyle: const TextStyle(
-        fontFamily: 'Manrope',
-        fontSize: 14,
+        fontFamily: 'Poppins',
+        fontSize: 12,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -460,7 +461,7 @@ class OfficeSheetItem extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: color,
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),
               ),

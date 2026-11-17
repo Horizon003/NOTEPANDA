@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/brand.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/palettes.dart';
+import '../core/theme/tokens.dart';
 import 'providers.dart';
 import '../features/notifications/push_binding.dart';
 import '../features/study_progress/study_tracker.dart';
@@ -23,9 +23,8 @@ class HyzenApp extends ConsumerWidget {
       child: MaterialApp.router(
         title: Brand.appName,
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(ref.watch(paletteColorProvider)),
-        darkTheme: AppTheme.dark(ref.watch(paletteColorProvider)),
-        themeMode: ref.watch(themeModeProvider),
+        theme: AppTheme.light(),
+        themeMode: ThemeMode.light,
         routerConfig: router,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
@@ -34,8 +33,8 @@ class HyzenApp extends ConsumerWidget {
               ref.watch(textSizeProvider) / 13,
             ),
           ),
-          child: ColoredBox(
-            color: Theme.of(context).scaffoldBackgroundColor,
+          child: DecoratedBox(
+            decoration: const BoxDecoration(gradient: hPageGradient),
             child: Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(

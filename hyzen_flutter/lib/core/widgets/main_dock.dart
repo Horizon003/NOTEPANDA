@@ -6,13 +6,11 @@ import '../../features/content/data/content_providers.dart';
 import '../theme/tokens.dart';
 import 'navigation_preferences.dart';
 
-/// Visible destinations map to the existing shell branches. Auxiliary branches
-/// keep their original indexes; they are intentionally absent from this list.
 enum DockDestination {
   home('Home', '/home', 0, Icons.home_outlined),
-  study('Study', '/study', 1, Icons.menu_book_outlined),
+  study('Study', '/study', 1, Icons.grid_view_rounded),
   office('Office Workspace', '/pdf-studio', 3, Icons.description_outlined),
-  shop('Shop', '/shop', 6, Icons.storefront_outlined),
+  shop('Shop', '/shop', 6, Icons.shopping_bag_outlined),
   downloads('Downloads', '/downloads', 4, Icons.file_download_outlined);
 
   const DockDestination(this.label, this.route, this.branchIndex, this.icon);
@@ -22,177 +20,130 @@ enum DockDestination {
   bool matches(String path) => path == route || path.startsWith('$route/');
 }
 
-/// One opaque, five-destination dock. The shell owns navigation and restores
-/// each branch's existing stack; the current route alone determines selection.
+/// Compact pill dock from the reference. Navigation stacks stay in the shell.
 class MainDock extends ConsumerWidget {
   const MainDock({super.key, required this.path, required this.onSelected});
   final String path;
   final ValueChanged<DockDestination> onSelected;
-
-  static double height(BuildContext context) => 64.0;
+  static double height(BuildContext context) => 60;
   static double contentInset(BuildContext context) =>
-      height(context) * 1.25 +
-      12 +
-      math.max(10.0, MediaQuery.viewPaddingOf(context).bottom);
-
+      height(context) +
+      16 +
+      math.max(10, MediaQuery.viewPaddingOf(context).bottom);
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(dockThemeProvider);
-    final size = ref.watch(dockSizeProvider);
-    final dark =
-        mode == 'dark' ||
-        (mode == 'follow' && Theme.of(context).brightness == Brightness.dark);
-    final ink = mode == 'follow'
-        ? Theme.of(context).colorScheme.onSurface
-        : (dark ? Colors.white : Colors.black);
-
     if (MediaQuery.viewInsetsOf(context).bottom > 0) {
       return const SizedBox.shrink();
     }
+    final size = ref.watch(dockSizeProvider).clamp(.9, 1.05);
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
+          constraints: const BoxConstraints(maxWidth: 470),
           child: Material(
             key: const ValueKey('main-dock'),
-            color: mode == 'follow'
-                ? Theme.of(context).colorScheme.surface
-                : (dark ? Colors.black : Colors.white),
+            color: const Color(0xFFF0F0F2),
             elevation: 0,
-            shadowColor: Colors.black26,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(HRadius.md),
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
+            shape: const StadiumBorder(
+              side: BorderSide(color: Color(0xFFE5E5E8)),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: SizedBox(
-              height: math.max(64, height(context) * size),
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final compact =
-                        constraints.maxWidth / 5 < 116 ||
-                        MediaQuery.textScalerOf(context).scale(11) > 13;
-                    return Row(
-                      children: [
-                        for (final destination in DockDestination.values)
-                          _DockItem(
-                            destination: destination,
-                            ink: ink,
-                            size: size,
-                            compact: compact,
-                            selected: destination.matches(path),
-                            onTap: () => onSelected(destination),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DockItem extends StatelessWidget {
-  const _DockItem({
-    required this.destination,
-    required this.ink,
-    required this.size,
-    required this.selected,
-    required this.compact,
-    required this.onTap,
-  });
-  final DockDestination destination;
-  final Color ink;
-  final double size;
-  final bool selected, compact;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) {
-    final reduce = MediaQuery.disableAnimationsOf(context);
-    final duration = reduce ? Duration.zero : HMotion.medium;
-    final office = destination == DockDestination.office;
-    final iconOnly = MediaQuery.textScalerOf(context).scale(11) > 18;
-    return Expanded(
-      child: Tooltip(
-        message: destination.label,
-        excludeFromSemantics: true,
-        child: Semantics(
-          key: ValueKey('dock-${destination.name}'),
-          selected: selected,
-          button: true,
-          label: destination.label,
-          onTap: onTap,
-          child: ExcludeSemantics(
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(HRadius.md),
-              child: AnimatedContainer(
-                duration: duration,
-                curve: HMotion.curve,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? ink.withValues(alpha: .12)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(HRadius.md),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  final selected = DockDestination.values
+                      .where((d) => d.matches(path))
+                      .firstOrNull;
+                  final iconOnly =
+                      MediaQuery.textScalerOf(context).scale(1) > 1.4 ||
+                      c.maxWidth < 278;
+                  final activeWidth = iconOnly || selected == null
+                      ? c.maxWidth / 5
+                      : (c.maxWidth - 192).clamp(48.0, 124.0);
+                  final restWidth = (c.maxWidth - activeWidth) / 4;
+                  return Row(
                     children: [
-                      AnimatedSlide(
-                        offset: !reduce && selected
-                            ? const Offset(0, -.07)
-                            : Offset.zero,
-                        duration: duration,
-                        curve: HMotion.curve,
-                        child: AnimatedScale(
-                          scale: !reduce && selected ? 1.04 : 1,
-                          duration: duration,
+                      for (final d in DockDestination.values)
+                        AnimatedContainer(
+                          duration: HMotion.duration(context),
                           curve: HMotion.curve,
-                          child: Icon(
-                            destination.icon,
-                            color: ink,
-                            size: 20 * size,
-                          ),
-                        ),
-                      ),
-                      if (!iconOnly) const SizedBox(height: 4),
-                      if (!iconOnly)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              office && compact ? 'Office' : destination.label,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 10.5 * size,
-                                height: 1.15,
-                                color: ink,
-                                fontWeight: selected
-                                    ? FontWeight.w600
-                                    : FontWeight.w600,
+                          width: selected == null || iconOnly
+                              ? c.maxWidth / 5
+                              : (d == selected ? activeWidth : restWidth),
+                          height: 48,
+                          child: Tooltip(
+                            message: d.label,
+                            excludeFromSemantics: true,
+                            child: Semantics(
+                              key: ValueKey('dock-${d.name}'),
+                              button: true,
+                              selected: d == selected,
+                              label: d.label,
+                              onTap: () => onSelected(d),
+                              child: ExcludeSemantics(
+                                child: InkWell(
+                                  onTap: () => onSelected(d),
+                                  customBorder: const StadiumBorder(),
+                                  child: AnimatedContainer(
+                                    duration: HMotion.duration(context),
+                                    curve: HMotion.curve,
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: d == selected
+                                          ? HColors.ink
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(28),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: d == selected && !iconOnly
+                                          ? 10
+                                          : 0,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          d.icon,
+                                          size: 19 * size,
+                                          color: d == selected
+                                              ? Colors.white
+                                              : HColors.ink,
+                                        ),
+                                        if (d == selected && !iconOnly) ...[
+                                          const SizedBox(width: 5),
+                                          Flexible(
+                                            child: Text(
+                                              d == DockDestination.office
+                                                  ? 'Office'
+                                                  : d.label,
+                                              maxLines: 1,
+                                              softWrap: false,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),

@@ -4,10 +4,11 @@ repo_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 flutter_bin=${HYZEN_FLUTTER_BIN:-flutter}
 preview_dir="$repo_dir/hyzen_flutter/build/live-preview"
 cd "$repo_dir/hyzen_flutter"
+version=$(sed -n 's/^version: //p' pubspec.yaml)
 "$flutter_bin" pub get
 "$flutter_bin" build web --release --pwa-strategy=none --no-web-resources-cdn \
   --target lib/main_account_review.dart --base-href /app/ \
-  --dart-define=HYZEN_REVIEW_ROUTE=/home --dart-define=HYZEN_APP_VERSION=1.5.5+14
+  --dart-define=HYZEN_REVIEW_ROUTE=/home --dart-define=HYZEN_APP_VERSION="$version"
 rm -rf "$preview_dir"
 mkdir -p "$preview_dir/app"
 cp -a build/web/. "$preview_dir/app/"

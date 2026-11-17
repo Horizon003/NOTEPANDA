@@ -126,7 +126,10 @@ class TabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
     final headerHeight = header != null
-        ? 64.0
+        ? (scaler.scale(16) * 1.4 + scaler.scale(12) * 1.5 + 8).clamp(
+            64.0,
+            180.0,
+          )
         : (scaler.scale(22) * 1.25 +
                   (subtitle != null ? scaler.scale(11) * 1.4 : 0) +
                   12)
@@ -151,19 +154,22 @@ class TabPage extends StatelessWidget {
       drawer: drawer,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(headerHeight),
-        child: Theme(
-          data: headerTheme ?? Theme.of(context),
-          child:
-              header ??
-              _Bar(
-                height: headerHeight,
-                integrated: integratedHeader,
-                onAccount: () => showAccountMenu(context),
-                title: title,
-                subtitle: subtitle,
-                actions: actions,
-                showMenu: drawer != null,
-              ),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(gradient: hPageGradient),
+          child: Theme(
+            data: headerTheme ?? Theme.of(context),
+            child:
+                header ??
+                _Bar(
+                  height: headerHeight,
+                  integrated: integratedHeader,
+                  onAccount: () => showAccountMenu(context),
+                  title: title,
+                  subtitle: subtitle,
+                  actions: actions,
+                  showMenu: drawer != null,
+                ),
+          ),
         ),
       ),
       body: homeBackground != null
@@ -280,8 +286,8 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: t.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              fontSize: integrated ? 13 : 17,
+                              fontWeight: FontWeight.w600,
+                              fontSize: integrated ? 13 : 16,
                               letterSpacing: -.2,
                             ),
                           ),
@@ -294,8 +300,8 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: t.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -.4,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -.2,
                       ),
                     ),
                   if (subtitle != null && title != 'PHARM D')
@@ -348,18 +354,7 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
     );
-    return integrated
-        ? DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.black, Color(0xF2000000)],
-              ),
-            ),
-            child: header,
-          )
-        : SurfacePanel(radius: 0, child: header);
+    return SurfacePanel(radius: 0, tint: Colors.transparent, child: header);
   }
 }
 
@@ -397,7 +392,7 @@ Future<void> showAccountMenu(BuildContext context) {
   final router = GoRouter.of(context);
   return showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AccountStyle.theme(context).scaffoldBackgroundColor,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     isScrollControlled: true,
     useSafeArea: true,
     clipBehavior: Clip.antiAlias,

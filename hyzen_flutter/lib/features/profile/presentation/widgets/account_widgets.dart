@@ -28,85 +28,7 @@ abstract final class AccountStyle {
   static Color avatarOf(BuildContext context) =>
       isDark(context) ? const Color(0xFF322B25) : const Color(0xFFE9DECF);
 
-  static ThemeData theme(BuildContext context) {
-    final base = Theme.of(context);
-    final dark = base.brightness == Brightness.dark;
-    final ink = dark ? Colors.white : HColors.ink;
-    final muted = secondaryOf(context);
-    final surface = cardOf(context);
-    final line = dark ? divider : HColors.outline;
-    final action = linkOf(context);
-    final scheme = base.colorScheme.copyWith(
-      primary: action,
-      onPrimary: dark ? Colors.black : Colors.white,
-      surface: surface,
-      onSurface: ink,
-      onSurfaceVariant: muted,
-      outlineVariant: line,
-      primaryContainer: avatarOf(context),
-      onPrimaryContainer: muted,
-      error: dark ? destructive : HColors.error,
-    );
-    return base.copyWith(
-      colorScheme: scheme,
-      scaffoldBackgroundColor: backgroundOf(context),
-      textTheme: base.textTheme.apply(bodyColor: ink, displayColor: ink),
-      dividerColor: line,
-      dividerTheme: DividerThemeData(color: line, thickness: .7, space: 1),
-      iconTheme: IconThemeData(color: muted),
-      iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: muted,
-        ),
-      ),
-      appBarTheme: base.appBarTheme.copyWith(
-        backgroundColor: backgroundOf(context),
-        foregroundColor: ink,
-        surfaceTintColor: Colors.transparent,
-        systemOverlayStyle: dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
-      ),
-      dialogTheme: base.dialogTheme.copyWith(
-        backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      bottomSheetTheme: base.bottomSheetTheme.copyWith(
-        backgroundColor: surface,
-        modalBackgroundColor: surface,
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: action),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: ink,
-          foregroundColor: dark ? Colors.black : Colors.white,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(16)),
-          side: dark ? BorderSide.none : BorderSide(color: line),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: dark ? card : HColors.surfaceAlt,
-        prefixIconColor: muted,
-        suffixIconColor: muted,
-        hintStyle: TextStyle(color: muted),
-        labelStyle: TextStyle(color: muted),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
+  static ThemeData theme(BuildContext context) => Theme.of(context);
 }
 
 class AccountTheme extends StatelessWidget {
@@ -177,7 +99,7 @@ class AccountPage extends StatelessWidget {
                     ),
                   ),
           child: Scaffold(
-            backgroundColor: AccountStyle.backgroundOf(context),
+            backgroundColor: Colors.transparent,
             body: SafeArea(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -231,7 +153,7 @@ class CircularNavigationButton extends StatelessWidget {
       style: IconButton.styleFrom(backgroundColor: Colors.transparent),
       icon: Icon(
         close ? Icons.close_rounded : Icons.chevron_left_rounded,
-        size: close ? 31 : 30,
+        size: 22,
       ),
     ),
   );
@@ -245,7 +167,7 @@ class SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) => Material(
     color: AccountStyle.cardOf(context, elevated: raised),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24),
       side: AccountStyle.isDark(context)
           ? BorderSide.none
           : const BorderSide(color: HColors.outline),
@@ -481,19 +403,19 @@ class RoundedPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FilledButton(
     style: FilledButton.styleFrom(
-      minimumSize: const Size(0, 48),
+      minimumSize: const Size(0, 36),
       backgroundColor: AccountStyle.isDark(context)
           ? Colors.white
           : HColors.ink,
       foregroundColor: AccountStyle.isDark(context)
           ? Colors.black
           : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       textStyle: Theme.of(context).textTheme.labelLarge,
     ),
     onPressed: loading ? null : onPressed,
     child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: loading
           ? const SizedBox(
               width: 22,

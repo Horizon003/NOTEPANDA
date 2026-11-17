@@ -1,32 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../app/providers.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/common.dart';
-import '../../../core/widgets/main_dock.dart';
 import '../../../core/widgets/surfaces.dart';
-import '../../downloads/domain/download_record.dart';
-import 'home_background.dart';
-import 'home_dashboard_top.dart';
-
-import 'home_visuals.dart';
-import 'announcement_carousel.dart';
-import '../../../core/widgets/ui_kit.dart';
 import '../../../core/widgets/profile_avatar.dart';
-import '../../notifications/notifications_screen.dart';
+import '../../../core/widgets/ui_kit.dart';
 import '../../academics/domain/models.dart';
 import '../../academics/presentation/library_screens.dart';
 import '../../academics/presentation/discovery_widgets.dart';
 import '../../content/data/content_providers.dart';
-import '../../shell/app_shell.dart';
-import '../../auth/presentation/auth_controllers.dart';
-import '../data/recent_controller.dart';
 import '../../downloads/data/downloads_controller.dart';
+import '../../downloads/domain/download_record.dart';
+import '../../shell/app_shell.dart';
+import '../../study_progress/study_tracker.dart';
+import '../../study_progress/campus_rank_screen.dart';
+import '../data/recent_controller.dart';
+import 'home_dashboard_top.dart';
+import 'announcement_carousel.dart';
 
-// The reference artwork is decorative; all controls below are live Flutter UI.
 final homeClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 String homeGreeting(DateTime time) {
   if (time.hour < 5 || time.hour >= 23) return 'Good night';
@@ -41,469 +34,411 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider).valueOrNull;
     final user = ref.watch(authStateProvider).valueOrNull;
-    final settings = ref.watch(siteSettingsProvider);
-    final recent = ref.watch(recentProvider);
-    final ann = ref.watch(boolPrefProvider('pref_announcements'))
-        ? ref.watch(announcementSlidesProvider)
-        : ref.watch(announcementSlidesProvider).take(0).toList();
     final name =
         profile?.firstName ?? user?.displayName?.split(' ').first ?? 'there';
-    final fresh = ref.watch(lastCreatedProfileProvider)?.uid == user?.uid;
-    final counts = ref.watch(
-      downloadsProvider.select(
-        (map) => (
-          map.values
-              .where((r) => r.status == DownloadStatus.downloading)
-              .length,
-          map.values.where((r) => r.isAvailableOffline).length,
-          map.values.where((r) => r.isAvailableOffline && r.unopened).length,
+    final now = ref.watch(homeClockProvider)();
+    final recent = ref.watch(recentProvider);
+    final slides = ref.watch(announcementSlidesProvider);
+    final downloads = ref.watch(downloadsProvider).values;
+    final saved = downloads.where((r) => r.isAvailableOffline).length;
+    final fresh = downloads
+        .where((r) => r.isAvailableOffline && r.unopened)
+        .length;
+    final active = downloads
+        .where((r) => r.status == DownloadStatus.downloading)
+        .length;
+    final downloadLabels = [
+      if (saved > 0) '$saved Saved',
+      if (fresh > 0) '$fresh New',
+      if (active > 0) '$active Downloading',
+    ];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return TabPage(
+      title: 'Home',
+      integratedHeader: true,
+      header: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Tooltip(
+                message: 'Profile & settings',
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => showAccountMenu(context),
+                  child: SizedBox.square(
+                    dimension: 48,
+                    child: Center(
+                      child: ProfileAvatar(
+                        photoUrl: profile?.photoUrl,
+                        radius: 21,
+                        fallback: name,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hello, $name',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleLarge?.copyWith(fontSize: 16),
+                    ),
+                    Text(
+                      'Today ${now.day} ${months[now.month - 1]}',
+                      key: const ValueKey('home-greeting'),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: HColors.ink2),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Search academic resources',
+                onPressed: () => context.go('/search', extra: true),
+                icon: const Icon(Icons.search_rounded, size: 23),
+              ),
+            ],
+          ),
+        ),
+      ),
+      onRefresh: () => refreshContent(ref, [
+        'pw_settings',
+        'pw_announcement',
+        ...LibraryKind.values.map((k) => k.storageKey),
+      ]),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverList.list(
+            children: [
+              HomeDashboardTop(year: profile?.professionalYear),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Your plan',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  TextButton(
+                    key: const ValueKey('home-professional-badge'),
+                    onPressed: () => context.push('/profile'),
+                    child: Text(
+                      profile?.professionalYear == null
+                          ? 'Your year'
+                          : 'Year ${profile!.professionalYear}',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const _PlanCards(),
+              const SizedBox(height: 14),
+              const _StudyStats(),
+              if (downloadLabels.isNotEmpty)
+                Wrap(
+                  spacing: 4,
+                  children: [
+                    for (final label in downloadLabels)
+                      TextButton(
+                        onPressed: () => context.go('/downloads'),
+                        child: Text(
+                          label,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 4,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => context.go('/downloads'),
+                    icon: const Icon(Icons.download_outlined, size: 15),
+                    label: const Text('Downloads'),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => context.go('/shop'),
+                    icon: const Icon(Icons.storefront_outlined, size: 15),
+                    label: const Text('Shop'),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => context.go('/search', extra: true),
+                    icon: const Icon(Icons.search_rounded, size: 15),
+                    label: const Text('Search'),
+                  ),
+                ],
+              ),
+              if (ref.watch(boolPrefProvider('pref_announcements')) &&
+                  slides.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                AnnouncementCarousel(slides: slides),
+                const SizedBox(height: 8),
+              ],
+              if (recent.isNotEmpty) ...[
+                SectionHeader(
+                  title: 'Last lessons',
+                  action: 'Clear',
+                  onAction: () async {
+                    if (await confirmDialog(
+                      context,
+                      title: 'Clear recent history?',
+                      message:
+                          'Only recently opened history will be cleared. Your files stay saved.',
+                      confirm: 'Clear history',
+                    )) {
+                      await ref.read(recentProvider.notifier).clear();
+                    }
+                  },
+                ),
+                for (final item in recent.take(3))
+                  FileTile(
+                    file: item.file,
+                    color: HColors.notes,
+                    compact: true,
+                  ),
+              ],
+              const SizedBox(height: 14),
+              const SubjectDiscovery(compact: true),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlanCards extends StatelessWidget {
+  const _PlanCards();
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    Widget library() => HCard(
+      color: HColors.apricot,
+      radius: 24,
+      shadow: false,
+      semanticLabel: 'Study Library',
+      onTap: () => context.go('/study'),
+      padding: const EdgeInsets.all(16),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: large ? 0 : 210),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _PlanTag('Learn'),
+            const SizedBox(height: 16),
+            Text(
+              'Study\nlibrary',
+              style: t.textTheme.headlineSmall?.copyWith(
+                fontSize: 23,
+                height: 1.22,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('Notes, MCQs &\npast papers', style: t.textTheme.bodyMedium),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Color(0x44FFFFFF),
+                  child: Icon(
+                    Icons.menu_book_outlined,
+                    color: HColors.ink,
+                    size: 17,
+                  ),
+                ),
+                const Spacer(),
+                const Icon(Icons.north_east_rounded, size: 18),
+              ],
+            ),
+          ],
         ),
       ),
     );
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final badges = [
-      if (counts.$1 > 0) '${counts.$1} Downloading',
-      if (counts.$2 > 0) '${counts.$2} Saved',
-      if (counts.$3 > 0) '${counts.$3} New',
-    ];
-    Widget grid(List<Widget> children) => LayoutBuilder(
-      builder: (context, c) {
-        final columns = scale > 1.3 || c.maxWidth < 300
-            ? 1
-            : (c.maxWidth >= 700 ? 3 : 2);
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+    Widget office() => HCard(
+      color: HColors.blue,
+      radius: 24,
+      shadow: false,
+      onTap: () => context.go('/pdf-studio'),
+      semanticLabel: 'Office Workspace',
+      padding: const EdgeInsets.all(14),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: large ? 0 : 122),
+        child: Stack(
           children: [
-            for (final child in children)
+            Positioned(
+              right: -8,
+              bottom: -4,
+              child: ExcludeSemantics(
+                child: Image.asset(
+                  'assets/mascot/mascot_peeking.png',
+                  width: 65,
+                  height: 65,
+                  cacheWidth: 180,
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _PlanTag('Create'),
+                const SizedBox(height: 12),
+                Text(
+                  'Office\nworkspace',
+                  style: t.textTheme.headlineSmall?.copyWith(
+                    fontSize: 18,
+                    height: 1.25,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Scan · PDF',
+                  style: t.textTheme.bodySmall?.copyWith(color: HColors.ink),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    Widget goals() => HCard(
+      color: HColors.pink,
+      radius: 24,
+      shadow: false,
+      onTap: () => context.push('/study-goals'),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_outline_rounded, size: 20),
+          const SizedBox(width: 8),
+          Expanded(child: Text('Study goals', style: t.textTheme.labelLarge)),
+        ],
+      ),
+    );
+    if (large) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          library(),
+          const SizedBox(height: 10),
+          office(),
+          const SizedBox(height: 10),
+          goals(),
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: library()),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [office(), const SizedBox(height: 10), goals()],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlanTag extends StatelessWidget {
+  const _PlanTag(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: .35),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      child: Text(text, style: const TextStyle(fontSize: 10)),
+    ),
+  );
+}
+
+class _StudyStats extends ConsumerWidget {
+  const _StudyStats();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final p = ref.watch(studyTrackerProvider);
+    final board = ref.watch(campusBoardProvider('week')).valueOrNull;
+    final entries = [
+      ('${p.currentStreak} days', 'Study Streak', '/study-streak'),
+      (
+        '${p.weekSeconds ~/ 3600}h ${(p.weekSeconds ~/ 60) % 60}m',
+        'This Week',
+        '/study-goals',
+      ),
+      (
+        board?.mine?.rank == null ? '—' : '#${board!.mine!.rank}',
+        'Prof. Rank',
+        '/campus-rank',
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, c) {
+        final columns = MediaQuery.textScalerOf(context).scale(1) > 1.5 ? 1 : 3;
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final e in entries)
               SizedBox(
-                width: (c.maxWidth - (columns - 1) * 12) / columns,
-                child: child,
+                width: (c.maxWidth - (columns - 1) * 8) / columns,
+                child: HCard(
+                  radius: 22,
+                  shadow: false,
+                  onTap: () => context.push(e.$3),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.$1,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(e.$2, style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
               ),
           ],
         );
       },
-    );
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-      child: TabPage(
-        title: 'PHARM D',
-        integratedHeader: true,
-        headerTheme: Theme.of(context),
-        header: ColoredBox(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Tooltip(
-                    message: 'Profile & settings',
-                    child: InkWell(
-                      onTap: () => showAccountMenu(context),
-                      customBorder: const CircleBorder(),
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: ClipOval(
-                          child: profile?.photoUrl != null
-                              ? ProfileAvatar(
-                                  photoUrl: profile!.photoUrl,
-                                  radius: 20,
-                                  fallback: name,
-                                )
-                              : Image.asset(
-                                  'assets/brand/hyzen_icon_square.png',
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (scale <= 1.3)
-                          Text(
-                            homeGreeting(ref.watch(homeClockProvider)()),
-                            key: const ValueKey('home-greeting'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              letterSpacing: 0,
-                              fontWeight: FontWeight.w600,
-                              color: dark
-                                  ? Colors.white70
-                                  : const Color(0xFF5D5D5D),
-                            ),
-                          ),
-                        Tooltip(
-                          message: name,
-                          child: Text(
-                            fresh ? 'Welcome, $name' : 'Welcome back, $name',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF181818),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const NotificationBell(),
-                ],
-              ),
-            ),
-          ),
-        ),
-        homeBackground: (child) => HomeAtmosphere(child: child),
-        onRefresh: () => refreshContent(ref, [
-          'pw_settings',
-          'pw_announcement',
-          ...LibraryKind.values.map((k) => k.storageKey),
-        ]),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                HomeDashboardTop(year: profile?.professionalYear),
-                HomeAtmosphere(
-                  content: true,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      0,
-                      16,
-                      8 + MainDock.contentInset(context),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(0, -4),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: homeDepthShadows(
-                                context,
-                                blur: 18,
-                                y: 8,
-                              ),
-                            ),
-                            child: Material(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(16),
-                              clipBehavior: Clip.antiAlias,
-                              child: InkWell(
-                                onTap: () => context.go('/search', extra: true),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 4,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.search,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          'Search academic resources',
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        tooltip: 'Scan a document',
-                                        onPressed: () =>
-                                            context.push('/create-pdf'),
-                                        icon: Icon(
-                                          Icons.document_scanner_outlined,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (ann.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: AnnouncementCarousel(slides: ann),
-                          ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Quick Access',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => context.go('/study'),
-                              child: const Text('See All'),
-                            ),
-                          ],
-                        ),
-                        const Gap(10),
-                        grid([
-                          _ReferenceCard(
-                            title: 'Study Library',
-                            subtitle: 'Your academic library',
-                            icon: Icons.menu_book_outlined,
-                            black: true,
-                            onTap: () => context.go('/study'),
-                          ),
-                          _ReferenceCard(
-                            title: 'Office Workspace',
-                            subtitle: 'Scan, read & create',
-                            icon: Icons.document_scanner_outlined,
-                            onTap: () => context.go('/pdf-studio'),
-                          ),
-                        ]),
-                        const Gap(14),
-                        Text(
-                          'Others',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        const Gap(8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _CompactHomeLink(
-                                label: settings.sectionEnabled('shop')
-                                    ? 'Shop'
-                                    : 'Search',
-                                icon: settings.sectionEnabled('shop')
-                                    ? Icons.storefront_outlined
-                                    : Icons.search,
-                                onTap: () => settings.sectionEnabled('shop')
-                                    ? context.go('/shop')
-                                    : context.go('/search', extra: true),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _CompactHomeLink(
-                                label: 'Downloads',
-                                icon: Icons.file_download_outlined,
-                                badges: badges,
-                                onTap: () => context.go('/downloads'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _CompactHomeLink(
-                                label: 'Study Plan',
-                                icon: Icons.calendar_month_outlined,
-                                onTap: () => context.push('/study-goals'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _CompactHomeLink(
-                                label: 'My Progress',
-                                icon: Icons.bar_chart_rounded,
-                                onTap: () => context.push('/study-progress'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Gap(20),
-                        if (recent.isNotEmpty) ...[
-                          const Gap(24),
-                          SectionHeader(
-                            title: 'Continue studying',
-                            action: 'Clear',
-                            onAction: () async {
-                              if (await confirmDialog(
-                                context,
-                                title: 'Clear recent history?',
-                                message:
-                                    'Only the list of recently opened files will be cleared. Your downloads and original documents stay saved.',
-                                confirm: 'Clear history',
-                              )) {
-                                await ref.read(recentProvider.notifier).clear();
-                              }
-                            },
-                          ),
-                          for (final item in recent.take(3))
-                            FileTile(
-                              file: item.file,
-                              color: Theme.of(context).colorScheme.primary,
-                              compact: true,
-                            ),
-                        ],
-                        const Gap(16),
-                        const SubjectDiscovery(compact: true),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReferenceCard extends StatelessWidget {
-  const _ReferenceCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-    this.black = false,
-  });
-  final String title, subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool black;
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    final ink = t.colorScheme.onSurface;
-    return HCard(
-      onTap: onTap,
-      semanticLabel: title,
-      color: black
-          ? (t.brightness == Brightness.dark
-                ? HColors.darkPeach
-                : HColors.nudePeach)
-          : null,
-      shadow: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: ink, size: 20),
-              const Spacer(),
-              Icon(Icons.arrow_outward, color: ink, size: 16),
-            ],
-          ),
-          const Gap(12),
-          Text(title, style: t.textTheme.titleLarge?.copyWith(color: ink)),
-          const Gap(4),
-          Text(
-            subtitle,
-            style: t.textTheme.bodySmall?.copyWith(
-              color: t.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CompactHomeLink extends StatelessWidget {
-  const _CompactHomeLink({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    this.badges = const [],
-  });
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-  final List<String> badges;
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: homeDepthShadows(context, blur: 11, y: 5, opacity: .85),
-      ),
-      child: Material(
-        color: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: SizedBox(
-            height:
-                ((68 + 12 * badges.length) *
-                        MediaQuery.textScalerOf(context).scale(1))
-                    .clamp(68.0, 260.0),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 7),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  for (final badge in badges)
-                    Text(
-                      badge,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

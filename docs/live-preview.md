@@ -1,8 +1,10 @@
-# Interactive Flutter UI preview
+# Archived 1.5.5 Flutter UI preview
 
 [Open the live preview](https://hyzen-nude-ui-preview.deepparsnip16.chatgpt.site). The host is owner-private; use the same ChatGPT account that requested it.
 
-The live preview runs `hyzen_flutter/lib/main_account_review.dart`, using the
+This deployed Site contains the older 1.5.5 design. The owner paused further preview work; current 1.5.6 captures are linked from [the reference review](reference-redesign-1.5.6.md).
+
+The older live preview runs `hyzen_flutter/lib/main_account_review.dart`, using the
 actual application widgets, router, design system and local study tools. The
 surrounding HTML provides screen, theme, viewport and accessibility text-size
 controls; it does not reproduce the app UI.

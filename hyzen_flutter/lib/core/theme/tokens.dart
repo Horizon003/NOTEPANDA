@@ -2,42 +2,48 @@ import 'package:flutter/material.dart';
 
 /// PHARM D WITH HYZEN design tokens.
 ///
-/// Warm nude surfaces and charcoal ink, refined from the owner’s mobile references.
+/// Reference-led pastel surfaces, geometric typography and charcoal controls.
 /// Semantic status colors and document annotation ink remain meaningful.
 class HColors {
   HColors._();
   // Brand
-  static const primary = Color(0xFF43372F);
-  static const primaryDeep = Color(0xFF292522);
-  static const primarySoft = Color(0xFFEFE2D3);
-  static const slate = Color(0xFF352E29);
-  static const slateDeep = Color(0xFF211C18);
-  static const teal = Color(0xFF6D6256);
-  static const mint = Color(0xFFD7C3AE);
+  static const primary = Color(0xFF18181B);
+  static const primaryDeep = Color(0xFF121216);
+  static const primarySoft = Color(0xFFE7E0FA);
+  static const slate = Color(0xFF25252B);
+  static const slateDeep = Color(0xFF17171C);
+  static const teal = Color(0xFF66717B);
+  static const mint = Color(0xFFBEE8D4);
   static const onPrimary = Colors.white;
 
   // Ink
-  static const ink = Color(0xFF292522);
-  static const ink2 = Color(0xFF62584F);
-  static const ink3 = Color(0xFF786C60);
+  static const ink = Color(0xFF121216);
+  static const ink2 = Color(0xFF68686F);
+  static const ink3 = Color(0xFF76767C);
 
   // Surfaces (light)
-  static const background = Color(0xFFFBF7F2);
-  static const surface = Color(0xFFFFFCF8);
-  static const surfaceAlt = Color(0xFFF0E7DC);
-  static const outline = Color(0xFFE0D5C9);
-  static const outlineStrong = Color(0xFFB4A492);
+  static const background = Color(0xFFFAFAFC);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceAlt = Color(0xFFF1F1F4);
+  static const outline = Color(0xFFE7E7EB);
+  static const outlineStrong = Color(0xFFC5C5CC);
 
   // Warm nude accents: confined to content surfaces, never text on pale ink.
-  static const nudePeach = Color(0xFFE8CDBB);
-  static const nudeSand = Color(0xFFE9DECF);
+  static const nudePeach = Color(0xFFFFCD89);
+  static const nudeSand = Color(0xFFE4DBFA);
   static const darkPeach = Color(0xFF49382D);
+
+  static const lavender = Color(0xFFB99BFA);
+  static const blue = Color(0xFFAFCDFB);
+  static const pink = Color(0xFFF9CDE7);
+  static const apricot = Color(0xFFFFCE80);
+  static const sage = Color(0xFFB8DFCD);
 
   // Status
   static const success = Color(0xFF15885A);
   static const warning = Color(0xFFB7791F);
   static const error = Color(0xFFC0392B);
-  static const info = Color(0xFF6D6258);
+  static const info = Color(0xFF64646F);
 
   // Dark
   static const darkBackground = Color(0xFF171411);
@@ -48,11 +54,11 @@ class HColors {
   static const darkPrimary = Color(0xFFE7D2BC);
 
   /// Restrained module accents – used on small icon badges only.
-  static const notes = Color(0xFF43372F);
-  static const mcqs = Color(0xFF6D6258);
-  static const papers = Color(0xFF6D6258);
-  static const special = Color(0xFF6D6258);
-  static const lectures = Color(0xFF6D6258);
+  static const notes = Color(0xFF487866);
+  static const mcqs = Color(0xFF78629B);
+  static const papers = Color(0xFF527692);
+  static const special = Color(0xFF945E7F);
+  static const lectures = Color(0xFF95693A);
 }
 
 /// Four-point rhythm; touch targets remain at least 48dp.
@@ -72,9 +78,9 @@ class HSpace {
 class HRadius {
   HRadius._();
   static const sm = 10.0;
-  static const md = 12.0;
-  static const lg = 16.0;
-  static const xl = 20.0;
+  static const md = 20.0;
+  static const lg = 26.0;
+  static const xl = 32.0;
   static const pill = 999.0;
   static BorderRadius all(double r) => BorderRadius.circular(r);
 }
@@ -125,3 +131,26 @@ Color adaptiveAccent(BuildContext context, Color color) {
       .withLightness(hsl.lightness < 0.68 ? 0.68 : hsl.lightness)
       .toColor();
 }
+
+/// Static canvas, matching the supplied white/peach reference background.
+const hPageGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xFFFAF9FE), Color(0xFFFFFAF5), Color(0xFFFAFAFC)],
+  stops: [0, .48, 1],
+);
+const hStudyGradient = LinearGradient(
+  begin: Alignment.centerLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xFFB8DFCD), Color(0xFFDFE3AA), Color(0xFFF1DEB3)],
+);
+const hFocusGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xFFC0A5FC), Color(0xFFA995F1)],
+);
+const hLessonGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xFFFCD9EA), Color(0xFFF8C5DF)],
+);

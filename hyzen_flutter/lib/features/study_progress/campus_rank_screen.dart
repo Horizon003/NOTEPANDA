@@ -290,7 +290,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: dark ? Colors.white12 : const Color(0xFFE0E0E0),
         ),
@@ -348,7 +348,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
               height: 135 + 50 * (scale - 1),
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: Stack(
                 children: [
@@ -366,7 +366,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                       alignment: Alignment.bottomLeft,
                       child: Material(
                         color: const Color(0xEDFFFFFF),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(24),
                         child: Padding(
                           padding: const EdgeInsets.all(11),
                           child: Row(

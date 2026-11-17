@@ -1,4 +1,4 @@
-name: Native Flutter 1.5.5 profile verification
+name: Native Flutter 1.5.6 reference profile verification
 on:
   workflow_dispatch:
   push:
@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: native-profile-155
+  group: native-profile-reference
   cancel-in-progress: true
 jobs:
   native-profile:
@@ -51,9 +51,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: monochrome-native-profile
+          name: reference-native-profile
           path: |
-            hyzen_flutter/qa/monochrome/native/
+            hyzen_flutter/qa/reference/native/
             hyzen_flutter/build/integration_response_data.json
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4

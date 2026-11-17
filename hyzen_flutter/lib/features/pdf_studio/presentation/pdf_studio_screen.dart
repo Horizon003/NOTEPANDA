@@ -6,6 +6,8 @@ import '../../../app/providers.dart';
 import '../../../core/utils/media_upload.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/ui_kit.dart';
+import '../../../core/widgets/hyzen_art.dart';
+import '../../../core/theme/tokens.dart';
 import '../../downloads/domain/download_record.dart';
 import '../../viewer/external_files.dart';
 import '../../viewer/offline_pdf.dart';
@@ -102,24 +104,38 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
       subtitle: 'Scan, edit and organise',
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           sliver: SliverToBoxAdapter(
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () => context.push('/create-pdf?source=camera'),
-                    icon: const Icon(Icons.document_scanner_outlined, size: 20),
-                    label: const Text('Scan pages'),
-                  ),
+                const HyzenBanner(
+                  title: 'Your workspace',
+                  subtitle: 'Scan, edit and organise documents',
+                  art: 'office-kit',
+                  eyebrow: 'Office Workspace',
+                  gradient: hLessonGradient,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => showOfficeToolsSheet(context),
-                    icon: const Icon(Icons.add_rounded, size: 20),
-                    label: const Text('Create / import'),
-                  ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: () =>
+                          context.push('/create-pdf?source=camera'),
+                      icon: const Icon(
+                        Icons.document_scanner_outlined,
+                        size: 16,
+                      ),
+                      label: const Text('Scan pages'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => showOfficeToolsSheet(context),
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: const Text('Create / import'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -249,74 +265,86 @@ class _FileRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ink = OfficeColors.ink(context);
-    return InkWell(
-      onTap: () => openStudioReader(context, file),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 40,
-              height: 50,
-              child: OfficeFileThumbnail(
-                path: file.internalFilePath,
-                version: file.updatedAt.toIso8601String(),
-                fallbackIcon: documentIconForName(file.displayName),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Material(
+        color: Colors.white,
+        shape: StadiumBorder(
+          side: BorderSide(color: OfficeColors.divider(context)),
+        ),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: () => openStudioReader(context, file),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 50,
+                  child: OfficeFileThumbnail(
+                    path: file.internalFilePath,
+                    version: file.updatedAt.toIso8601String(),
+                    fallbackIcon: documentIconForName(file.displayName),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Flexible(
-                        child: Text(
-                          file.displayName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              file.displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
+                          if (file.isStarred) ...[
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 17,
+                              color: Color(0xFFADADAD),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        [
+                          officeRelativeDate(
+                            file.lastOpenedAt ?? file.updatedAt,
+                          ),
+                          formatBytes(file.fileSizeBytes),
+                          if (file.pageCount > 0)
+                            '${file.pageCount} page${file.pageCount == 1 ? '' : 's'}',
+                        ].join(' • '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: OfficeColors.muted(context),
+                          fontSize: 12,
                         ),
                       ),
-                      if (file.isStarred) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.star_rounded,
-                          size: 17,
-                          color: Color(0xFFADADAD),
-                        ),
-                      ],
                     ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    [
-                      officeRelativeDate(file.lastOpenedAt ?? file.updatedAt),
-                      formatBytes(file.fileSizeBytes),
-                      if (file.pageCount > 0)
-                        '${file.pageCount} page${file.pageCount == 1 ? '' : 's'}',
-                    ].join(' • '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: OfficeColors.muted(context),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  tooltip: 'Document actions',
+                  icon: Icon(Icons.more_vert_rounded, color: ink),
+                  onPressed: () => showOfficeFileMore(context, ref, file),
+                ),
+              ],
             ),
-            IconButton(
-              tooltip: 'Document actions',
-              icon: Icon(Icons.more_vert_rounded, color: ink),
-              onPressed: () => showOfficeFileMore(context, ref, file),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -339,19 +367,19 @@ class _OfficeSearch extends StatelessWidget {
         color: OfficeColors.muted(context),
       ),
       filled: true,
-      fillColor: OfficeColors.page(context),
+      fillColor: Colors.white,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(vertical: 13),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(26),
         borderSide: BorderSide(color: OfficeColors.divider(context)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(26),
         borderSide: BorderSide(color: OfficeColors.divider(context)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(26),
         borderSide: const BorderSide(color: OfficeColors.blue, width: 1.6),
       ),
     ),
