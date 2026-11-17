@@ -37,6 +37,7 @@ class HGlassButton extends StatelessWidget {
     child: Semantics(
       button: true,
       label: label,
+      value: badge > 0 ? '$badge unread' : null,
       child: SizedBox.square(
         dimension: 48,
         child: Material(
@@ -44,31 +45,57 @@ class HGlassButton extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             customBorder: const CircleBorder(),
-            child: Center(
-              child: ClipOval(
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .65),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xE6FFFFFF),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Center(
-                      child: Badge(
-                        isLabelVisible: badge > 0,
-                        label: Text(badge > 9 ? '9+' : '$badge'),
+            child: Stack(
+              children: [
+                Center(
+                  child: ClipOval(
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                      child: Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: .65),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xE6FFFFFF),
+                            width: 1.2,
+                          ),
+                        ),
+                        alignment: Alignment.center,
                         child: HAssetIcon(icon, size: 19),
                       ),
                     ),
                   ),
                 ),
-              ),
+                if (badge > 0)
+                  PositionedDirectional(
+                    top: 2,
+                    end: 2,
+                    child: Container(
+                      height: 16,
+                      constraints: const BoxConstraints(minWidth: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.error,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: ExcludeSemantics(
+                        child: Text(
+                          badge > 9 ? '9+' : '$badge',
+                          textScaler: TextScaler.noScaling,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            height: 1,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

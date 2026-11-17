@@ -101,6 +101,57 @@ void main() {
     expect(taps, 1);
   });
   testWidgets(
+    'notification count fits outside the glass and announces its full value',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      var taps = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(2.5)),
+              child: Center(
+                child: HGlassButton(
+                  icon: 'icon-bell',
+                  label: 'Notifications',
+                  badge: 12,
+                  onTap: () => taps++,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final button = find.byTooltip('Notifications');
+      final badge = find.text('9+');
+      final target = tester.getRect(button);
+      final count = tester.getRect(badge);
+      final glass = tester.getRect(find.byType(ClipOval));
+      expect(target.size, const Size.square(48));
+      expect(target.contains(count.topLeft), isTrue);
+      expect(target.contains(count.bottomRight), isTrue);
+      expect(count.top, lessThan(glass.top));
+      expect(count.height, closeTo(10, 2));
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Notifications')),
+        matchesSemantics(
+          label: 'Notifications',
+          value: '12 unread',
+          isButton: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+          isFocusable: true,
+        ),
+      );
+      await tester.tapAt(count.center);
+      expect(taps, 1);
+      semantics.dispose();
+    },
+  );
+
+  testWidgets(
     'organize pages exposes generated rotate and remove controls at 320dp',
     (tester) async {
       tester.view.physicalSize = const Size(320, 760);
