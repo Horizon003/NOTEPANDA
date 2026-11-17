@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/content/data/content_providers.dart';
 import '../theme/tokens.dart';
-import 'navigation_preferences.dart';
+import 'polish_ui.dart';
 
 enum DockDestination {
   home('Home', '/home', 0, Icons.home_outlined),
@@ -35,7 +35,7 @@ class MainDock extends ConsumerWidget {
     if (MediaQuery.viewInsetsOf(context).bottom > 0) {
       return const SizedBox.shrink();
     }
-    final size = ref.watch(dockSizeProvider).clamp(.9, 1.05);
+    const size = 1.0;
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
@@ -155,11 +155,13 @@ class _DockButtonState extends State<_DockButton> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  widget.destination.icon,
-                  size: widget.iconSize,
-                  color: foreground,
-                ),
+                HAssetIcon(switch (widget.destination) {
+                  DockDestination.home => 'icon-home',
+                  DockDestination.study => 'action-notes',
+                  DockDestination.office => 'action-scan',
+                  DockDestination.shop => 'icon-shop',
+                  DockDestination.downloads => 'action-downloads',
+                }, size: 27),
                 if (!widget.iconOnly)
                   Flexible(
                     child: ClipRect(

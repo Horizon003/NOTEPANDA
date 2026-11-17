@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/providers.dart';
-import 'main_dock.dart';
 
 class DockThemePreference extends Notifier<String> {
   @override
@@ -34,58 +32,3 @@ class DockSizePreference extends Notifier<double> {
 final dockSizeProvider = NotifierProvider<DockSizePreference, double>(
   DockSizePreference.new,
 );
-
-class AppearanceControls extends ConsumerStatefulWidget {
-  const AppearanceControls({super.key});
-  @override
-  ConsumerState<AppearanceControls> createState() => _AppearanceControlsState();
-}
-
-class _AppearanceControlsState extends ConsumerState<AppearanceControls> {
-  String _preview = '/home';
-  @override
-  Widget build(BuildContext context) {
-    final font = ref.watch(textSizeProvider),
-        size = ref.watch(dockSizeProvider);
-    return SafeArea(
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text(
-            'Font Size · $font',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Slider(
-            min: 6,
-            max: 24,
-            divisions: 18,
-            value: font.toDouble(),
-            label: '$font',
-            onChanged: (v) =>
-                ref.read(textSizeProvider.notifier).set(v.round()),
-          ),
-          const Text('Live preview: Your next study session starts here.'),
-          const SizedBox(height: 24),
-          Text(
-            'Bottom navigation',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Text('Navigation size · ${(size * 100).round()}%'),
-          Slider(
-            min: .85,
-            max: 1.25,
-            divisions: 8,
-            value: size,
-            label: '${(size * 100).round()}%',
-            onChanged: ref.read(dockSizeProvider.notifier).set,
-          ),
-          MainDock(
-            path: _preview,
-            onSelected: (d) => setState(() => _preview = d.route),
-          ),
-        ],
-      ),
-    );
-  }
-}

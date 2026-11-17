@@ -33,17 +33,19 @@ class HCard extends StatelessWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.padding = const EdgeInsets.all(12),
     this.radius = HRadius.lg,
     this.color,
     this.shadow = true,
     this.semanticLabel,
+    this.outlineColor,
   });
   final Widget child;
-  final VoidCallback? onTap;
+  final VoidCallback? onTap, onLongPress;
   final EdgeInsetsGeometry padding;
   final double radius;
-  final Color? color;
+  final Color? color, outlineColor;
   final bool shadow;
   final String? semanticLabel;
   @override
@@ -55,12 +57,13 @@ class HCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: br,
         side: color == null
-            ? BorderSide(color: t.colorScheme.outlineVariant)
+            ? BorderSide(color: outlineColor ?? t.colorScheme.outlineVariant)
             : BorderSide.none,
       ),
       clipBehavior: Clip.none,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: br,
         child: Padding(padding: padding, child: child),
       ),

@@ -136,7 +136,7 @@ Color adaptiveAccent(BuildContext context, Color color) {
 const hPageGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
-  colors: [Color(0xFFFAF9FE), Color(0xFFFFFAF5), Color(0xFFFAFAFC)],
+  colors: [Color(0xFFF0EBFA), Color(0xFFFFF4E9), Color(0xFFEBF5F5)],
   stops: [0, .48, 1],
 );
 const hStudyGradient = LinearGradient(

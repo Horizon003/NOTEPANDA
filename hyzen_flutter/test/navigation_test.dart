@@ -1,3 +1,6 @@
+import 'package:hyzen_pharmd/core/widgets/polish_ui.dart';
+import 'package:hyzen_pharmd/features/search/presentation/search_screen.dart';
+import 'package:hyzen_pharmd/core/widgets/ui_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hyzen_pharmd/features/academics/presentation/library_screens.dart';
 import 'package:hyzen_pharmd/features/downloads/presentation/downloads_screen.dart';
@@ -377,14 +380,11 @@ void main() {
           (w) => w is HCard && w.semanticLabel == entry.key,
         );
       } else {
-        target = find
-            .descendant(
-              of: find.byType(HomeScreen),
-              matching: find.text(entry.key),
-            )
-            .first;
+        target = find.byKey(ValueKey('dock-${entry.key.toLowerCase()}'));
       }
-      await Scrollable.ensureVisible(tester.element(target), alignment: .5);
+      if (entry.key != 'Downloads' && entry.key != 'Shop') {
+        await Scrollable.ensureVisible(tester.element(target), alignment: .5);
+      }
       await tester.pumpAndSettle();
       await tester.tap(target);
       await tester.pumpAndSettle();
@@ -1225,6 +1225,160 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+  testWidgets('Home inline search filters and carries query to full search', (
+    tester,
+  ) async {
+    await open(tester, '/home');
+    final search = find.byKey(const ValueKey('home-search-input'));
+    await tester.ensureVisible(search);
+    await tester.enterText(search, 'Insulin');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    for (final scope in ['notes', 'books', 'lectures', 'downloads']) {
+      expect(find.byKey(ValueKey('search-scope-$scope')), findsOneWidget);
+    }
+    await tester.tap(find.byKey(const ValueKey('search-scope-notes')));
+    await tester.pumpAndSettle();
+    expect(find.text('Insulin Notes'), findsOneWidget);
+    await tester.ensureVisible(find.text('View all results'));
+    await tester.tap(find.text('View all results'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    final field = tester.widget<TextField>(
+      find.descendant(
+        of: find.byType(HSearchField),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(field.controller?.text, 'Insulin');
+    expect(find.text('Insulin Notes'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('keyboard search submission retains the selected category', (
+    tester,
+  ) async {
+    await open(tester, '/home');
+    final input = find.byKey(const ValueKey('home-search-input'));
+    await Scrollable.ensureVisible(tester.element(input), alignment: .35);
+    await tester.pumpAndSettle();
+    await tester.enterText(input, 'Pharmacology');
+    await tester.pump(const Duration(milliseconds: 250));
+    final books = find.byKey(const ValueKey('search-scope-books'));
+    await Scrollable.ensureVisible(tester.element(books), alignment: .5);
+    await tester.pumpAndSettle();
+    await tester.tap(books);
+    await tester.pumpAndSettle();
+    await Scrollable.ensureVisible(tester.element(input), alignment: .35);
+    await tester.pumpAndSettle();
+    await tester.tap(input);
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<SearchScreen>(find.byType(SearchScreen)).initialScope.name,
+      'books',
+    );
+    expect(
+      tester.widget<SearchScreen>(find.byType(SearchScreen)).initialQuery,
+      'Pharmacology',
+    );
+  });
+  testWidgets('hold previews preserve Home until explicitly opened', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final name in ['Study Library', 'Office Workspace']) {
+      await open(tester, '/home');
+      final card = find.byWidgetPredicate(
+        (w) => w is HCard && w.semanticLabel == name,
+      );
+      await tester.ensureVisible(card);
+      await tester.longPress(card);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('card-hold-preview')), findsOneWidget);
+      expect(find.text(name), findsOneWidget);
+      expect(
+        container.read(routerProvider).routeInformationProvider.value.uri.path,
+        '/home',
+      );
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pumpAndSettle();
+      if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
+        await expectLater(
+          find.byType(HyzenApp),
+          matchesGoldenFile(
+            '../qa/reference/after/hold-${name.startsWith('Study') ? 'study' : 'office'}.png',
+          ),
+        );
+      }
+      await tester.tap(find.byTooltip('Close preview'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('card-hold-preview')), findsNothing);
+    }
+  });
+  testWidgets('retired app size sliders cannot override Android text scaling', (
+    tester,
+  ) async {
+    await container.read(textSizeProvider.notifier).set(6);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await open(tester, '/home');
+    expect(
+      MediaQuery.textScalerOf(
+        tester.element(find.byType(HomeScreen)),
+      ).scale(14),
+      21,
+    );
+    await open(tester, '/settings');
+    expect(find.text('Text size'), findsNothing);
+    expect(find.byType(Slider), findsNothing);
+  });
+  testWidgets('notification unread filter and read-all update real inbox', (
+    tester,
+  ) async {
+    await open(tester, '/notifications');
+    final inbox = container.read(notificationsProvider.notifier);
+    inbox.readAll();
+    inbox.receivePush({
+      'id': 'test-polish-new',
+      'title': 'New lecture',
+      'body': 'A new class is available',
+      'url': '',
+    });
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Unread · 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('New lecture'), findsOneWidget);
+    await tester.tap(find.text('Read all'));
+    await tester.pumpAndSettle();
+    expect(find.text('New lecture'), findsNothing);
+    expect(find.text('You’re up to date'), findsOneWidget);
+  });
+  testWidgets(
+    'hero motion settles and reduced motion uses a static transform',
+    (tester) async {
+      for (final reduced in [false, true]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: MediaQueryData(disableAnimations: reduced),
+              child: const HSoftArt(child: Text('Art')),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.binding.transientCallbackCount, 0);
+        final translate = tester
+            .widgetList<Transform>(find.byType(Transform))
+            .first;
+        expect(translate.transform.getTranslation().y.abs(), lessThan(.001));
+      }
+    },
+  );
   testWidgets('reference Home hero and positioned profile fit a 360px phone', (
     tester,
   ) async {
@@ -1612,8 +1766,24 @@ void main() {
           '/contact',
           '/settings',
           '/about',
+          '/notifications',
         ]) {
           await open(tester, path);
+          if (path == '/notifications') {
+            final inbox = container.read(notificationsProvider.notifier);
+            inbox.receivePush({
+              'id': 'preview-material',
+              'title': 'New pharmacology notes',
+              'body':
+                  'Your next revision session is ready. Explore the latest academic resources.',
+              'url': '/study/notes',
+            });
+            inbox.addLocalReminder(
+              'A little focus goes a long way',
+              'Take 25 minutes for your daily study goal.',
+              'preview-goal',
+            );
+          }
           await tester.runAsync(
             () => Future<void>.delayed(const Duration(milliseconds: 60)),
           );

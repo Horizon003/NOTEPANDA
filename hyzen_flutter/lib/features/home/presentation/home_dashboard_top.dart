@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/polish_ui.dart';
 import '../../study_progress/study_tracker.dart';
 import 'home_screen.dart' show homeClockProvider;
 
@@ -36,12 +37,14 @@ class HomeDashboardTop extends ConsumerWidget {
                       top: -18,
                       bottom: 0,
                       child: ExcludeSemantics(
-                        child: Image.asset(
-                          'assets/reference/focus-shapes.png',
-                          key: const ValueKey('home-hero-art'),
-                          width: artWidth,
-                          fit: BoxFit.contain,
-                          cacheWidth: 540,
+                        child: HSoftArt(
+                          child: Image.asset(
+                            'assets/reference/focus-shapes.png',
+                            key: const ValueKey('home-hero-art'),
+                            width: artWidth,
+                            fit: BoxFit.contain,
+                            cacheWidth: 540,
+                          ),
                         ),
                       ),
                     ),

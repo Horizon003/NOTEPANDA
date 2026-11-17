@@ -1,4 +1,3 @@
-import '../../../core/widgets/navigation_preferences.dart';
 import 'dart:async';
 import 'profile_promotions.dart';
 import '../../academics/data/drive_gateway.dart';
@@ -824,23 +823,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ref.read(siteSettingsProvider).raw,
                   ),
                 ),
-            ],
-          ),
-        ],
-        if (_matches('appearance text size font')) ...[
-          const AccountSectionHeader('Appearance'),
-          SettingsCard(
-            children: [
-              SettingsRow(
-                title: 'Text size',
-                value: '${ref.watch(textSizeProvider)}',
-                onTap: () => showModalBottomSheet<void>(
-                  context: context,
-                  showDragHandle: true,
-                  isScrollControlled: true,
-                  builder: (_) => const AppearanceControls(),
-                ),
-              ),
             ],
           ),
         ],

@@ -1,3 +1,4 @@
+import '../features/search/data/search_scope.dart';
 import 'package:flutter/material.dart';
 import '../features/admin/presentation/push_center.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -181,8 +182,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/search',
-                builder: (_, state) =>
-                    SearchScreen(focusSearch: state.extra == true),
+                builder: (_, state) => SearchScreen(
+                  focusSearch: state.extra == true,
+                  initialQuery: state.uri.queryParameters['q'] ?? '',
+                  initialScope:
+                      SearchScope.values
+                          .where(
+                            (s) => s.name == state.uri.queryParameters['scope'],
+                          )
+                          .firstOrNull ??
+                      SearchScope.all,
+                ),
               ),
             ],
           ),

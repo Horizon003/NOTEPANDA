@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/config/brand.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/tokens.dart';
-import 'providers.dart';
 import '../features/notifications/push_binding.dart';
 import '../features/study_progress/study_tracker.dart';
 import 'router.dart';
@@ -26,27 +25,19 @@ class HyzenApp extends ConsumerWidget {
         theme: AppTheme.light(),
         themeMode: ThemeMode.light,
         routerConfig: router,
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: _AppTextScaler(
-              MediaQuery.textScalerOf(context),
-              ref.watch(textSizeProvider) / 13,
-            ),
-          ),
-          child: DecoratedBox(
-            decoration: const BoxDecoration(gradient: hPageGradient),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1080),
-                child: Listener(
-                  onPointerDown: (_) =>
-                      ref.read(studyTrackerProvider).interaction(),
-                  onPointerSignal: (_) =>
-                      ref.read(studyTrackerProvider).interaction(),
-                  child: ExternalOpenGate(
-                    child: child ?? const SizedBox.shrink(),
-                  ),
+        builder: (context, child) => DecoratedBox(
+          decoration: const BoxDecoration(gradient: hPageGradient),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1080),
+              child: Listener(
+                onPointerDown: (_) =>
+                    ref.read(studyTrackerProvider).interaction(),
+                onPointerSignal: (_) =>
+                    ref.read(studyTrackerProvider).interaction(),
+                child: ExternalOpenGate(
+                  child: child ?? const SizedBox.shrink(),
                 ),
               ),
             ),
@@ -55,14 +46,4 @@ class HyzenApp extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _AppTextScaler extends TextScaler {
-  const _AppTextScaler(this.system, this.factor);
-  final TextScaler system;
-  final double factor;
-  @override
-  double scale(double fontSize) => system.scale(fontSize * factor);
-  @override
-  double get textScaleFactor => scale(14) / 14;
 }

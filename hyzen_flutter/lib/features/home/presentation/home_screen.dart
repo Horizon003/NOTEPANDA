@@ -1,3 +1,6 @@
+import '../../../core/widgets/polish_ui.dart';
+import '../../search/presentation/home_search.dart';
+import '../../notifications/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -112,6 +115,8 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     Text(
                       'Today ${now.day} ${months[now.month - 1]}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       key: const ValueKey('home-greeting'),
                       style: Theme.of(
@@ -122,10 +127,19 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton(
-                tooltip: 'Search academic resources',
-                onPressed: () => context.go('/search', extra: true),
-                icon: const Icon(Icons.search_rounded, size: 23),
+              HGlassButton(
+                icon: 'icon-search',
+                label: 'Search academic resources',
+                onTap: () => context.go('/search', extra: true),
+              ),
+              HGlassButton(
+                icon: 'icon-bell',
+                label: 'Notifications',
+                badge: ref
+                    .watch(notificationsProvider)
+                    .where((m) => m['read'] != true)
+                    .length,
+                onTap: () => context.push('/notifications'),
               ),
             ],
           ),
@@ -142,6 +156,8 @@ class HomeScreen extends ConsumerWidget {
           sliver: SliverList.list(
             children: [
               HomeDashboardTop(year: profile?.professionalYear),
+              const SizedBox(height: 16),
+              const HomeSearch(),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -181,27 +197,6 @@ class HomeScreen extends ConsumerWidget {
                       ),
                   ],
                 ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 4,
-                children: [
-                  TextButton.icon(
-                    onPressed: () => context.go('/downloads'),
-                    icon: const Icon(Icons.download_outlined, size: 15),
-                    label: const Text('Downloads'),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => context.go('/shop'),
-                    icon: const Icon(Icons.storefront_outlined, size: 15),
-                    label: const Text('Shop'),
-                  ),
-                  TextButton.icon(
-                    onPressed: () => context.go('/search', extra: true),
-                    icon: const Icon(Icons.search_rounded, size: 15),
-                    label: const Text('Search'),
-                  ),
-                ],
-              ),
               if (ref.watch(boolPrefProvider('pref_announcements')) &&
                   slides.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -254,6 +249,15 @@ class _PlanCards extends StatelessWidget {
       shadow: false,
       semanticLabel: 'Study Library',
       onTap: () => context.go('/study'),
+      onLongPress: () => showCardPreview(
+        context,
+        title: 'Study Library',
+        description:
+            'Explore professional-year notes, practice MCQs, past papers and guide books. Continue with your subjects at your own pace.',
+        asset: 'action-notes',
+        color: HColors.apricot,
+        onOpen: () => context.go('/study'),
+      ),
       padding: const EdgeInsets.all(16),
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: large ? 0 : 180),
@@ -297,6 +301,15 @@ class _PlanCards extends StatelessWidget {
       radius: 24,
       shadow: false,
       onTap: () => context.go('/pdf-studio'),
+      onLongPress: () => showCardPreview(
+        context,
+        title: 'Office Workspace',
+        description:
+            'Scan pages, import PDFs, crop and organise documents, annotate files and search recognised text.',
+        asset: 'action-scan',
+        color: HColors.blue,
+        onOpen: () => context.go('/pdf-studio'),
+      ),
       semanticLabel: 'Office Workspace',
       padding: const EdgeInsets.all(14),
       child: ConstrainedBox(
@@ -446,16 +459,18 @@ class _StudyStats extends ConsumerWidget {
     final p = ref.watch(studyTrackerProvider);
     final board = ref.watch(campusBoardProvider('week')).valueOrNull;
     final entries = [
-      ('${p.currentStreak} days', 'Study Streak', '/study-streak'),
+      ('${p.currentStreak} days', 'Streak', '/study-streak', 'icon-streak'),
       (
         '${p.weekSeconds ~/ 3600}h ${(p.weekSeconds ~/ 60) % 60}m',
-        'This Week',
-        '/study-goals',
+        'Time spent',
+        '/study-progress',
+        'icon-time',
       ),
       (
         board?.mine?.rank == null ? '—' : '#${board!.mine!.rank}',
         'Prof. Rank',
         '/campus-rank',
+        'icon-rank',
       ),
     ];
     return LayoutBuilder(
@@ -470,12 +485,15 @@ class _StudyStats extends ConsumerWidget {
                 width: (c.maxWidth - (columns - 1) * 8) / columns,
                 child: HCard(
                   radius: 22,
+                  outlineColor: const Color(0xFFD2CADF),
                   shadow: false,
                   onTap: () => context.push(e.$3),
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      HAssetIcon(e.$4, size: 30),
+                      const SizedBox(height: 6),
                       Text(
                         e.$1,
                         style: Theme.of(context).textTheme.titleMedium,
