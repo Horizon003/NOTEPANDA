@@ -1,34 +1,60 @@
+import 'dart:async';
+import 'dart:ui' show FrameTiming;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-import 'package:hyzen_pharmd/main_account_review.dart' as fixture;
 import 'package:hyzen_pharmd/app/app.dart';
-import 'package:hyzen_pharmd/app/router.dart';
 import 'package:hyzen_pharmd/app/providers.dart';
+import 'package:hyzen_pharmd/app/router.dart';
 import 'package:hyzen_pharmd/core/widgets/polish_ui.dart';
 import 'package:hyzen_pharmd/features/pdf_studio/data/studio_pdf_engine.dart';
 import 'package:hyzen_pharmd/features/viewer/offline_pdf.dart';
+import 'package:hyzen_pharmd/main_account_review.dart' as fixture;
+import 'package:integration_test/integration_test.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  // Let the engine schedule its own animation frames. A fixed number of
+  // awaited pumps ties real elapsed time to emulator rendering throughput.
+  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   testWidgets(
     'native reference profile: home, retained tabs, scroll, routes and PDF',
     (tester) async {
-      await fixture.main();
-      for (
-        var attempt = 0;
-        attempt < 30 && find.byType(HyzenApp).evaluate().isEmpty;
-        attempt++
-      ) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-      await pumpFrames(tester);
+      _checkpoint('starting fixture');
+      await fixture.main().timeout(const Duration(seconds: 20));
+      await _waitFor(() => find.byType(HyzenApp).evaluate().isNotEmpty, 'app');
       final container = ProviderScope.containerOf(
         tester.element(find.byType(HyzenApp)),
       );
       final router = container.read(routerProvider);
-      await binding.watchPerformance(() async {
+      final ambient = container.read(
+        boolPrefProvider('pref_ambient_motion').notifier,
+      );
+      ambient.set(true);
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+
+      router.go('/home');
+      final hero = find.byKey(const ValueKey('home-hero-art'));
+      await _waitFor(() => hero.evaluate().isNotEmpty, 'Home hero');
+      final art = tester.widget<HSoftArt>(find.byType(HSoftArt));
+      expect(art.loop && art.enabled, isTrue);
+      await _sample(binding, 'ambient_hero', () async {
+        final initial = tester.getCenter(hero);
+        var moved = false;
+        final elapsed = Stopwatch()..start();
+        while (elapsed.elapsed < const Duration(seconds: 6)) {
+          await _wait(const Duration(milliseconds: 250));
+          moved |= (tester.getCenter(hero) - initial).distance > 0.25;
+        }
+        expect(
+          moved,
+          isTrue,
+          reason: 'Home artwork must animate in the sample',
+        );
+      });
+
+      await _sample(binding, 'tab_navigation', () async {
         for (var i = 0; i < 5; i++) {
           for (final path in [
             '/home',
@@ -38,34 +64,24 @@ void main() {
             '/shop',
           ]) {
             router.go(path);
-            await pumpFrames(tester);
+            await _wait();
           }
         }
-      }, reportKey: 'tab_navigation');
+      });
+
       router.go('/home');
-      await pumpFrames(tester);
-      final art = tester.widget<HSoftArt>(find.byType(HSoftArt));
-      expect(art.loop && art.enabled, isTrue);
-      await binding.watchPerformance(() async {
-        await pumpFrames(tester, count: 375);
-      }, reportKey: 'ambient_hero');
-      await binding.watchPerformance(() async {
+      await _wait();
+      await _sample(binding, 'home_scroll', () async {
         for (var i = 0; i < 5; i++) {
-          await tester.fling(
-            find.byType(CustomScrollView).first,
-            const Offset(0, -450),
-            900,
-          );
-          await pumpFrames(tester, count: 60);
-          await tester.fling(
-            find.byType(CustomScrollView).first,
-            const Offset(0, 450),
-            900,
-          );
-          await pumpFrames(tester, count: 60);
+          for (final dy in [-450.0, 450.0]) {
+            final scroll = find.byType(CustomScrollView).first;
+            await tester.fling(scroll, Offset(0, dy), 900);
+            await _wait(const Duration(milliseconds: 650));
+          }
         }
-      }, reportKey: 'home_scroll');
-      await binding.watchPerformance(() async {
+      });
+
+      await _sample(binding, 'route_transitions', () async {
         for (final path in [
           '/study-goals',
           '/study-streak',
@@ -73,69 +89,112 @@ void main() {
           '/profile',
           '/settings',
         ]) {
-          router.push(path);
-          await pumpFrames(tester);
+          unawaited(router.push<void>(path));
+          await _wait();
           router.pop();
-          await pumpFrames(tester);
+          await _wait();
         }
-      }, reportKey: 'route_transitions');
+      });
+
+      _checkpoint('creating PDF fixture');
       final path = await StudioPdfEngine.textToPdf(
         'Pharm D profile fixture\nPharmacology revision',
+      ).timeout(const Duration(seconds: 15));
+      expect(
+        await StudioPdfEngine.pageCount(
+          path,
+        ).timeout(const Duration(seconds: 10)),
+        1,
       );
-      expect(await StudioPdfEngine.pageCount(path), 1);
-      var pdfOpened = false;
-      await binding.watchPerformance(() async {
-        final context = tester.element(find.byType(HyzenApp));
+      await _sample(binding, 'pdf_open', () async {
         router.go('/pdf-studio');
-        await pumpFrames(tester);
+        await _wait();
         final nav = Navigator.of(tester.element(find.byType(Scaffold).last));
-        nav.push(
-          MaterialPageRoute<void>(
-            builder: (_) => Scaffold(
-              appBar: AppBar(title: const Text('Profile PDF')),
-              body: OfflinePdf(path: path, onOpened: () => pdfOpened = true),
+        var pdfOpened = false;
+        unawaited(
+          nav.push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => Scaffold(
+                appBar: AppBar(title: const Text('Profile PDF')),
+                body: OfflinePdf(path: path, onOpened: () => pdfOpened = true),
+              ),
             ),
           ),
         );
-        await pumpFrames(tester);
-        for (var attempt = 0; attempt < 15 && !pdfOpened; attempt++) {
-          await tester.pump(const Duration(seconds: 1));
-        }
-        expect(context.mounted, isTrue);
-        expect(
-          pdfOpened,
-          isTrue,
-          reason: 'PDF renderer must report a successfully opened document',
-        );
+        await _waitFor(() => pdfOpened, 'first rendered PDF frame');
         nav.pop();
-        await pumpFrames(tester);
-      }, reportKey: 'pdf_open');
-      // Captures happen outside performance windows: readback affects timings.
-      await binding.convertFlutterSurfaceToImage();
-      for (final mode in [ThemeMode.light]) {
-        container.read(themeModeProvider.notifier).set(mode);
-        for (final path in [
-          '/home',
-          '/study',
-          '/pdf-studio',
-          '/downloads',
-          '/profile',
-          '/settings',
-          '/study-goals',
-        ]) {
-          router.go(path);
-          await pumpFrames(tester);
-          await binding.takeScreenshot('${mode.name}-${path.substring(1)}');
-        }
+        await _wait();
+      });
+
+      // Readback runs after profiling with the decorative ticker idle.
+      _checkpoint('preparing screenshot surface');
+      ambient.set(false);
+      await _wait();
+      await binding.convertFlutterSurfaceToImage().timeout(
+        const Duration(seconds: 15),
+      );
+      container.read(themeModeProvider.notifier).set(ThemeMode.light);
+      for (final path in [
+        '/home',
+        '/study',
+        '/pdf-studio',
+        '/downloads',
+        '/profile',
+        '/settings',
+        '/study-goals',
+      ]) {
+        router.go(path);
+        await _wait();
+        final name = 'light-${path.substring(1)}';
+        _checkpoint('capturing $name');
+        final bytes = await binding
+            .takeScreenshot(name)
+            .timeout(const Duration(seconds: 15));
+        expect(bytes, isNotEmpty, reason: 'Screenshot $name must contain data');
       }
       expect(tester.takeException(), isNull);
+      binding.reportData!['profile_complete'] = true;
+      _checkpoint('complete');
     },
-    timeout: const Timeout(Duration(minutes: 8)),
+    timeout: const Timeout(Duration(minutes: 3)),
   );
 }
 
-Future<void> pumpFrames(WidgetTester tester, {int count = 24}) async {
-  for (var frame = 0; frame < count; frame++) {
-    await tester.pump(const Duration(milliseconds: 16));
+void _checkpoint(String message) => debugPrint('Native profile: $message');
+
+Future<void> _wait([Duration duration = const Duration(milliseconds: 380)]) =>
+    Future<void>.delayed(duration);
+
+Future<void> _waitFor(bool Function() predicate, String description) async {
+  final elapsed = Stopwatch()..start();
+  while (!predicate()) {
+    if (elapsed.elapsed >= const Duration(seconds: 12)) {
+      throw TimeoutException('Waiting for $description');
+    }
+    await _wait(const Duration(milliseconds: 100));
   }
+}
+
+Future<void> _sample(
+  IntegrationTestWidgetsFlutterBinding binding,
+  String name,
+  Future<void> Function() action,
+) async {
+  // Engine timings arrive in batches. Register a fresh listener for each run
+  // and leave bounded time for the final batch without forcing extra frames.
+  await _wait(const Duration(milliseconds: 1100));
+  _checkpoint('sampling $name');
+  final frames = <FrameTiming>[];
+  final collect = frames.addAll;
+  binding.addTimingsCallback(collect);
+  try {
+    await action().timeout(const Duration(seconds: 25));
+    await _wait(const Duration(milliseconds: 1200));
+  } finally {
+    binding.removeTimingsCallback(collect);
+  }
+  expect(frames, isNotEmpty, reason: '$name must capture engine timings');
+  binding.reportData ??= {};
+  binding.reportData![name] = FrameTimingSummarizer(frames).summary;
+  _checkpoint('$name recorded ${frames.length} frames');
 }
