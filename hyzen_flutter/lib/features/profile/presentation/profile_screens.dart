@@ -83,7 +83,7 @@ class ProfileScreen extends ConsumerWidget {
           subtitle: p?.rollNumber?.isNotEmpty == true
               ? 'Account info · ${p!.rollNumber}'
               : 'Account info',
-          photoUrl: p?.photoUrl ?? user?.photoURL,
+          photoUrl: ProfileAvatar.resolveUrl(p?.photoUrl, user?.photoURL),
           onTap: () => go('/profile/info'),
         ),
         const SizedBox(height: 22),
@@ -175,7 +175,7 @@ class AccountInfoScreen extends ConsumerWidget {
         const SizedBox(height: 8),
         Center(
           child: AccountAvatar(
-            photoUrl: p?.photoUrl ?? user?.photoURL,
+            photoUrl: ProfileAvatar.resolveUrl(p?.photoUrl, user?.photoURL),
             fallback: name,
             radius: 46,
           ),
@@ -339,7 +339,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 email: user.email ?? '',
               ));
     final p = _p;
-    _photo = p?.photoUrl ?? user?.photoURL;
+    _photo = ProfileAvatar.resolveUrl(p?.photoUrl, user?.photoURL);
     _name = TextEditingController(text: p?.fullName ?? '');
     _mobile = TextEditingController(
       text: PkPhone.normalize(p?.mobile ?? '') == null
@@ -783,7 +783,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         AccountProfileCard(
           name: _accountName(p, user?.displayName, ref.watch(isAdminProvider)),
           subtitle: 'Account info',
-          photoUrl: p?.photoUrl ?? user?.photoURL,
+          photoUrl: ProfileAvatar.resolveUrl(p?.photoUrl, user?.photoURL),
           onTap: () => context.open('/profile/info'),
         ),
         const SizedBox(height: 20),

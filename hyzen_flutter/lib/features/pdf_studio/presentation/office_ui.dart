@@ -133,7 +133,13 @@ class OfficeBrandHeader extends ConsumerWidget {
                               ),
                             ),
                             child: ProfileAvatar(
-                              photoUrl: p?.photoUrl,
+                              photoUrl: ProfileAvatar.resolveUrl(
+                                p?.photoUrl,
+                                ref
+                                    .watch(authStateProvider)
+                                    .valueOrNull
+                                    ?.photoURL,
+                              ),
                               radius: 19,
                               fallback: p?.firstName ?? 'H',
                             ),

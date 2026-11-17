@@ -94,7 +94,7 @@ class HomeDashboardTop extends ConsumerWidget {
                               key: const ValueKey('home-continue-study'),
                               onPressed: () {
                                 p.start();
-                                context.go('/study');
+                                context.push('/study-progress');
                               },
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(36, 32),

@@ -1,3 +1,8 @@
+import 'package:go_router/go_router.dart';
+import 'package:hyzen_pharmd/features/academics/presentation/library_screens.dart';
+import 'package:hyzen_pharmd/features/downloads/presentation/downloads_screen.dart';
+import 'package:hyzen_pharmd/features/pdf_studio/presentation/scan_pdf_screen.dart';
+import 'package:hyzen_pharmd/features/study_progress/study_progress_screen.dart';
 import 'dart:io';
 import 'package:hyzen_pharmd/features/notifications/notifications_screen.dart';
 import 'package:hyzen_pharmd/features/study_progress/study_forms.dart';
@@ -1150,6 +1155,76 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('Home quick actions open notes camera scanner and downloads', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const camera = MethodChannel('com.hyzen.pharmd/camera_pages');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      camera,
+      (_) async => <String>[],
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        camera,
+        null,
+      ),
+    );
+    for (final action in [
+      ('notes', '/study/notes', LibraryLevelScreen),
+      ('scan', '/create-pdf?source=camera', ScanPdfScreen),
+      ('downloads', '/downloads', DownloadsScreen),
+    ]) {
+      await open(tester, '/home');
+      final button = find.byKey(ValueKey('home-action-${action.$1}'));
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      final size = tester.getSize(button);
+      expect(size.width, greaterThanOrEqualTo(48));
+      expect(size.height, greaterThanOrEqualTo(48));
+      await tester.tap(button);
+      await tester.pump();
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pumpAndSettle();
+      final screen = find.byType(action.$3);
+      expect(screen, findsOneWidget);
+      expect(
+        GoRouterState.of(tester.element(screen)).uri.toString(),
+        action.$2,
+      );
+      expect(tester.takeException(), isNull);
+    }
+  });
+  testWidgets('Daily Challenge starts a session and opens timer progress', (
+    tester,
+  ) async {
+    await open(tester, '/home');
+    await tester.tap(find.byKey(const ValueKey('home-continue-study')));
+    await tester.pumpAndSettle();
+    expect(container.read(studyTrackerProvider).running, isTrue);
+    expect(
+      GoRouterState.of(
+        tester.element(find.byType(StudyProgressScreen)),
+      ).uri.path,
+      '/study-progress',
+    );
+    container.read(routerProvider).pop();
+    await tester.pumpAndSettle();
+    expect(
+      container.read(routerProvider).routeInformationProvider.value.uri.path,
+      '/home',
+    );
+    expect(container.read(studyTrackerProvider).running, isTrue);
+    container.read(studyTrackerProvider).pause();
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('reference Home hero and positioned profile fit a 360px phone', (
     tester,
   ) async {

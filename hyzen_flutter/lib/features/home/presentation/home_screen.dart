@@ -84,7 +84,10 @@ class HomeScreen extends ConsumerWidget {
                     dimension: 48,
                     child: Center(
                       child: ProfileAvatar(
-                        photoUrl: profile?.photoUrl,
+                        photoUrl: ProfileAvatar.resolveUrl(
+                          profile?.photoUrl,
+                          user?.photoURL,
+                        ),
                         radius: 21,
                         fallback: name,
                       ),
@@ -263,7 +266,7 @@ class _PlanCards extends StatelessWidget {
               'Study\nlibrary',
               style: t.textTheme.headlineSmall?.copyWith(
                 fontSize: 22,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w600,
                 height: 1.22,
               ),
             ),
@@ -307,7 +310,7 @@ class _PlanCards extends StatelessWidget {
               'Office\nworkspace',
               style: t.textTheme.headlineSmall?.copyWith(
                 fontSize: 18,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w600,
                 height: 1.25,
               ),
             ),
@@ -335,20 +338,7 @@ class _PlanCards extends StatelessWidget {
         ),
       ),
     );
-    Widget goals() => HCard(
-      color: HColors.pink,
-      radius: 24,
-      shadow: false,
-      onTap: () => context.push('/study-goals'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle_outline_rounded, size: 20),
-          const SizedBox(width: 8),
-          Expanded(child: Text('Study goals', style: t.textTheme.labelLarge)),
-        ],
-      ),
-    );
+    Widget goals() => const _HomeQuickActions();
     if (large) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -361,21 +351,76 @@ class _PlanCards extends StatelessWidget {
         ],
       );
     }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(flex: 6, child: library()),
-        const SizedBox(width: 10),
-        Expanded(
-          flex: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [office(), const SizedBox(height: 10), goals()],
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Three independent 48dp targets must fit even on a 320dp phone.
+        final rightWidth = (constraints.maxWidth * .45).clamp(156.0, 260.0);
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: library()),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: rightWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [office(), const SizedBox(height: 10), goals()],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
+}
+
+class _HomeQuickActions extends StatelessWidget {
+  const _HomeQuickActions();
+  @override
+  Widget build(BuildContext context) => Material(
+    color: HColors.pink,
+    borderRadius: BorderRadius.circular(24),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          for (final action in const [
+            ('notes', 'Open notes', '/study/notes'),
+            ('scan', 'Scan a document', '/create-pdf?source=camera'),
+            ('downloads', 'Open downloads', '/downloads'),
+          ])
+            IconButton(
+              key: ValueKey('home-action-${action.$1}'),
+              tooltip: action.$2,
+              onPressed: () => context.push(action.$3),
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                maximumSize: const Size(48, 48),
+                padding: const EdgeInsets.all(4),
+                tapTargetSize: MaterialTapTargetSize.padded,
+              ),
+              icon: Ink(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Color(0xB3FFFFFF),
+                  shape: BoxShape.circle,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Image.asset(
+                    'assets/reference/action-${action.$1}.png',
+                    cacheWidth: 120,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _PlanTag extends StatelessWidget {
