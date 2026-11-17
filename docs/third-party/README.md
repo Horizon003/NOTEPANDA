@@ -28,3 +28,7 @@ type, photographic onboarding and 3D illustrations in the 1.5.6 revision. These
 preferences override Unslop defaults that discourage those particular choices.
 The four assets in `hyzen_flutter/assets/reference/` were generated for this app;
 the student portrait depicts a fictional person. Existing Hyzen panda artwork is retained.
+
+## Outfit
+
+Outfit is bundled under SIL Open Font License 1.1. See `hyzen_flutter/assets/fonts/Outfit-OFL.txt`. Static weights are instantiated from the Google Fonts variable font; the owner selected this family for the pastel refinement.
