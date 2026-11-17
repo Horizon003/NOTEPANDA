@@ -1,4 +1,4 @@
-name: Native Flutter 1.5.6 reference profile verification
+name: Native Flutter 1.5.8 motion profile verification
 on:
   workflow_dispatch:
   push:
@@ -47,7 +47,10 @@ jobs:
           profile: pixel_2
           disable-animations: false
           working-directory: hyzen_flutter
-          script: flutter drive --profile --no-dds --no-enable-impeller --enable-software-rendering --driver=test_driver/monochrome_profile.dart --target=integration_test/monochrome_profile_test.dart --dart-define=HYZEN_REVIEW_ROUTE=/home
+          script: flutter drive --profile --no-dds --driver=test_driver/monochrome_profile.dart --target=integration_test/monochrome_profile_test.dart --dart-define=HYZEN_REVIEW_ROUTE=/home
+      - name: Require complete nonempty profile measurements
+        working-directory: hyzen_flutter
+        run: python ../tools/ci/stage_profile_evidence.py qa/reference/native build/verified-profile
       - uses: actions/upload-artifact@v4
         if: always()
         with:
