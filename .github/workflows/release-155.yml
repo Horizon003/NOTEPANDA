@@ -1,4 +1,4 @@
-name: Signed Android 1.5.7 release
+name: Signed Android 1.5.8 release
 on:
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: release-157
+  group: release-158
   cancel-in-progress: true
 jobs:
   build:
@@ -66,18 +66,18 @@ jobs:
       - name: Build universal release APK through Flutter
         working-directory: hyzen_flutter
         run: |
-          flutter build apk --release --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.7+16
+          flutter build apk --release --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.8+17
       - name: Build release native instrumentation tests
         working-directory: hyzen_flutter/android
         run: |
-          defines=$(python3 -c 'import os,base64; print(",".join(base64.b64encode(v.encode()).decode() for v in ["PUSH_API_BASE="+os.environ["PUSH_API_BASE"],"HYZEN_APP_VERSION=1.5.7+16"]))')
+          defines=$(python3 -c 'import os,base64; print(",".join(base64.b64encode(v.encode()).decode() for v in ["PUSH_API_BASE="+os.environ["PUSH_API_BASE"],"HYZEN_APP_VERSION=1.5.8+17"]))')
           gradle :app:assembleReleaseAndroidTest -Pdart-defines="$defines" -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart
       - name: Verify and package
         run: |
           set -euo pipefail
           mkdir -p release
-          cp hyzen_flutter/build/app/outputs/apk/release/app-release.apk release/PharmD-With-Hyzen-1.5.7.apk
-          apk=release/PharmD-With-Hyzen-1.5.7.apk
+          cp hyzen_flutter/build/app/outputs/apk/release/app-release.apk release/PharmD-With-Hyzen-1.5.8.apk
+          apk=release/PharmD-With-Hyzen-1.5.8.apk
           signer=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
           "$signer" verify --print-certs "$apk" > release/signing-report.txt
           grep -qi '3fd902d131ae56d8de4792c9f5953759e2b375e32bcad8f57f7ef5c0ab887f83' release/signing-report.txt
@@ -85,17 +85,17 @@ jobs:
           for abi in armeabi-v7a arm64-v8a x86_64; do grep -Fxq "lib/$abi/libflutter.so" /tmp/apk-entries.txt; done
           aapt=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -1)
           "$aapt" dump badging "$apk" > release/apk-metadata.txt
-          grep -q "versionCode='16' versionName='1.5.7'" release/apk-metadata.txt
-          (cd release && sha256sum PharmD-With-Hyzen-1.5.7.apk > SHA256SUMS.txt)
+          grep -q "versionCode='17' versionName='1.5.8'" release/apk-metadata.txt
+          (cd release && sha256sum PharmD-With-Hyzen-1.5.8.apk > SHA256SUMS.txt)
           printf 'Source commit: %s\nBuild: %s/%s/actions/runs/%s\n' "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > release/provenance.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: signed-release-157
+          name: signed-release-158
           path: release/
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
-          name: native-tests-157
+          name: native-tests-158
           path: hyzen_flutter/build/app/outputs/apk/androidTest/release/app-release-androidTest.apk
           if-no-files-found: error
       - name: Remove signing files
@@ -109,16 +109,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: signed-release-157
+          name: signed-release-158
           path: release
       - uses: actions/download-artifact@v4
         with:
-          name: native-tests-157
+          name: native-tests-158
           path: native-test
       - name: Download successful production baseline for update check
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download v1.5.6-15 --pattern PharmD-With-Hyzen-1.5.6.apk --dir baseline
+        run: gh release download v1.5.7-16 --pattern PharmD-With-Hyzen-1.5.7.apk --dir baseline
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -131,11 +131,11 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            adb install baseline/PharmD-With-Hyzen-1.5.6.apk
+            adb install baseline/PharmD-With-Hyzen-1.5.7.apk
             adb install -t native-test/app-release-androidTest.apk
             adb shell am instrument -w -e class com.hyzen.pharmd.UpdateRetentionTest -e phase seed com.hyzen.pharmd.test/androidx.test.runner.AndroidJUnitRunner > update-seed.txt
             grep -q 'OK (1 test)' update-seed.txt
-            adb install -r release/PharmD-With-Hyzen-1.5.7.apk
+            adb install -r release/PharmD-With-Hyzen-1.5.8.apk
             adb shell am instrument -w -e class com.hyzen.pharmd.UpdateRetentionTest com.hyzen.pharmd.test/androidx.test.runner.AndroidJUnitRunner > update-verify.txt
             grep -q 'OK (1 test)' update-verify.txt
             adb shell am instrument -w -e notClass com.hyzen.pharmd.UpdateRetentionTest com.hyzen.pharmd.test/androidx.test.runner.AndroidJUnitRunner > native-pdf-tests.txt
@@ -149,7 +149,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: release-157-install-logs
+          name: release-158-install-logs
           path: |
             launch-logcat.txt
             update-seed.txt
@@ -212,10 +212,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: signed-release-157
+          name: signed-release-158
           path: release
+      - uses: actions/download-artifact@v4
+        with:
+          name: reference-native-profile
+          path: profile-evidence
+      - name: Attach measured profile evidence
+        run: python tools/ci/stage_profile_evidence.py profile-evidence release
       - name: Publish release and APK
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.5.7-16 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.7 — Pastel Workspace Edition' --notes-file docs/release-1.5.7.md --latest
+          gh release create v1.5.8-17 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.8 — Adaptive Motion Edition' --notes-file docs/release-1.5.8.md --latest
