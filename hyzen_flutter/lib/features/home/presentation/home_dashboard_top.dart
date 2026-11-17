@@ -195,15 +195,17 @@ class StudyWeekRibbon extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            [
-                              'Mon',
-                              'Tue',
-                              'Wed',
-                              'Thu',
-                              'Fri',
-                              'Sat',
-                              'Sun',
-                            ][i],
+                            (MediaQuery.textScalerOf(context).scale(1) > 1.3
+                                ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+                                : [
+                                    'Mon',
+                                    'Tue',
+                                    'Wed',
+                                    'Thu',
+                                    'Fri',
+                                    'Sat',
+                                    'Sun',
+                                  ])[i],
                             maxLines: 1,
                             style: t.textTheme.labelSmall?.copyWith(
                               color: today ? Colors.white70 : HColors.ink2,
@@ -211,11 +213,15 @@ class StudyWeekRibbon extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 3),
-                          Text(
-                            '${date.day}',
-                            style: t.textTheme.titleMedium?.copyWith(
-                              color: ink,
-                              fontSize: 14,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              '${date.day}',
+                              maxLines: 1,
+                              style: t.textTheme.titleMedium?.copyWith(
+                                color: ink,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],

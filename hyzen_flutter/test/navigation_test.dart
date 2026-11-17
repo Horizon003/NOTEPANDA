@@ -14,6 +14,8 @@ import 'package:hyzen_pharmd/core/widgets/surfaces.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:hyzen_pharmd/features/home/presentation/home_dashboard_top.dart';
 import 'package:hyzen_pharmd/features/auth/domain/student_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -203,6 +205,46 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets(
+    'date ribbon keeps two-digit dates on one line at 320dp and 200% text',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+              child: SizedBox(
+                width: 288,
+                child: StudyWeekRibbon(
+                  now: DateTime(2026, 11, 17),
+                  days: const {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (var day = 16; day <= 22; day++) {
+        final paragraph = tester.renderObject<RenderParagraph>(
+          find.text('$day'),
+        );
+        expect(
+          paragraph
+              .getBoxesForSelection(
+                const TextSelection(baseOffset: 0, extentOffset: 2),
+              )
+              .map((box) => box.top)
+              .toSet()
+              .length,
+          1,
+          reason: '$day must remain a single readable date',
+        );
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
   test('HOME-03 time greeting boundaries', () {
     expect(homeGreeting(DateTime(2026, 1, 1, 6)), 'Good morning');
     expect(homeGreeting(DateTime(2026, 1, 1, 12)), 'Good afternoon');
