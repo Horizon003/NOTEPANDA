@@ -143,5 +143,5 @@ jobs:
           if gh release view v1.5.10-19 >/dev/null 2>&1; then
             gh release upload v1.5.10-19 release/* --clobber
           else
-            gh release create v1.5.10-19 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.10 — Daily Rhythm Review' --notes-file docs/release-1.5.10.md --prerelease --latest=false
+            gh release create v1.5.10-19 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.10 — Firebase & Admin Review' --notes-file docs/release-1.5.10.md --prerelease --latest=false
           fi

@@ -57,7 +57,7 @@ const path=require('node:path');
    await page.screenshot({path:path.join(output,'admin-import-'+width+'.png')});
    checks.push('layout '+width);
   }
-  const revision=(await (await page.request.get(new URL('../source-commit.txt',base).href)).text()).trim();
+  const revision=(await page.evaluate(async url=>(await fetch(url,{cache:'no-store'})).text(),new URL('../source-commit.txt',base).href)).trim();
   const result={checks,errors,source:revision,fixtureOnly:true,realFlutter:true};fs.writeFileSync(path.join(output,'evidence.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
   if(errors.length)process.exitCode=1;
  }finally{await browser.close();}
