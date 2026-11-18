@@ -13,9 +13,22 @@ const projectId='pharmawhisper-debd2';
 const day=ms=>Math.floor((ms+18000000)/86400000);
 (async()=>{
  if(process.env.HYZEN_LIVE_FIREBASE_CHECK!=='yes')throw Error('Explicit live-check opt-in is required.');
+ if(process.argv.includes('--permissions-only')){
+  const {GoogleAuth}=require('../functions/node_modules/google-auth-library');
+  const client=await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform']}).getClient();
+  const wanted=['datastore.indexes.list','datastore.indexes.create','datastore.indexes.get','datastore.operations.get','firebaserules.releases.get','firebaserules.releases.update','firebaserules.rulesets.create','firebase.projects.get','serviceusage.services.get'];
+  const result=await client.request({url:`https://cloudresourcemanager.googleapis.com/v1/projects/${projectId}:testIamPermissions`,method:'POST',data:{permissions:wanted}});
+  const allowed=result.data.permissions||[];
+  console.log(JSON.stringify({allowed,missing:wanted.filter(p=>!allowed.includes(p))}));
+  return;
+ }
  const source=fs.readFileSync('hyzen_flutter/lib/core/firebase/firebase_options.dart','utf8').split('FirebaseOptions web = FirebaseOptions(')[1].split(');')[0];
  const config={projectId,apiKey:source.match(/apiKey:\s*'([^']+)'/)[1],appId:source.match(/appId:\s*'([^']+)'/)[1]};
- const admin=adminApp.initializeApp({credential:adminApp.applicationDefault(),projectId});
+ const credentialFile=process.env.GOOGLE_APPLICATION_CREDENTIALS;
+ const credentials=credentialFile?JSON.parse(fs.readFileSync(credentialFile,'utf8')):null;
+ if(credentials?.project_id && credentials.project_id!==projectId)throw Error('Smoke-check credentials belong to a different project.');
+ const credential=credentials?.private_key?adminApp.cert(credentials):adminApp.applicationDefault();
+ const admin=adminApp.initializeApp({credential,projectId});
  const auth=getAuth(admin),db=getFirestore(admin),prefix='hyzen-ci-smoke-'+randomUUID(),uids=[prefix+'-a',prefix+'-b'],apps=[];
  const checks=[];
  const denied=promise=>assert.rejects(promise,e=>e.code==='permission-denied');
