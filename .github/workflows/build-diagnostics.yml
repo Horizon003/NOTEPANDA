@@ -1,0 +1,42 @@
+name: Read Android verification diagnostics
+on:
+  push:
+    branches: [work/monochrome-motion-1.5.5]
+    paths: ['.github/workflows/build-diagnostics.yml']
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Completed validation run to inspect
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_RUN: ${{ inputs.run_id || '44334773642' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read failed job logs on the Actions runner
+        run: |
+          gh run view "$TARGET_RUN" --repo "$GITHUB_REPOSITORY" --log-failed > diagnostics.txt
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          lines=Path('diagnostics.txt').read_text().splitlines()
+          selected=set()
+          for i,line in enumerate(lines):
+              if re.search(r'FAIL|Error:|error:|Exception|Timed out|Timeout|HYZEN_PROFILE|checkpoint|BUILD FAILED|What went wrong',line):
+                  selected.update(range(max(0,i-3),min(len(lines),i+9)))
+          text='\n'.join(lines[i] for i in sorted(selected))[-24000:] or '\n'.join(lines[-60:])
+          print('::notice title=Android verification diagnostics::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
+          Path('diagnostic-excerpt.txt').write_text(text)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-diagnostics
+          path: |
+            diagnostics.txt
+            diagnostic-excerpt.txt
