@@ -28,7 +28,10 @@ Firebase competitive scores.
   five/day; +5 for a consecutive qualifying 15-minute day. Week starts Monday;
   month and professional-total are supported. These are distinct from wallet points.
 - `campusMemberships/{uid}`: admin-verified professional year; student-selected
-  alias and opt-out. Private profile text cannot verify an account.
+  alias and opt-out. A one-time Firebase ranking-consent marker prevents an old
+  D1-only opt-out preference becoming an automatic Firebase opt-in. Confirm the
+  existing ranking privacy control once; no points/history are deleted. Private
+  profile text cannot verify an account.
 - `professionalRanks/{uid}`: only opted-in verified students, projected exactly
   from their private year ledger. Board sorted by points/minutes/UID, pages of30.
   Admin verification/year changes **must delete this public row in the same
@@ -53,7 +56,7 @@ backend/functions/node_modules/.bin/firebase emulators:exec --config backend/fir
 ```
 
 The checked-in full rules file is **an emulator candidate, not an authorized
-replacement for current production rules**. Eleven rule tests and an opt-in real Flutter SDK/admin round trip cover legitimate credit,
+replacement for current production rules**. Twelve rule tests and an opt-in real Flutter SDK/admin round trip cover legitimate credit,
 forgery, duplicate/concurrent claims, bonuses, privacy, pauses/gaps and revocation.
 
 ## Deploy into the existing project

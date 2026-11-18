@@ -37,6 +37,7 @@ class FirebaseStudyStore {
 
   static bool eligible(Map<String, dynamic>? member) =>
       member?['verified'] == true &&
+      member?['firebaseRankConsent'] == true &&
       member?['optOut'] == false &&
       number(member?['academicYear']) >= 1 &&
       number(member?['academicYear']) <= 5;
@@ -508,6 +509,7 @@ class FirebaseStudyStore {
         'alias': alias,
         'optOut': optOut,
         'privacyUpdatedAt': FieldValue.serverTimestamp(),
+        'firebaseRankConsent': true,
       });
       if (optOut) {
         tx.delete(_public);
@@ -531,7 +533,7 @@ class FirebaseStudyStore {
     if (!eligible(member)) {
       return {
         'status':
-            'Verified professional year and ranking consent are required.',
+            'Verified year and Firebase ranking consent are required. Open Privacy to confirm.',
         'entries': <Map<String, dynamic>>[],
         'mine': null,
       };

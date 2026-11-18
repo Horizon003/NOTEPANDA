@@ -174,6 +174,59 @@ void main() {
               .data()?['verified'],
           true,
         );
+
+        // Legacy D1 opt-out never becomes an automatic Firebase opt-in.
+        final readerToken =
+            '${encode({'alg': 'none', 'typ': 'JWT'})}.${encode({'iss': issuer, 'sub': issuer, 'aud': 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit', 'iat': nowSeconds, 'exp': nowSeconds + 3600, 'uid': user.uid})}.';
+        await FirebaseAuth.instance.signInWithCustomToken(readerToken);
+        expect(
+          (await store.call('readCampusBoard', {'period': 'week'}))['status'],
+          contains('consent'),
+        );
+        await store.call('setRankPrivacy', {
+          'alias': 'Reader',
+          'optOut': false,
+        });
+        expect(
+          (await store.call('readCampusBoard', {'period': 'week'}))['status'],
+          'ready',
+        );
+        final rankedSession = studyId();
+        await store.call('rewardPulse', {
+          'session': rankedSession,
+          'action': 'start',
+        });
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        await store.call('rewardPulse', {
+          'session': rankedSession,
+          'action': 'heartbeat',
+        });
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        await store.call('rewardPulse', {
+          'session': rankedSession,
+          'action': 'pause',
+        });
+        final ledger =
+            (await FirebaseFirestore.instance
+                    .doc('studyUsers/${user.uid}/state/rank_2')
+                    .get())
+                .data()!;
+        expect(ledger['sourceVersion'], greaterThan(0));
+        expect(
+          (await FirebaseFirestore.instance
+                  .doc('professionalRanks/${user.uid}')
+                  .get())
+              .data()?['academicYear'],
+          2,
+        );
+        await store.call('setRankPrivacy', {'alias': 'Reader', 'optOut': true});
+        expect(
+          (await FirebaseFirestore.instance
+                  .doc('professionalRanks/${user.uid}')
+                  .get())
+              .exists,
+          false,
+        );
       } finally {
         await subscription.cancel();
         await FirebaseAuth.instance.signOut();

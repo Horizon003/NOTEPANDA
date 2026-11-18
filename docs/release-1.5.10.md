@@ -15,6 +15,7 @@ workflow and a real-account round trip succeed. No Blaze plan is needed.
 - Import history offers batch undo without deleting later additions.
 - A 320dp/200% font dropdown overflow is fixed. CSV/JSON/Excel template downloads and JSON backup export/restore work through
   native Android document pickers and browser file/download APIs.
+- Firebase ranking requires one-time consent through its existing privacy control, preserving legacy opt-out safety.
 - Administrator verification changes atomically invalidate public ranking rows;
   validated private history is retained.
 

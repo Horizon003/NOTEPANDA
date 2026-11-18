@@ -108,7 +108,7 @@ service cloud.firestore {
     function memberPath(uid) { return /databases/$(database)/documents/campusMemberships/$(uid); }
     function publicRankPath(uid) { return /databases/$(database)/documents/professionalRanks/$(uid); }
     function memberData(uid) { return exists(memberPath(uid)) ? get(memberPath(uid)).data : {}; }
-    function rankEligible(m) { return m.get('verified', false) == true && m.get('optOut', true) == false && m.get('academicYear', 0) in [1,2,3,4,5]; }
+    function rankEligible(m) { return m.get('verified', false) == true && m.get('firebaseRankConsent', false) == true && m.get('optOut', true) == false && m.get('academicYear', 0) in [1,2,3,4,5]; }
     function studyYear(uid) { let m = memberData(uid); return m.get('verified', false) == true && m.get('academicYear', 0) in [1,2,3,4,5] ? m.academicYear : 0; }
     function studyDay(t) { return int((t.toMillis() + 18000000) / 86400000); }
     function studyMonth(d) { let t = timestamp.value(d * 86400000); return t.year() * 12 + t.month(); }
@@ -269,14 +269,11 @@ service cloud.firestore {
       allow create,update: if studyAdmin() && request.resource.data.verified is bool && request.resource.data.academicYear is int && request.resource.data.academicYear in [1,2,3,4,5] && !existsAfter(publicRankPath(uid));
       allow delete: if studyAdmin() && !existsAfter(publicRankPath(uid));
       allow update: if studyOwner(uid) && resource.data.verified == true
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alias','optOut','privacyUpdatedAt'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alias','optOut','privacyUpdatedAt','firebaseRankConsent'])
         && request.resource.data.alias is string && request.resource.data.alias.size() > 0 && request.resource.data.alias.size() <= 40 && request.resource.data.optOut is bool
-        && request.resource.data.privacyUpdatedAt == request.time
+        && request.resource.data.firebaseRankConsent == true && request.resource.data.privacyUpdatedAt == request.time
         && (request.resource.data.optOut ? !existsAfter(publicRankPath(uid)) : projectedRank(uid,getAfter(publicRankPath(uid)).data));
     }
 
-    match /{document=**} {
-      allow read, write: if false;
-    }
   }
 }

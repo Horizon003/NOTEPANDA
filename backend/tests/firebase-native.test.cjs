@@ -60,7 +60,7 @@ test('verified rank credit matches the settled minute and metadata is not self-v
  const at=Timestamp.fromMillis(now-10000),prev=Timestamp.fromMillis(now-25000);
  const old={version:1,session,active:true,closed:false,at,previousAt:prev,previousActive:true,previousSession:session,totalMs:45000,sessionMs:45000,deltaMs:0,creditDay:d,creditYear:year,completion:0,academicYear:year};
  await env.withSecurityRulesDisabled(async c=>{
-  await setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,academicYear:year,alias:'Reader',optOut:false});
+  await setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,firebaseRankConsent:true,academicYear:year,alias:'Reader',optOut:false});
   await setDoc(doc(c.firestore(),`studyUsers/${uid}/state/activity`),old);
   await setDoc(doc(c.firestore(),`studyUsers/${uid}/verifiedDays/${year}_${d}`),{day:d,academicYear:year,totalMs:45000,completed:0,bonus:0,lastVersion:1});
  });
@@ -80,7 +80,7 @@ test('verified rank credit matches the settled minute and metadata is not self-v
 test('admin verification changes must invalidate the public rank atomically',async()=>{
  const uid='revoked';
  await env.withSecurityRulesDisabled(async c=>{
-  await setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,academicYear:2,alias:'Reader',optOut:false});
+  await setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,firebaseRankConsent:true,academicYear:2,alias:'Reader',optOut:false});
   await setDoc(doc(c.firestore(),`professionalRanks/${uid}`),{uid,verified:true,academicYear:2,alias:'Reader',optOut:false,totalPoints:50});
  });
  await assertFails(updateDoc(doc(admin,`campusMemberships/${uid}`),{verified:false}));
@@ -126,4 +126,17 @@ test('personal batches are immutable and never authorize rank or reward changes'
  await assertFails(updateDoc(ref,{events:[]}));
  await assertFails(getDoc(doc(b,'studyUsers/alice/eventBatches/history')));
  await assertFails(setDoc(doc(a,'professionalRanks/alice'),{uid:'alice',totalPoints:999999}));
+});
+test('legacy D1 privacy cannot silently become Firebase ranking consent',async()=>{
+ const uid='legacy-private',client=env.authenticatedContext(uid).firestore(),member=doc(client,`campusMemberships/${uid}`),publicRef=doc(client,`professionalRanks/${uid}`);
+ await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,academicYear:2,alias:'Legacy',optOut:false}));
+ const projection={uid,alias:'Legacy',verified:true,optOut:false,academicYear:2,weekKey:0,weekPoints:0,weekMinutes:0,monthKey:0,monthPoints:0,monthMinutes:0,totalPoints:0,totalMinutes:0,sourceVersion:0};
+ await assertFails(setDoc(publicRef,projection));
+ const board=query(collection(client,'professionalRanks'),where('academicYear','==',2),where('verified','==',true),where('optOut','==',false));
+ await assertFails(getDocs(board));
+ const batch=writeBatch(client);
+ batch.update(member,{alias:'Legacy',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp()});
+ batch.set(publicRef,projection);
+ await assertSucceeds(batch.commit());
+ await assertSucceeds(getDocs(board));
 });
