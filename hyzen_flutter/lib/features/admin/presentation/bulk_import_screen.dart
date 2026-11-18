@@ -195,7 +195,7 @@ class _BulkImportScreenState extends ConsumerState<BulkImportScreen> {
             children: [
               // Template stays at the top, above file selection.
               HButton(
-                label: 'Download CSV template',
+                label: 'CSV template',
                 icon: Icons.file_download_outlined,
                 onPressed: _busy ? null : _template,
                 outlined: true,
@@ -230,6 +230,7 @@ class _BulkImportScreenState extends ConsumerState<BulkImportScreen> {
               ),
               const Gap(HSpace.md),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _defaultType,
                 decoration: const InputDecoration(labelText: 'Resource type'),
                 items: [
@@ -243,9 +244,7 @@ class _BulkImportScreenState extends ConsumerState<BulkImportScreen> {
                   ])
                     DropdownMenuItem(
                       value: kind,
-                      child: Text(
-                        kind == 'auto' ? 'Auto-detect from file / sheet' : kind,
-                      ),
+                      child: Text(kind == 'auto' ? 'Auto-detect' : kind),
                     ),
                 ],
                 onChanged: _busy

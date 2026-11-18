@@ -6,6 +6,34 @@ import 'package:hyzen_pharmd/features/admin/domain/import_formats.dart';
 import 'package:hyzen_pharmd/features/admin/domain/import_templates.dart';
 
 void main() {
+  test('website JSON with UTF-8 BOM is accepted', () {
+    final csv = dataFileCsv(
+      'bom.json',
+      Uint8List.fromList(utf8.encode('\uFEFF${importTemplateJson()}')),
+    );
+    expect(parseCsv(csv).length, 7);
+  });
+  test(
+    'website batch markers remain undoable without touching later files',
+    () {
+      final tree = <Map<String, dynamic>>[
+        {
+          '_createdByBatch': 'old',
+          'files': <Map<String, dynamic>>[
+            {
+              '_importBatch': 'old',
+              'title': 'Imported',
+              'pdfUrl': 'https://example.org/old.pdf',
+            },
+            {'title': 'Later', 'pdfUrl': 'https://example.org/later.pdf'},
+          ],
+        },
+      ];
+      expect(undoImportNodes(tree, 'old'), 1);
+      expect(jsonEncode(tree), contains('Later'));
+      expect(jsonEncode(tree), isNot(contains('Imported')));
+    },
+  );
   test(
     'all three website-compatible templates round trip after real links replace placeholders',
     () {

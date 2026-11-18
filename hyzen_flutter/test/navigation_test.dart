@@ -2038,6 +2038,18 @@ void main() {
       }
     }
     expect(find.text('2nd Professional'), findsOneWidget);
+    tester.view.physicalSize = const Size(320, 844);
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    admin.read(routerProvider).go('/admin/import');
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byWidgetPredicate((w) => w is DropdownButtonFormField<String>),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'Admin import at 320dp / 200%');
   });
   if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
     testWidgets('onboarding reference visual QA', (tester) async {

@@ -12,7 +12,9 @@ String dataFileCsv(String name, Uint8List bytes) {
   final ext = name.toLowerCase().split('.').last;
   if (ext == 'csv') return utf8.decode(bytes);
   if (ext == 'json') {
-    final decoded = jsonDecode(utf8.decode(bytes));
+    final decoded = jsonDecode(
+      utf8.decode(bytes).replaceFirst(RegExp(r'^\uFEFF'), ''),
+    );
     final maps = resourceJsonRows(decoded);
     if (maps.isEmpty) {
       throw FriendlyException(

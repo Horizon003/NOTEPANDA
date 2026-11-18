@@ -13,7 +13,7 @@ workflow and a real-account round trip succeed. No Blaze plan is needed.
   past-paper inference and optional lecture filename/section. Valid rows can be
   imported while invalid/duplicate/conflicting lecture rows are excluded.
 - Import history offers batch undo without deleting later additions.
-- CSV/JSON/Excel template downloads and JSON backup export/restore work through
+- A 320dp/200% font dropdown overflow is fixed. CSV/JSON/Excel template downloads and JSON backup export/restore work through
   native Android document pickers and browser file/download APIs.
 - Administrator verification changes atomically invalidate public ranking rows;
   validated private history is retained.

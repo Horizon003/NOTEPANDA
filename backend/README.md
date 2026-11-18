@@ -53,7 +53,7 @@ backend/functions/node_modules/.bin/firebase emulators:exec --config backend/fir
 ```
 
 The checked-in full rules file is **an emulator candidate, not an authorized
-replacement for current production rules**. Eleven tests cover legitimate credit,
+replacement for current production rules**. Eleven rule tests and an opt-in real Flutter SDK/admin round trip cover legitimate credit,
 forgery, duplicate/concurrent claims, bonuses, privacy, pauses/gaps and revocation.
 
 ## Deploy into the existing project
