@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:hyzen_pharmd/features/study_progress/study_calendar.dart';
 import 'package:hyzen_pharmd/features/study_progress/study_progress_screen.dart';
 import 'dart:async';
@@ -152,6 +153,8 @@ void main() {
         const Duration(seconds: 15),
       );
       container.read(themeModeProvider.notifier).set(ThemeMode.light);
+      binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+      List<int>? previousCapture;
       for (final path in [
         '/home',
         '/study',
@@ -165,12 +168,23 @@ void main() {
         '/study-calendar',
       ]) {
         await _showRoute(router, path);
+        await tester.pumpAndSettle(timeout: const Duration(seconds: 15));
+        // PixelCopy must see the settled raster frame, not merely a mounted
+        // route. SwiftShader can trail the UI tree by more than 800 ms.
+        await binding.endOfFrame;
+        await _wait(const Duration(milliseconds: 1500));
         final name = 'light-${path.substring(1)}';
         _checkpoint('capturing $name');
         final bytes = await binding
             .takeScreenshot(name)
             .timeout(const Duration(seconds: 15));
         expect(bytes, isNotEmpty, reason: 'Screenshot $name must contain data');
+        expect(
+          previousCapture == null || !listEquals(previousCapture, bytes),
+          isTrue,
+          reason: '$name must not reuse the previous screen frame',
+        );
+        previousCapture = bytes;
       }
       expect(tester.takeException(), isNull);
       binding.reportData!['profile_complete'] = true;

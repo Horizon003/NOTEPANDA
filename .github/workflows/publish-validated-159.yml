@@ -131,4 +131,8 @@ jobs:
                   for path in root.rglob('*.png'):
                       archive.write(path, prefix+'/'+str(path.relative_to(root)))
           PY
-          gh release create v1.5.9-18 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.9 — Daily Rhythm Review' --notes-file docs/release-1.5.9.md --prerelease --latest=false
+          if gh release view v1.5.9-18 >/dev/null 2>&1; then
+            gh release upload v1.5.9-18 release/* --clobber
+          else
+            gh release create v1.5.9-18 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.9 — Daily Rhythm Review' --notes-file docs/release-1.5.9.md --prerelease --latest=false
+          fi
