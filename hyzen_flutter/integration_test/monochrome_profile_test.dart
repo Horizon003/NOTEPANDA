@@ -168,7 +168,11 @@ void main() {
         '/study-calendar',
       ]) {
         await _showRoute(router, path);
-        await tester.pumpAndSettle(timeout: const Duration(seconds: 15));
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 15),
+        );
         // PixelCopy must see the settled raster frame, not merely a mounted
         // route. SwiftShader can trail the UI tree by more than 800 ms.
         await binding.endOfFrame;
