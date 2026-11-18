@@ -15,7 +15,7 @@ function signature(index) {
   const url=`${root}/${database}/collectionGroups/${group}/indexes`;
   let page='', existing=[];
   do {
-   const data=await request(`${url}?pageSize=100${page?'&pageToken='+encodeURIComponent(page):''}`);
+   const data=await request(`${url}${page?'?pageToken='+encodeURIComponent(page):''}`);
    existing.push(...data.indexes||[]); page=data.nextPageToken||'';
   }while(page);
   const operations=[];
