@@ -21,7 +21,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Read failed job logs on the Actions runner
         run: |
-          gh run view "$TARGET_RUN" --repo "$GITHUB_REPOSITORY" --log-failed > diagnostics.txt
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$TARGET_RUN/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure")|.id' > failed-jobs.txt
+          : > diagnostics.txt
+          while read -r job_id; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" >> diagnostics.txt
+          done < failed-jobs.txt
           python3 - <<'PY'
           import re
           from pathlib import Path
