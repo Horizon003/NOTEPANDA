@@ -60,6 +60,23 @@ test('authenticated HTTP flow verifies tokens, roles, canonical membership and r
     assert.equal((await call('/studyPulse','student',{data:{session,action:'heartbeat'}})).status,403);
     verified=true;
   });
+  await t.test('authenticated wallet/calendar are account scoped and independent from rank verification',async()=>{
+    verified=false;
+    const initial=await call('/rewardState','student',{data:{}});
+    assert.equal(initial.status,200);const state=(await initial.json()).result;
+    const request={data:{kind:'daily',day:state.today,uid:'other-account'}};
+    const claim=await call('/claimReward','student',request);assert.equal(claim.status,200);
+    assert.equal((await claim.json()).result.points,100);
+    assert.equal((await (await call('/claimReward','student',request)).json()).result.points,100);
+    assert.equal((await (await call('/rewardState','other-account',{data:{}})).json()).result.points,0);
+    assert.equal((await call('/claimReward','student',{data:{kind:'daily',day:'1900-01-01'}})).status,409);
+    const event={id:'exam-http',title:'Pharmacy paper',day:'2026-11-23',at:'2026-11-23T04:00:00Z',color:0xffd46a61,kind:'Exam',leadMinutes:30};
+    assert.equal((await call('/calendarEvents','student',{data:{action:'save',event}})).status,200);
+    assert.equal((await (await call('/calendarEvents','student',{data:{action:'read'}})).json()).result.events.length,1);
+    assert.equal((await (await call('/calendarEvents','other-account',{data:{action:'read'}})).json()).result.events.length,0);
+    assert.equal((await call('/rewardPulse','student',{data:{session:'b'.repeat(32),action:'start'}})).status,200);
+    verified=true;
+  });
   await t.test('admin send retry reuses provider ID; only server-selected recipients see inbox entry',async()=>{
     const message={id:'22222222-2222-4222-8222-222222222222',title:'Study update',body:'New study material',route:'/study',category:'material',target:'professional',year:1};
     const first=await call('/send','admin',message);assert.equal(first.status,200);

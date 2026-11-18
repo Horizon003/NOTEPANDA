@@ -31,3 +31,10 @@ test('calendar is account scoped, upserts and deletes safely',async()=>{
  assert.equal((await calendarEvents(db,'a',{action:'read'})).events[0].title,'Updated');
  await calendarEvents(db,'a',{action:'delete',id:'e1'});assert.equal((await calendarEvents(db,'a',{action:'read'})).events.length,0);
 });
+
+test('parallel daily claims credit exactly once and invalid calendar dates are rejected',async()=>{
+ const {db}=fixture();
+ await Promise.all(Array.from({length:8},()=>claimReward(db,'a',{kind:'daily',day:'2026-11-01'},at(1))));
+ assert.equal((await rewardState(db,'a',at(1))).points,100);
+ await assert.rejects(calendarEvents(db,'a',{action:'save',event:{id:'bad',title:'Exam',day:'2026-02-31',at:'2026-03-03T09:00:00Z',color:0xffd46a61,kind:'Exam',leadMinutes:30}}));
+});

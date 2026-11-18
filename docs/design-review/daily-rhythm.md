@@ -61,9 +61,13 @@ checks remain separate from widget/emulator verification.
   offline calendar persistence/account isolation, and Home calendar routing/color.
 - Calendar/Streak/Progress layouts checked at 320, 360, 390, 430 and 800 logical
   pixels with normal and 200% text. Existing maximum display-scale checks remain.
-- Worker: 24 tests passed; shared scoring: 8 tests passed; deploy dry run bundled
+- Worker: 26 tests passed; shared scoring: 8 tests passed; deploy dry run bundled
   successfully. This does not establish authenticated production behavior.
 - Actual Flutter widget screenshots: `hyzen_flutter/qa/reference/after/`; previous
   Home/Progress fixtures: `hyzen_flutter/qa/daily-rhythm/before/`.
 - Android signed build, native update/startup, scanner/document tests and current
   emulator profiling are tracked by the 1.5.9 workflow, not assumed from 1.5.8.
+
+Authenticated HTTP fixtures also exercise the new endpoints through verified JWTs,
+account isolation and duplicate claims. They use an isolated test key/database,
+not a production account. Eight simultaneous daily claims credit only once.

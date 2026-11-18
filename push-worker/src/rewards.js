@@ -11,7 +11,7 @@ export function streakCount(days, today) {
 }
 export async function rewardState(db, uid, now=Date.now()) {
   const claims = (await db.prepare('SELECT day FROM reward_claims WHERE uid=? ORDER BY day').bind(uid).all()).results.map(r=>r.day);
-  const badges = (await db.prepare("SELECT reward_key FROM reward_ledger WHERE uid=? AND kind='achievement'").bind(uid).all()).results.map(r=>Number(r.reward_key.split(':')[1]));
+  const badges = (await db.prepare("SELECT reward_key FROM reward_ledger WHERE uid=? AND kind='achievement'").bind(uid).all()).results.map(r=>Number(r.reward_key.split(':')[1])).sort((a,b)=>b-a);
   const row = await db.prepare('SELECT COALESCE(SUM(points),0) AS points FROM reward_ledger WHERE uid=?').bind(uid).first();
   const time = await db.prepare('SELECT COALESCE(SUM(seconds),0) AS seconds FROM reward_days WHERE uid=?').bind(uid).first();
   // A verified second never gets spent twice; fractional hours carry forward.
@@ -71,7 +71,7 @@ export async function rewardPulse(db,uid,data,now=Date.now()) {
 export async function calendarEvents(db,uid,data,now=Date.now()) {
   if(data.action==='save') {
     const e=data.event;
-    if(!e||!/^[a-zA-Z0-9_-]{1,80}$/.test(e.id)||typeof e.title!=='string'||!e.title.trim()||e.title.length>120||!/^\d{4}-\d{2}-\d{2}$/.test(e.day)||!Number.isFinite(Date.parse(e.day+'T12:00:00Z'))||!Number.isInteger(e.color)||e.color<0||e.color>0xffffffff||!['Test','Exam','Event'].includes(e.kind)||!Number.isFinite(Date.parse(e.at))||!Number.isInteger(e.leadMinutes)||e.leadMinutes<0||e.leadMinutes>10080)throw fail('Invalid calendar event.');
+    if(!e||!/^[a-zA-Z0-9_-]{1,80}$/.test(e.id)||typeof e.title!=='string'||!e.title.trim()||e.title.length>120||!/^\d{4}-\d{2}-\d{2}$/.test(e.day)||(!Number.isFinite(Date.parse(e.day+'T12:00:00Z'))||new Date(e.day+'T12:00:00Z').toISOString().slice(0,10)!==e.day)||!Number.isInteger(e.color)||e.color<0||e.color>0xffffffff||!['Test','Exam','Event'].includes(e.kind)||!Number.isFinite(Date.parse(e.at))||!Number.isInteger(e.leadMinutes)||e.leadMinutes<0||e.leadMinutes>10080)throw fail('Invalid calendar event.');
     await db.prepare('INSERT INTO calendar_events(uid,id,payload,updated_at) VALUES(?,?,?,?) ON CONFLICT(uid,id) DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at').bind(uid,e.id,JSON.stringify(e),now).run();
   } else if(data.action==='delete') {
     if(typeof data.id!=='string')throw fail('Missing event.');
