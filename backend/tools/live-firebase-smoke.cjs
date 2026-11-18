@@ -1,20 +1,21 @@
 // Opt-in production smoke test. Uses two isolated temporary users and removes
 // all their data in finally. Never touches student records or settings trees.
 const assert=require('node:assert/strict');
+const requireBackend=require('node:module').createRequire(require('node:path').resolve(__dirname,'../functions/package.json'));
 const fs=require('node:fs');
 const {randomUUID}=require('node:crypto');
-const adminApp=require('../functions/node_modules/firebase-admin/app');
-const {getAuth}=require('../functions/node_modules/firebase-admin/auth');
-const {getFirestore}=require('../functions/node_modules/firebase-admin/firestore');
-const {initializeApp,deleteApp}=require('../functions/node_modules/firebase/app');
-const {getAuth:clientAuth,signInWithCustomToken,signOut}=require('../functions/node_modules/firebase/auth');
-const {getFirestore:clientDb,doc,setDoc,getDocFromServer,updateDoc,deleteDoc,writeBatch,serverTimestamp}=require('../functions/node_modules/firebase/firestore');
+const adminApp=requireBackend('firebase-admin/app');
+const {getAuth}=requireBackend('firebase-admin/auth');
+const {getFirestore}=requireBackend('firebase-admin/firestore');
+const {initializeApp,deleteApp}=requireBackend('firebase/app');
+const {getAuth:clientAuth,signInWithCustomToken,signOut}=requireBackend('firebase/auth');
+const {getFirestore:clientDb,doc,setDoc,getDocFromServer,updateDoc,deleteDoc,writeBatch,serverTimestamp}=requireBackend('firebase/firestore');
 const projectId='pharmawhisper-debd2';
 const day=ms=>Math.floor((ms+18000000)/86400000);
 (async()=>{
  if(process.env.HYZEN_LIVE_FIREBASE_CHECK!=='yes')throw Error('Explicit live-check opt-in is required.');
  if(process.argv.includes('--permissions-only')){
-  const {GoogleAuth}=require('../functions/node_modules/google-auth-library');
+  const {GoogleAuth}=requireBackend('google-auth-library');
   const client=await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform']}).getClient();
   const wanted=['datastore.indexes.list','datastore.indexes.create','datastore.indexes.get','datastore.operations.get','firebaserules.releases.get','firebaserules.releases.update','firebaserules.rulesets.create','firebase.projects.get','serviceusage.services.get'];
   const result=await client.request({url:`https://cloudresourcemanager.googleapis.com/v1/projects/${projectId}:testIamPermissions`,method:'POST',data:{permissions:wanted}});
