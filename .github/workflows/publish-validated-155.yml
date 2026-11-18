@@ -116,4 +116,4 @@ jobs:
         run: |
           python3 tools/ci/stage_profile_evidence.py native-profile release
           python3 tools/ci/stage_install_evidence.py install-validation release "$BUILT_SOURCE" "$BUILD_RUN" "$PROFILE_RUN"
-          gh release create v1.5.8-17 release/* --target "$BUILT_SOURCE" --title 'PHARM D WITH HYZEN 1.5.8 — Adaptive Motion Edition' --notes-file docs/release-1.5.8.md --latest
+          gh release create v1.5.8-17 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.8 — Adaptive Motion Edition' --notes-file docs/release-1.5.8.md --latest
