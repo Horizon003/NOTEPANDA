@@ -1,3 +1,4 @@
+import 'reward_controller.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,7 +62,8 @@ class CampusBoard {
   final int? academicYear;
 }
 
-class CampusController extends StateNotifier<AsyncValue<CampusBoard>> {
+class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
+    with WidgetsBindingObserver {
   CampusController(this.cloud, this.prefs, this.key, this.period)
     : super(const AsyncLoading()) {
     if (cloud == null) {
@@ -74,13 +76,25 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>> {
         ),
       );
     } else {
+      WidgetsBinding.instance.addObserver(this);
+      _timer = Timer.periodic(const Duration(seconds: 15), (_) {
+        if (_foreground) unawaited(load());
+      });
       unawaited(load());
     }
   }
   final StudyCloud? cloud;
   final SharedPreferences prefs;
   final String key, period;
+  Timer? _timer;
+  bool _foreground = true;
   bool loading = false;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    if (_foreground) unawaited(load());
+  }
+
   CampusBoard decode(Map<String, dynamic> data, {bool cached = false}) =>
       CampusBoard(
         data['status'] ?? 'ready',
@@ -160,6 +174,8 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>> {
 
   @override
   void dispose() {
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     cloud?.dispose();
     super.dispose();
   }
@@ -172,12 +188,16 @@ final campusBoardProvider = StateNotifierProvider.autoDispose
           ref.watch(firebaseReadyProvider) &&
           studyApiBase.isNotEmpty &&
           user != null;
-      return CampusController(
+      final controller = CampusController(
         ready ? StudyCloud(user) : null,
         ref.watch(sharedPrefsProvider),
         'hyzen_campus_${user?.uid ?? 'guest'}_$period',
         period,
       );
+      ref.listen(rankRefreshProvider, (_, __) {
+        unawaited(controller.load());
+      });
+      return controller;
     });
 
 class CampusRankScreen extends ConsumerStatefulWidget {

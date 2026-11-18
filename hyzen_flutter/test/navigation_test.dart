@@ -1,3 +1,5 @@
+import 'package:hyzen_pharmd/features/study_progress/study_calendar.dart';
+import 'package:hyzen_pharmd/features/study_progress/reward_controller.dart';
 import 'package:hyzen_pharmd/core/widgets/workspace_icons.dart';
 import 'package:hyzen_pharmd/core/widgets/display_preferences.dart';
 import 'package:hyzen_pharmd/core/widgets/profile_avatar.dart';
@@ -116,6 +118,12 @@ void main() {
       overrides: [
         homeClockProvider.overrideWithValue(() => qaClock),
         sharedPrefsProvider.overrideWithValue(prefs),
+        // Widget navigation verifies planner state; OS alarm delivery is a
+        // separate native check, outside fake-async widget scheduling.
+        calendarProvider.overrideWith(
+          (ref) =>
+              CalendarController(prefs, 'ui-calendar', null, (_, __) async {}),
+        ),
         authStateProvider.overrideWith(
           (ref) => Stream.value(StudentUser(photoURL: accountPhoto)),
         ),
@@ -461,7 +469,8 @@ void main() {
         final greeting = tester.widget<Text>(
           find.byKey(const ValueKey('home-greeting')),
         );
-        expect(greeting.data, 'Today 1 Jan');
+        expect(greeting.data, 'Hello, Ali');
+        expect(find.text('Today 1 Jan'), findsNothing);
         expect(greeting.style!.color, isNot(HColors.mint));
         expect(find.text('Hello, Ali'), findsOneWidget);
         final accountAction = tester.getSize(
@@ -1404,31 +1413,139 @@ void main() {
       expect(tester.takeException(), isNull);
     }
   });
-  testWidgets('Daily Challenge starts a session and opens timer progress', (
+  testWidgets(
+    'calendar and streak adapt to phone/tablet widths and large text',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      for (final width in [320.0, 360.0, 390.0, 430.0, 800.0]) {
+        for (final scale in [1.0, 2.0]) {
+          tester.view.physicalSize = Size(width, 844);
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          for (final route in [
+            '/study-calendar',
+            '/study-streak',
+            '/study-progress',
+          ]) {
+            await open(tester, route);
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '$route at $width / $scale',
+            );
+            await tester.drag(
+              find.byType(Scrollable).first,
+              const Offset(0, -580),
+            );
+            await tester.pumpAndSettle();
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '$route after scroll at $width / $scale',
+            );
+          }
+        }
+      }
+    },
+  );
+  testWidgets('calendar opens selected Home date and colors its event pill', (
+    tester,
+  ) async {
+    qaClock = DateTime(2026, 11, 18);
+    await open(tester, '/home');
+    await tester.ensureVisible(find.byType(StudyWeekRibbon));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(StudyWeekRibbon),
+        matching: find.text('18'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(StudyCalendarScreen), findsOneWidget);
+    expect(
+      GoRouterState.of(
+        tester.element(find.byType(StudyCalendarScreen)),
+      ).uri.queryParameters['date'],
+      '2026-11-18',
+    );
+    await container
+        .read(calendarProvider)
+        .put(
+          PlannerEvent(
+            id: 'exam-fixture',
+            title: 'Pharmacology paper',
+            at: DateTime(2026, 11, 18, 9),
+            color: 0xffd46a61,
+            kind: 'Exam',
+          ),
+        );
+    await tester.pumpAndSettle();
+    expect(find.text('Pharmacology paper'), findsOneWidget);
+    container.read(routerProvider).pop();
+    await tester.pumpAndSettle();
+    final boxes = tester.widgetList<Container>(
+      find.descendant(
+        of: find.byType(StudyWeekRibbon),
+        matching: find.byType(Container),
+      ),
+    );
+    expect(
+      boxes.any(
+        (c) =>
+            c.decoration is BoxDecoration &&
+            (c.decoration as BoxDecoration).color == const Color(0xffd46a61),
+      ),
+      isTrue,
+    );
+    expect(container.read(studyTrackerProvider).running, isFalse);
+  });
+  testWidgets('points bubble hides without changing confirmed wallet', (
     tester,
   ) async {
     await open(tester, '/home');
-    await tester.tap(find.byKey(const ValueKey('home-continue-study')));
+    container.read(rewardProvider).apply({
+      'today': '2026-11-18',
+      'points': 950,
+      'streak': 7,
+      'bestStreak': 7,
+      'claimedDays': ['2026-11-18'],
+      'claimedMilestones': [5],
+    });
     await tester.pumpAndSettle();
-    expect(container.read(studyTrackerProvider).running, isTrue);
-    expect(
-      GoRouterState.of(
-        tester.element(find.byType(StudyProgressScreen)),
-      ).uri.path,
-      '/study-progress',
-    );
-    container.read(routerProvider).pop();
+    expect(find.text('My Points 950'), findsOneWidget);
+    await tester.tap(find.text('My Points 950'));
     await tester.pumpAndSettle();
-    expect(
-      container.read(routerProvider).routeInformationProvider.value.uri.path,
-      '/home',
-    );
-    expect(container.read(studyTrackerProvider).running, isTrue);
-    container.read(studyTrackerProvider).pause();
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
+    expect(find.text('My Points 950'), findsNothing);
+    expect(container.read(rewardProvider).points, 950);
   });
+  testWidgets(
+    'Daily Challenge opens progress without starting a manual session',
+    (tester) async {
+      await open(tester, '/home');
+      await tester.tap(find.byKey(const ValueKey('home-focus-card')));
+      await tester.pumpAndSettle();
+      expect(container.read(studyTrackerProvider).running, isFalse);
+      expect(
+        GoRouterState.of(
+          tester.element(find.byType(StudyProgressScreen)),
+        ).uri.path,
+        '/study-progress',
+      );
+      container.read(routerProvider).pop();
+      await tester.pumpAndSettle();
+      expect(
+        container.read(routerProvider).routeInformationProvider.value.uri.path,
+        '/home',
+      );
+      expect(container.read(studyTrackerProvider).running, isFalse);
+      container.read(studyTrackerProvider).pause();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('Home inline search filters and carries query to full search', (
     tester,
   ) async {
@@ -1988,6 +2105,8 @@ void main() {
           '/pdf-studio',
           '/study-goals',
           '/study-progress',
+          '/study-streak',
+          '/study-calendar',
           '/study/notes/id-0/id-1/id-2/id-3/id-4',
           '/downloads',
           '/profile',
@@ -2074,7 +2193,7 @@ void main() {
             await tester.pumpAndSettle();
             if (path == '/home') {
               final button = tester.getRect(
-                find.byKey(const ValueKey('home-continue-study')),
+                find.byKey(const ValueKey('home-focus-card')),
               );
               final documentBottom = button.bottom + scrollable.position.pixels;
               await tester.scrollUntilVisible(

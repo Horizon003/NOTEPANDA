@@ -1,3 +1,4 @@
+import '../features/study_progress/study_calendar.dart';
 import '../features/search/data/search_scope.dart';
 import 'package:flutter/material.dart';
 import '../features/admin/presentation/push_center.dart';
@@ -89,6 +90,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         '/study-progress',
         '/study-goals',
         '/study-streak',
+        '/study-calendar',
         '/campus-rank',
       ].contains(loc)) {
         return null;
@@ -151,6 +153,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/study-goals',
         builder: (_, __) => const StudyGoalsScreen(),
+      ),
+      GoRoute(
+        path: '/study-calendar',
+        builder: (_, s) => StudyCalendarScreen(
+          initialDate: DateTime.tryParse(s.uri.queryParameters['date'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/study-streak',

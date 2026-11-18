@@ -317,7 +317,9 @@ class AccountProfileCard extends StatelessWidget {
     required this.subtitle,
     required this.photoUrl,
     required this.onTap,
+    this.badges,
   });
+  final Widget? badges;
   final String name, subtitle;
   final String? photoUrl;
   final VoidCallback onTap;
@@ -331,7 +333,13 @@ class AccountProfileCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              AccountAvatar(photoUrl: photoUrl, fallback: name, radius: 28),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AccountAvatar(photoUrl: photoUrl, fallback: name, radius: 28),
+                  if (badges != null) badges!,
+                ],
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

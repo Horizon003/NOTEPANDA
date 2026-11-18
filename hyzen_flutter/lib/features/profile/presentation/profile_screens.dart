@@ -1,3 +1,5 @@
+import '../../study_progress/reward_controller.dart';
+import '../../../core/widgets/reward_art.dart';
 import 'dart:async';
 import '../../../core/widgets/display_preferences.dart';
 import 'profile_promotions.dart';
@@ -79,6 +81,15 @@ class ProfileScreen extends ConsumerWidget {
       },
       children: [
         AccountProfileCard(
+          badges: ref.watch(rewardProvider).badges.isEmpty
+              ? null
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final day in ref.watch(rewardProvider).badges.take(3))
+                      RewardArt(10 + rewardMilestones.indexOf(day), size: 18),
+                  ],
+                ),
           name: name,
           subtitle: p?.rollNumber?.isNotEmpty == true
               ? 'Account info · ${p!.rollNumber}'

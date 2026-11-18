@@ -18,3 +18,8 @@ CREATE TRIGGER IF NOT EXISTS rank_privacy_update AFTER UPDATE ON rank_privacy BE
 CREATE TABLE IF NOT EXISTS rank_boards(academic_year INTEGER NOT NULL, period TEXT NOT NULL, generation TEXT NOT NULL, updated_at INTEGER NOT NULL, revision INTEGER NOT NULL, day TEXT NOT NULL, PRIMARY KEY(academic_year,period));
 CREATE TABLE IF NOT EXISTS rank_entries(generation TEXT NOT NULL, uid TEXT NOT NULL, alias TEXT NOT NULL, academicYear INTEGER NOT NULL, verifiedMinutes INTEGER NOT NULL, sessions INTEGER NOT NULL, score INTEGER NOT NULL, rank INTEGER NOT NULL, PRIMARY KEY(generation,uid));
 CREATE INDEX IF NOT EXISTS board_page ON rank_entries(generation,rank);
+CREATE TABLE IF NOT EXISTS reward_claims(uid TEXT NOT NULL, day TEXT NOT NULL, PRIMARY KEY(uid,day));
+CREATE TABLE IF NOT EXISTS reward_ledger(uid TEXT NOT NULL, reward_key TEXT NOT NULL, kind TEXT NOT NULL, points INTEGER NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY(uid,reward_key));
+CREATE TABLE IF NOT EXISTS reward_leases(uid TEXT PRIMARY KEY, session TEXT NOT NULL, last INTEGER NOT NULL, active INTEGER NOT NULL, version INTEGER NOT NULL, operation TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS reward_days(uid TEXT NOT NULL, day TEXT NOT NULL, seconds INTEGER NOT NULL, PRIMARY KEY(uid,day));
+CREATE TABLE IF NOT EXISTS calendar_events(uid TEXT NOT NULL, id TEXT NOT NULL, payload TEXT NOT NULL, updated_at INTEGER NOT NULL, PRIMARY KEY(uid,id));

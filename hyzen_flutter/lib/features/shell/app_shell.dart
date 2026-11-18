@@ -117,11 +117,13 @@ class TabPage extends StatelessWidget {
     this.integratedHeader = false,
     this.headerTheme,
     this.header,
+    this.headerExtent,
   });
   final Widget Function(Widget child)? homeBackground;
   final bool integratedHeader;
   final ThemeData? headerTheme;
   final Widget? header;
+  final double? headerExtent;
   final Widget? drawer;
   final String title;
   final String? subtitle;
@@ -131,15 +133,17 @@ class TabPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
-    final headerHeight = header != null
-        ? (scaler.scale(16) * 1.4 + scaler.scale(12) * 1.5 + 8).clamp(
-            64.0,
-            180.0,
-          )
-        : (scaler.scale(22) * 1.25 +
-                  (subtitle != null ? scaler.scale(11) * 1.4 : 0) +
-                  12)
-              .clamp(64.0, 160.0);
+    final headerHeight =
+        headerExtent ??
+        (header != null
+            ? (scaler.scale(16) * 1.4 + scaler.scale(12) * 1.5 + 8).clamp(
+                64.0,
+                180.0,
+              )
+            : (scaler.scale(22) * 1.25 +
+                      (subtitle != null ? scaler.scale(11) * 1.4 : 0) +
+                      12)
+                  .clamp(64.0, 160.0));
     final scroll = CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [

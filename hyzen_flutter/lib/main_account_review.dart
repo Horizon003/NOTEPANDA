@@ -84,6 +84,7 @@ Future<void> main() async {
         '/search',
         '/study-goals',
         '/study-streak',
+        '/study-calendar',
         '/study-progress',
         '/campus-rank',
         '/admin',

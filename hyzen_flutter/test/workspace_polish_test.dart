@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hyzen_pharmd/app/providers.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -206,6 +208,8 @@ void main() {
   testWidgets(
     'editor dock retains every tool at narrow width with large text',
     (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final studyPrefs = await SharedPreferences.getInstance();
       tester.view.physicalSize = const Size(320, 760);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -226,6 +230,7 @@ void main() {
       addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [sharedPrefsProvider.overrideWithValue(studyPrefs)],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(),

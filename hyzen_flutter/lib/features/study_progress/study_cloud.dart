@@ -41,9 +41,7 @@ class StudyCloud {
         )
         .timeout(const Duration(seconds: 20));
     if (response.statusCode != 200) {
-      throw StateError(
-        'Study cloud unavailable (${response.statusCode}).',
-      );
+      throw StateError('Study cloud unavailable (${response.statusCode}).');
     }
     final decoded = jsonDecode(response.body);
     if (decoded is! Map) {
@@ -73,9 +71,13 @@ class StudySyncWorker {
     required this.running,
     required this.session,
     required this.onStatus,
+    this.onRewards,
+    this.onRank,
   }) {
     _schedule(Duration.zero);
   }
+  final void Function(Map<String, dynamic>)? onRewards;
+  final void Function()? onRank;
   final StudyCloud cloud;
   final List<StudyEvent> Function() events;
   final Future<void> Function(Set<String>) acknowledge;
@@ -83,15 +85,16 @@ class StudySyncWorker {
   final String? Function() session;
   final void Function(String) onStatus;
   Timer? _timer;
-  bool _disposed = false, _busy = false;
+  bool _disposed = false, _busy = false, _dirty = false, _rankPaused = false;
   int _failures = 0;
-  String? _lease;
+  String? _lease, _rewardLease;
   void _schedule(Duration delay) {
     _timer?.cancel();
     if (!_disposed) _timer = Timer(delay, _run);
   }
 
   void changed() {
+    _dirty = true;
     if (!_busy) _schedule(const Duration(seconds: 1));
   }
 
@@ -99,6 +102,7 @@ class StudySyncWorker {
     _timer = null;
     if (_disposed || _busy) return;
     _busy = true;
+    _dirty = false;
     var failed = false;
     try {
       final batch = events().take(100).toList();
@@ -131,17 +135,44 @@ class StudySyncWorker {
       try {
         final current = session();
         if (running() && current != null) {
+          final reward = await cloud.call('rewardPulse', {
+            'session': current,
+            'action': _rewardLease == current ? 'heartbeat' : 'start',
+          });
+          _rewardLease = current;
+          if (!_disposed) onRewards?.call(reward);
+        } else if (_rewardLease != null) {
+          final reward = await cloud.call('rewardPulse', {
+            'session': _rewardLease,
+            'action': current == null ? 'stop' : 'pause',
+          });
+          _rewardLease = null;
+          if (!_disposed) onRewards?.call(reward);
+        }
+      } catch (_) {
+        _rewardLease = null;
+      }
+      try {
+        final current = session();
+        if (running() && current != null) {
           await cloud.call('studyPulse', {
             'session': current,
-            'action': _lease == current ? 'heartbeat' : 'start',
+            'action': _lease == current && !_rankPaused ? 'heartbeat' : 'start',
           });
           _lease = current;
-        } else if (_lease != null) {
+          _rankPaused = false;
+          if (!_disposed) onRank?.call();
+        } else if (_lease != null && (!_rankPaused || current == null)) {
           await cloud.call('studyPulse', {
             'session': _lease,
             'action': current == null ? 'stop' : 'pause',
           });
-          _lease = null;
+          if (current == null) {
+            _lease = null;
+          } else {
+            _rankPaused = true;
+          }
+          if (!_disposed) onRank?.call();
         }
       } catch (_) {
         _lease = null; /* Unverified time never becomes rank points. */
@@ -150,7 +181,9 @@ class StudySyncWorker {
     _busy = false;
     _schedule(
       Duration(
-        seconds: failed
+        seconds: _dirty
+            ? 0
+            : failed
             ? (5 * (1 << _failures)).clamp(10, 300)
             : running()
             ? 15

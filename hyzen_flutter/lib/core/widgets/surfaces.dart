@@ -41,12 +41,14 @@ class HCard extends StatelessWidget {
     this.shadow = true,
     this.semanticLabel,
     this.outlineColor,
+    this.gradient,
   });
   final Widget child;
   final VoidCallback? onTap, onLongPress;
   final EdgeInsetsGeometry padding;
   final double radius;
   final Color? color, outlineColor;
+  final Gradient? gradient;
   final bool shadow;
   final String? semanticLabel;
   @override
@@ -66,7 +68,11 @@ class HCard extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         borderRadius: br,
-        child: Padding(padding: padding * UiDensity.of(context), child: child),
+        child: Ink(
+          decoration: BoxDecoration(gradient: gradient, borderRadius: br),
+          padding: padding * UiDensity.of(context),
+          child: child,
+        ),
       ),
     );
     final decorated = DecoratedBox(

@@ -1,3 +1,4 @@
+import '../../study_progress/document_study_scope.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:math' as math;
@@ -260,7 +261,12 @@ class _StudioAnnotationScreenState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DocumentStudyScope(
+    ready: _image != null && !_working,
+    child: _buildEditor(context),
+  );
+
+  Widget _buildEditor(BuildContext context) {
     const quickTools = [
       _MarkTool.select,
       _MarkTool.ink,

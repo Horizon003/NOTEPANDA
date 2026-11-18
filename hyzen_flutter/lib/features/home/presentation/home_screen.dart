@@ -1,3 +1,5 @@
+import '../../../core/widgets/reward_art.dart';
+import '../../study_progress/reward_controller.dart';
 import '../../../core/widgets/polish_ui.dart';
 import '../../search/presentation/home_search.dart';
 import '../../notifications/notifications_screen.dart';
@@ -39,7 +41,6 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(authStateProvider).valueOrNull;
     final name =
         profile?.firstName ?? user?.displayName?.split(' ').first ?? 'there';
-    final now = ref.watch(homeClockProvider)();
     final recent = ref.watch(recentProvider);
     final slides = ref.watch(announcementSlidesProvider);
     final downloads = ref.watch(downloadsProvider).values;
@@ -55,95 +56,13 @@ class HomeScreen extends ConsumerWidget {
       if (fresh > 0) '$fresh New',
       if (active > 0) '$active Downloading',
     ];
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
     return TabPage(
       title: 'Home',
+      headerExtent: 88 + MediaQuery.textScalerOf(context).scale(12),
       integratedHeader: true,
-      header: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Tooltip(
-                message: 'Profile & settings',
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => showAccountMenu(context),
-                  child: SizedBox.square(
-                    dimension: 48,
-                    child: Center(
-                      child: ProfileAvatar(
-                        photoUrl: ProfileAvatar.resolveUrl(
-                          profile?.photoUrl,
-                          user?.photoURL,
-                        ),
-                        radius: 21,
-                        fallback: name,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Hello, $name',
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleLarge?.copyWith(fontSize: 16),
-                    ),
-                    Text(
-                      'Today ${now.day} ${months[now.month - 1]}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      key: const ValueKey('home-greeting'),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: HColors.ink2),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              HGlassButton(
-                icon: 'icon-search',
-                label: 'Search academic resources',
-                onTap: () => context.go('/search', extra: true),
-              ),
-              HGlassButton(
-                icon: 'icon-bell',
-                label: 'Notifications',
-                badge: ref
-                    .watch(notificationsProvider)
-                    .where((m) => m['read'] != true)
-                    .length,
-                onTap: () => context.push('/notifications'),
-              ),
-            ],
-          ),
-        ),
+      header: _HomeHeader(
+        name: name,
+        photoUrl: ProfileAvatar.resolveUrl(profile?.photoUrl, user?.photoURL),
       ),
       onRefresh: () => refreshContent(ref, [
         'pw_settings',
@@ -243,114 +162,71 @@ class _PlanCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final large = MediaQuery.textScalerOf(context).scale(22) > 22 * 1.3;
-    Widget library() => HCard(
-      color: HColors.apricot,
-      radius: 24,
-      shadow: false,
-      semanticLabel: 'Study Library',
-      onTap: () => context.go('/study'),
-      onLongPress: () => showCardPreview(
-        context,
-        title: 'Study Library',
-        description:
-            'Explore professional-year notes, practice MCQs, past papers and guide books. Continue with your subjects at your own pace.',
-        asset: 'action-notes',
-        color: HColors.apricot,
-        onOpen: () => context.go('/study'),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: large ? 0 : 180),
+    Widget planCard({required bool library}) {
+      final title = library ? 'Study library' : 'Office workspace';
+      final semantic = library ? 'Study Library' : 'Office Workspace';
+      final route = library ? '/study' : '/pdf-studio';
+      final color = library ? HColors.apricot : HColors.blue;
+      return HCard(
+        color: color,
+        radius: 24,
+        shadow: false,
+        semanticLabel: semantic,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: library
+              ? [const Color(0xffffc47c), const Color(0xffffe4cf)]
+              : [const Color(0xffa9c9f4), const Color(0xffe0e8f9)],
+        ),
+        padding: const EdgeInsets.all(14),
+        onTap: () => context.go(route),
+        onLongPress: () => showCardPreview(
+          context,
+          title: semantic,
+          description: library
+              ? 'Explore professional-year notes, practice MCQs, past papers and guide books. Continue with your subjects at your own pace.'
+              : 'Scan pages, import PDFs, crop and organise documents, annotate files and search recognised text.',
+          asset: library ? 'action-notes' : 'action-scan',
+          color: color,
+          onOpen: () => context.go(route),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _PlanTag('Learn'),
-            const SizedBox(height: 16),
+            _PlanTag(library ? 'Learn' : 'Create'),
+            const SizedBox(height: 10),
             Text(
-              'Study library',
+              title,
               style: t.textTheme.headlineSmall?.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                height: 1.22,
+                fontSize: 19,
+                height: 1.18,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 8),
-            Text('Notes, MCQs & past papers', style: t.textTheme.bodyMedium),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Color(0x44FFFFFF),
-                  child: Icon(
-                    Icons.menu_book_outlined,
-                    color: HColors.ink,
-                    size: 17,
-                  ),
-                ),
-                const Spacer(),
-                const Icon(Icons.north_east_rounded, size: 18),
-              ],
+            const SizedBox(height: 6),
+            Text(
+              library ? 'Notes, MCQs & past papers' : 'Scan · PDF · Documents',
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: RewardArt(
+                library ? 0 : 1,
+                size: large
+                    ? 116
+                    : library
+                    ? 140
+                    : 112,
+              ),
             ),
           ],
         ),
-      ),
-    );
-    Widget office() => HCard(
-      color: HColors.blue,
-      radius: 24,
-      shadow: false,
-      onTap: () => context.go('/pdf-studio'),
-      onLongPress: () => showCardPreview(
-        context,
-        title: 'Office Workspace',
-        description:
-            'Scan pages, import PDFs, crop and organise documents, annotate files and search recognised text.',
-        asset: 'action-scan',
-        color: HColors.blue,
-        onOpen: () => context.go('/pdf-studio'),
-      ),
-      semanticLabel: 'Office Workspace',
-      padding: const EdgeInsets.all(14),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: large ? 0 : 122),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _PlanTag('Create'),
-            const SizedBox(height: 12),
-            Text(
-              'Office workspace',
-              style: t.textTheme.headlineSmall?.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Scan · PDF',
-                    style: t.textTheme.bodySmall?.copyWith(color: HColors.ink),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                ExcludeSemantics(
-                  child: Image.asset(
-                    'assets/mascot/mascot_peeking.png',
-                    width: 36,
-                    height: 36,
-                    cacheWidth: 108,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    }
+
+    Widget library() => planCard(library: true);
+    Widget office() => planCard(library: false);
     Widget goals() => const _HomeQuickActions();
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -460,7 +336,12 @@ class _StudyStats extends ConsumerWidget {
     final p = ref.watch(studyTrackerProvider);
     final board = ref.watch(campusBoardProvider('week')).valueOrNull;
     final entries = [
-      ('${p.currentStreak} days', 'Streak', '/study-streak', 'icon-streak'),
+      (
+        '${ref.watch(rewardProvider).streak} days',
+        'Streak',
+        '/study-streak',
+        'icon-streak',
+      ),
       (
         '${p.weekSeconds ~/ 3600}h ${(p.weekSeconds ~/ 60) % 60}m',
         'Time spent',
@@ -540,6 +421,134 @@ class LegalScreen extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeHeader extends ConsumerStatefulWidget {
+  const _HomeHeader({required this.name, this.photoUrl});
+  final String name;
+  final String? photoUrl;
+  @override
+  ConsumerState<_HomeHeader> createState() => _HomeHeaderState();
+}
+
+class _HomeHeaderState extends ConsumerState<_HomeHeader> {
+  bool showPoints = true;
+  @override
+  Widget build(BuildContext context) {
+    final reward = ref.watch(rewardProvider);
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              top: 12,
+              left: 96,
+              right: 96,
+              child: Text(
+                'Hello, ${widget.name}',
+                key: const ValueKey('home-greeting'),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 88,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Tooltip(
+                        message: 'Profile & settings',
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => showAccountMenu(context),
+                          child: SizedBox.square(
+                            dimension: 48,
+                            child: Center(
+                              child: ProfileAvatar(
+                                photoUrl: widget.photoUrl,
+                                radius: 21,
+                                fallback: widget.name,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (reward.badges.isNotEmpty)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (final day in reward.badges.take(3))
+                              RewardArt(
+                                10 + rewardMilestones.indexOf(day),
+                                size: 16,
+                              ),
+                          ],
+                        ),
+                      if (showPoints)
+                        InkWell(
+                          onTap: () => setState(() => showPoints = false),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xfff4e3d8),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'My Points ${reward.points}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    HGlassButton(
+                      icon: 'icon-search',
+                      label: 'Search academic resources',
+                      onTap: () => context.go('/search', extra: true),
+                    ),
+                    HGlassButton(
+                      icon: 'icon-bell',
+                      label: 'Notifications',
+                      badge: ref
+                          .watch(notificationsProvider)
+                          .where((m) => m['read'] != true)
+                          .length,
+                      onTap: () => context.push('/notifications'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
