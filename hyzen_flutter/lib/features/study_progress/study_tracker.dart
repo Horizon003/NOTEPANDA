@@ -480,6 +480,7 @@ class StudyTracker extends ChangeNotifier with WidgetsBindingObserver {
 
   void checkpoint() => _tick();
   StudySyncWorker? _sync;
+  StreamSubscription<Map<String, dynamic>>? _history;
   String get cloudStatus => _cloudStatus;
   String _cloudStatus = 'Cloud sync unavailable · saved on this device';
   void markCloudUnavailable() {
@@ -497,6 +498,57 @@ class StudyTracker extends ChangeNotifier with WidgetsBindingObserver {
     VoidCallback? onRank,
   }) {
     _sync?.dispose();
+    _history?.cancel();
+    final migrationKey = '${storageKey}_firebase_history_v1';
+    if (prefs.getBool(migrationKey) != true) {
+      for (var i = 0; i < _events.length; i++) {
+        if (_events[i].synced) {
+          _events[i] = StudyEvent.fromJson({
+            ..._events[i].toJson(),
+            'synced': false,
+          });
+        }
+      }
+      _save();
+      unawaited(flush().then((_) => prefs.setBool(migrationKey, true)));
+    }
+    if (cloud.supportsRealtime) {
+      _history = cloud
+          .watch('history')
+          .listen(
+            (data) {
+              if (_disposed) return;
+              final ids = {for (final e in _events) e.id};
+              var changed = false;
+              for (final raw in data['events'] as List? ?? []) {
+                try {
+                  final event = StudyEvent.fromJson({
+                    ...Map<String, dynamic>.from(raw),
+                    'synced': true,
+                  });
+                  if (ids.add(event.id)) {
+                    _events.add(event);
+                    changed = true;
+                  }
+                } catch (_) {
+                  /* Keep valid history when one interval needs recovery. */
+                }
+              }
+              if (changed) {
+                _recompute();
+                _save();
+                notifyListeners();
+              }
+            },
+            onError: (Object _) {
+              if (!_disposed) {
+                _cloudStatus =
+                    'Firebase sync unavailable · local history is safe';
+                notifyListeners();
+              }
+            },
+          );
+    }
     _sync = StudySyncWorker(
       cloud: cloud,
       onRewards: onRewards,
@@ -748,6 +800,7 @@ class StudyTracker extends ChangeNotifier with WidgetsBindingObserver {
   void dispose() {
     pause();
     _sync?.dispose();
+    _history?.cancel();
     _disposed = true;
     _watch.stop();
     _timer?.cancel();

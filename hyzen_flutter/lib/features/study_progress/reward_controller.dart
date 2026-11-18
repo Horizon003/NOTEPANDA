@@ -20,9 +20,28 @@ class RewardController extends ChangeNotifier with WidgetsBindingObserver {
     }
     WidgetsBinding.instance.addObserver(this);
     unawaited(refresh());
+    if (cloud?.supportsRealtime == true) {
+      _subscription = cloud!
+          .watch('rewards')
+          .listen(
+            apply,
+            onError: (Object error) {
+              if (!_dead) {
+                this.error =
+                    'Firebase sync unavailable · showing confirmed points';
+                notifyListeners();
+              }
+            },
+          );
+    }
     if (cloud != null) {
       _timer = Timer.periodic(const Duration(seconds: 30), (_) {
-        if (_foreground) unawaited(refresh());
+        if (_foreground &&
+            (cloud?.supportsRealtime != true ||
+                today != _dayInPakistan() ||
+                prefs.containsKey('${key}_pending'))) {
+          unawaited(refresh());
+        }
       });
     }
   }
@@ -33,6 +52,7 @@ class RewardController extends ChangeNotifier with WidgetsBindingObserver {
   bool busy = false, _dead = false, _foreground = true;
   String? error;
   Timer? _timer;
+  StreamSubscription<Map<String, dynamic>>? _subscription;
   int get points => (data['points'] as num?)?.toInt() ?? 0;
   int get streak => (data['streak'] as num?)?.toInt() ?? 0;
   int get best => (data['bestStreak'] as num?)?.toInt() ?? 0;
@@ -126,6 +146,7 @@ class RewardController extends ChangeNotifier with WidgetsBindingObserver {
   void dispose() {
     _dead = true;
     _timer?.cancel();
+    _subscription?.cancel();
     cloud?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

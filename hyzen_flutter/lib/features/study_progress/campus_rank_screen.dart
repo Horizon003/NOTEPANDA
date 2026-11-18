@@ -80,6 +80,11 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
       _timer = Timer.periodic(const Duration(seconds: 15), (_) {
         if (_foreground) unawaited(load());
       });
+      if (cloud?.supportsRealtime == true) {
+        _live = cloud!.watch('rank:$period').listen((_) {
+          if (_foreground) unawaited(load());
+        }, onError: (Object _) {});
+      }
       unawaited(load());
     }
   }
@@ -87,6 +92,7 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
   final SharedPreferences prefs;
   final String key, period;
   Timer? _timer;
+  StreamSubscription<Map<String, dynamic>>? _live;
   bool _foreground = true;
   bool loading = false;
   @override
@@ -175,6 +181,7 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
   @override
   void dispose() {
     _timer?.cancel();
+    _live?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     cloud?.dispose();
     super.dispose();

@@ -59,9 +59,32 @@ class CalendarController extends ChangeNotifier with WidgetsBindingObserver {
     }
     WidgetsBinding.instance.addObserver(this);
     unawaited(sync());
+    if (cloud?.supportsRealtime == true) {
+      _subscription = cloud!
+          .watch('calendar')
+          .listen(
+            (data) {
+              if (busy) {
+                _pendingRemote = data;
+                return;
+              }
+              _queueRemote(data);
+            },
+            onError: (Object _) {
+              if (!_dead) {
+                error =
+                    'Firebase calendar sync unavailable · local changes are safe';
+                notifyListeners();
+              }
+            },
+          );
+    }
     if (cloud != null) {
       _timer = Timer.periodic(const Duration(seconds: 60), (_) {
-        if (_foreground) unawaited(sync());
+        if (_foreground &&
+            (cloud?.supportsRealtime != true || _pending.isNotEmpty)) {
+          unawaited(sync());
+        }
       });
     }
   }
@@ -72,6 +95,9 @@ class CalendarController extends ChangeNotifier with WidgetsBindingObserver {
   final Map<String, PlannerEvent> _events = {};
   final Map<String, dynamic> _pending = {};
   Timer? _timer;
+  StreamSubscription<Map<String, dynamic>>? _subscription;
+  Map<String, dynamic>? _pendingRemote;
+  Future<void> _remoteWrites = Future.value();
   bool busy = false, _dead = false, _foreground = true;
   String? error;
   List<PlannerEvent> get events =>
@@ -120,39 +146,59 @@ class CalendarController extends ChangeNotifier with WidgetsBindingObserver {
       }
       final result = await cloud!.call('calendarEvents', {'action': 'read'});
       if (_dead) return;
-      final server = {
-        for (final e in (result['events'] as List? ?? []))
-          e['id'] as String: PlannerEvent.fromJson(
-            Map<String, dynamic>.from(e),
-          ),
-      };
-      for (final id in _pending.keys) {
-        if (_events.containsKey(id)) {
-          server[id] = _events[id]!;
-        } else {
-          server.remove(id);
-        }
-      }
-      for (final id
-          in _events.keys.where((id) => !server.containsKey(id)).toList()) {
-        await onEvent(null, id);
-      }
-      for (final e in server.values) {
-        if (jsonEncode(_events[e.id]?.toJson()) != jsonEncode(e.toJson())) {
-          await onEvent(e, e.id);
-        }
-      }
-      _events
-        ..clear()
-        ..addAll(server);
-      await _save();
-      error = null;
+      await _mergeRemote(result);
     } catch (_) {
       error = 'Offline · calendar saved on this device';
     } finally {
       busy = false;
+      if (_pendingRemote != null && !_dead) {
+        final remote = _pendingRemote!;
+        _pendingRemote = null;
+        _queueRemote(remote);
+      }
       if (!_dead) notifyListeners();
     }
+  }
+
+  Future<void> _mergeRemote(Map<String, dynamic> result) async {
+    if (_dead) return;
+    final server = {
+      for (final e in (result['events'] as List? ?? []))
+        e['id'] as String: PlannerEvent.fromJson(Map<String, dynamic>.from(e)),
+    };
+    for (final id in _pending.keys) {
+      if (_events.containsKey(id)) {
+        server[id] = _events[id]!;
+      } else {
+        server.remove(id);
+      }
+    }
+    for (final id
+        in _events.keys.where((id) => !server.containsKey(id)).toList()) {
+      await onEvent(null, id);
+    }
+    for (final e in server.values) {
+      if (jsonEncode(_events[e.id]?.toJson()) != jsonEncode(e.toJson())) {
+        await onEvent(e, e.id);
+      }
+    }
+    _events
+      ..clear()
+      ..addAll(server);
+    await _save();
+    error = null;
+    if (!_dead) notifyListeners();
+  }
+
+  void _queueRemote(Map<String, dynamic> data) {
+    _remoteWrites = _remoteWrites.then((_) => _mergeRemote(data)).catchError((
+      Object _,
+    ) {
+      if (!_dead) {
+        error = 'Firebase calendar sync unavailable · local changes are safe';
+        notifyListeners();
+      }
+    });
   }
 
   @override
@@ -165,6 +211,7 @@ class CalendarController extends ChangeNotifier with WidgetsBindingObserver {
   void dispose() {
     _dead = true;
     _timer?.cancel();
+    _subscription?.cancel();
     cloud?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

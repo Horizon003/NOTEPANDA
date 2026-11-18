@@ -1,4 +1,3 @@
-import {rewardState,claimReward,rewardPulse,calendarEvents} from './rewards.js';
 import {createRemoteJWKSet,jwtVerify} from 'jose';
 import {validateMessage,selectRecipients} from './policy.js';
 import {materializeRecipients} from './draft.js';
@@ -45,12 +44,6 @@ export default {
     if(request.method==='OPTIONS')return reply({});
     try {
       const user=await identity(request,env),path=new URL(request.url).pathname;
-      if(['/rewardState','/claimReward','/rewardPulse','/calendarEvents'].includes(path)&&request.method==='POST') {
-        const text=await request.text();if(text.length>8192)return reply({error:'Payload too large'},413);
-        const data=JSON.parse(text).data||{};
-        const result=path==='/rewardState'?await rewardState(env.DB,user.uid):path==='/claimReward'?await claimReward(env.DB,user.uid,data):path==='/rewardPulse'?await rewardPulse(env.DB,user.uid,data):await calendarEvents(env.DB,user.uid,data);
-        return reply({result});
-      }
       if(['/syncStudy','/studyPulse','/readCampusBoard','/setRankPrivacy'].includes(path)&&request.method==='POST') {
         const text=await request.text();if(text.length>32768)return reply({error:'Payload too large'},413);
         const data=JSON.parse(text).data||{};

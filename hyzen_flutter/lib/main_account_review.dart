@@ -1,5 +1,7 @@
 // Browser-only review entrypoint. Renders the real app/routes with clearly
 // labelled sample data; never used by lib/main.dart or Android builds.
+import 'dart:async';
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,6 +68,9 @@ Future<void> main() async {
         '/admin/stats',
         '/admin/sections',
         '/admin/import',
+        '/admin/manage/data',
+        '/admin/manage/history',
+        '/admin/manage/rank-verification',
         '/admin/content/notes',
         '/admin/manage/settings',
         '/profile',
@@ -223,33 +228,130 @@ class _ReviewUser implements User {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-// Administrative reads stay in memory. Preview edits never reach Firebase.
+// In-memory administrative sandbox. Never writes to Firebase or persists user data.
 class _ReviewAdmin implements AdminRepository {
   _ReviewAdmin(this.notes);
   final List<Map<String, dynamic>> notes;
+  final _values = <String, Object?>{};
+  final _changes = StreamController<String>.broadcast();
+  int _sequence = 0;
+  Object? _value(String key) =>
+      _values[key] ??
+      switch (key) {
+        'pw_settings' => <String, dynamic>{},
+        'pw_credits' => {'cards': [], 'layout': 'stack'},
+        'pw_notes_tree' => notes,
+        _ => <dynamic>[],
+      };
+  Object? _copy(Object? value) => jsonDecode(jsonEncode(value));
+  void _set(String key, Object? value) {
+    if (key == 'pw_notes_tree' && value is List) {
+      notes
+        ..clear()
+        ..addAll(
+          value.whereType<Map>().map((m) => Map<String, dynamic>.from(m)),
+        );
+    } else {
+      _values[key] = value;
+    }
+    _changes.add(key);
+  }
 
-  Object? _value(String key) => switch (key) {
-    'pw_settings' => <String, dynamic>{},
-    'pw_credits' => {'cards': [], 'layout': 'stack'},
-    'pw_notes_tree' => notes,
-    'pw_products' ||
-    'pw_orders' ||
-    'pw_messages' ||
-    'pw_blogs' ||
-    'pw_social' ||
-    'pw_import_history' => [],
-    _ => <String, dynamic>{},
-  };
   @override
-  Future<Object?> read(String key) async => _value(key);
+  Future<Object?> read(String key) async => _copy(_value(key));
   @override
-  Stream<Object?> watch(String key) => Stream.value(_value(key));
+  Stream<Object?> watch(String key) async* {
+    yield _copy(_value(key));
+    yield* _changes.stream
+        .where((k) => k == key)
+        .map((_) => _copy(_value(key)));
+  }
+
   @override
   Future<List<Map<String, dynamic>>> tree(LibraryKind kind) async =>
       copyTree(_value(kind.storageKey), kind);
   @override
+  Future<Map<String, Object?>> backup() async => {
+    for (final key in AdminRepository.writableKeys) key: _copy(_value(key)),
+  };
+  @override
+  Future<void> restore(Map<String, dynamic> backup) async {
+    if (backup.keys.any((k) => !AdminRepository.writableKeys.contains(k))) {
+      throw const FormatException('Choose a Hyzen backup.');
+    }
+    for (final entry in backup.entries) {
+      _set(entry.key, _copy(entry.value));
+    }
+  }
+
+  @override
+  Future<MergeResult> importRows(
+    List<ImportRow> rows,
+    List<String> names,
+  ) async {
+    final batch = 'preview-import-${_sequence++}';
+    var added = 0, skipped = 0;
+    final conflicts = <String>[];
+    for (final key in rows.map((r) => r.storageKey).toSet()) {
+      final raw = await read(key);
+      final tree = (raw as List)
+          .whereType<Map>()
+          .map((m) => Map<String, dynamic>.from(m))
+          .toList();
+      final selected = rows.where((r) => r.storageKey == key);
+      final result = key == 'pw_lectures_tree'
+          ? mergeLectureRows(
+              tree,
+              selected,
+              () => 'preview-${_sequence++}',
+              batchId: batch,
+            )
+          : mergeRows(
+              tree,
+              selected,
+              () => 'preview-${_sequence++}',
+              batchId: batch,
+            );
+      added += result.added;
+      skipped += result.skipped;
+      conflicts.addAll(result.conflicts);
+      _set(key, tree);
+    }
+    final history = (await read('pw_import_history') as List);
+    history.insert(0, {
+      'id': batch,
+      'status': 'active',
+      'touched': rows.map((r) => r.storageKey).toSet().toList(),
+      'files': names,
+      'added': added,
+      'skipped': skipped,
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
+    _set('pw_import_history', history);
+    return MergeResult(added, skipped, conflicts);
+  }
+
+  @override
+  Future<int> undoImport(String id) async {
+    final history = (await read('pw_import_history') as List)
+        .cast<Map<String, dynamic>>();
+    final batch = history.firstWhere((h) => h['id'] == id);
+    var removed = 0;
+    for (final key in batch['touched'] as List) {
+      final tree = (await read(key) as List).cast<Map<String, dynamic>>();
+      removed += undoImportNodes(tree, id);
+      _set(key, tree);
+    }
+    batch['status'] = 'undone';
+    _set('pw_import_history', history);
+    return removed;
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => Future<Never>.error(
-    UnsupportedError('Preview only: administrative changes are not saved.'),
+    UnsupportedError(
+      'Preview only: this administrative action is not connected.',
+    ),
   );
 }
 

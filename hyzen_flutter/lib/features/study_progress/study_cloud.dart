@@ -1,64 +1,26 @@
 import 'dart:async';
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
+import 'firebase_study_store.dart';
 import 'study_session.dart';
-import '../notifications/push_api.dart';
 
-/// Set only after deploying and validating the authenticated callable backend.
-const studyApiBase = String.fromEnvironment(
-  'STUDY_API_BASE',
-  defaultValue: pushApiBase,
-);
+/// Study, rewards, calendar and ranking use the app's existing Firebase project.
+/// PUSH_API_BASE belongs only to the independent OneSignal sender.
+const studyApiBase = 'firestore://pharmawhisper-debd2';
 
 class StudyCloud {
-  StudyCloud(this.user, {http.Client? client})
-    : client = client ?? http.Client();
+  StudyCloud(this.user, {FirebaseFirestore? firestore}) : _database = firestore;
   final User user;
-  final http.Client client;
-  Future<Map<String, dynamic>> call(
-    String method,
-    Map<String, dynamic> data,
-  ) async {
-    if (studyApiBase.isEmpty) {
-      throw StateError('Study cloud is not configured.');
-    }
-    final token = await user.getIdToken();
-    if (token == null || token.isEmpty) {
-      throw StateError('Firebase session token is unavailable.');
-    }
-    final base = studyApiBase.endsWith('/')
-        ? studyApiBase.substring(0, studyApiBase.length - 1)
-        : studyApiBase;
-    final response = await client
-        .post(
-          Uri.parse('$base/$method'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({'data': data}),
-        )
-        .timeout(const Duration(seconds: 20));
-    if (response.statusCode != 200) {
-      throw StateError('Study cloud unavailable (${response.statusCode}).');
-    }
-    final decoded = jsonDecode(response.body);
-    if (decoded is! Map) {
-      throw StateError('Study cloud returned an invalid response.');
-    }
-    final result = Map<String, dynamic>.from(decoded);
-    if (result['error'] != null) {
-      throw StateError(result['error'].toString());
-    }
-    final payload = result['result'] ?? result['data'];
-    if (payload is! Map) {
-      throw StateError('Study cloud returned no result.');
-    }
-    return Map<String, dynamic>.from(payload);
-  }
-
-  void dispose() => client.close();
+  final FirebaseFirestore? _database;
+  late final FirebaseStudyStore _store = FirebaseStudyStore(
+    _database ?? FirebaseFirestore.instance,
+    user.uid,
+  );
+  bool get supportsRealtime => true;
+  Stream<Map<String, dynamic>> watch(String topic) => _store.watch(topic);
+  Future<Map<String, dynamic>> call(String method, Map<String, dynamic> data) =>
+      _store.call(method, data).timeout(const Duration(seconds: 20));
+  void dispose() {}
 }
 
 /// Durable events remain in the tracker until explicitly acknowledged. A lost

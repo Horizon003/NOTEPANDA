@@ -8,6 +8,8 @@ import 'package:hyzen_pharmd/features/study_progress/study_cloud.dart';
 class _User extends Fake implements User {}
 
 class _LostResponseCloud extends StudyCloud {
+  @override
+  bool get supportsRealtime => false;
   _LostResponseCloud() : super(_User());
   bool fail = true;
   int balance = 0;

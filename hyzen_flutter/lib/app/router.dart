@@ -1,3 +1,4 @@
+import '../features/admin/presentation/professional_verification_screen.dart';
 import '../features/study_progress/study_calendar.dart';
 import '../features/search/data/search_scope.dart';
 import 'package:flutter/material.dart';
@@ -355,6 +356,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 'connection' => const AdminConnectionScreen(),
                 'data' => const AdminDataScreen(),
                 'history' => const AdminHistoryScreen(),
+                'rank-verification' => const ProfessionalVerificationScreen(),
                 'theme' => const AdminThemeScreen(),
                 'catalog' ||
                 'delivery' ||
