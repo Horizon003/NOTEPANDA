@@ -1,4 +1,4 @@
-name: Native Flutter 1.5.8 motion profile verification
+name: Native Flutter 1.5.9 motion profile verification
 on:
   workflow_dispatch:
   push:
@@ -47,7 +47,17 @@ jobs:
           profile: pixel_2
           disable-animations: false
           working-directory: hyzen_flutter
-          script: flutter drive --profile --no-dds --driver=test_driver/monochrome_profile.dart --target=integration_test/monochrome_profile_test.dart --dart-define=HYZEN_REVIEW_ROUTE=/home
+          script: bash -o pipefail -c 'flutter drive --profile --no-dds --driver=test_driver/monochrome_profile.dart --target=integration_test/monochrome_profile_test.dart --dart-define=HYZEN_REVIEW_ROUTE=/home 2>&1 | tee /tmp/hyzen-native-profile.log'
+      - name: Surface profile failure before log cleanup
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('/tmp/hyzen-native-profile.log')
+          text=path.read_text()[-16000:] if path.exists() else 'Profile command did not start; inspect emulator bootstrap.'
+          for i in range(0,len(text),3000):
+              print('::notice title=Profile diagnostic '+str(i//3000+1)+'::'+text[i:i+3000].replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
+          PY
       - name: Require complete nonempty profile measurements
         working-directory: hyzen_flutter
         run: python ../tools/ci/stage_profile_evidence.py qa/reference/native build/verified-profile

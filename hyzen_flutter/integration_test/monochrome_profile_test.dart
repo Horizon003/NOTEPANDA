@@ -1,3 +1,5 @@
+import 'package:hyzen_pharmd/features/study_progress/study_calendar.dart';
+import 'package:hyzen_pharmd/features/study_progress/study_progress_screen.dart';
 import 'dart:async';
 import 'dart:ui' show FrameTiming;
 
@@ -156,6 +158,9 @@ void main() {
         '/profile',
         '/settings',
         '/study-goals',
+        '/study-progress',
+        '/study-streak',
+        '/study-calendar',
       ]) {
         await _showRoute(router, path);
         final name = 'light-${path.substring(1)}';
@@ -169,7 +174,7 @@ void main() {
       binding.reportData!['profile_complete'] = true;
       _checkpoint('complete');
     },
-    timeout: const Timeout(Duration(minutes: 3)),
+    timeout: const Timeout(Duration(minutes: 4)),
   );
 }
 
@@ -195,6 +200,8 @@ const _screens = {
   '/downloads': DownloadsScreen,
   '/shop': ShopScreen,
   '/study-goals': StudyGoalsScreen,
+  '/study-calendar': StudyCalendarScreen,
+  '/study-progress': StudyProgressScreen,
   '/study-streak': StudyStreakScreen,
   '/campus-rank': CampusRankScreen,
   '/profile': ProfileScreen,
