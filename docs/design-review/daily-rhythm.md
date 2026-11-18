@@ -1,3 +1,7 @@
+> Historical 1.5.9 design/validation notes. Its un-deployed Worker rewards plan
+> was superseded by [Firebase-native sync in 1.5.10](../../backend/README.md).
+> Do not follow its Cloudflare credential/deployment steps for current study sync.
+
 # Daily Rhythm implementation (1.5.9+18)
 
 Approved direction: Outfit, compact pastel clay artwork, a quiet warm background,
