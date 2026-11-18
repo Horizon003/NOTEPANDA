@@ -32,11 +32,8 @@ jobs:
           from pathlib import Path
           raw=Path('diagnostics.txt').read_text()+Path('diagnostic-errors.txt').read_text()
           lines=re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]','',raw).splitlines()
-          selected=set()
-          for i,line in enumerate(lines):
-              if re.search(r'FAILURE:|Error:|error:|Exception:|Exception was thrown|Timed out|TimeoutException|HYZEN_PROFILE|BUILD FAILED|What went wrong|Gradle task.*failed',line):
-                  selected.update(range(max(0,i-3),min(len(lines),i+9)))
-          text='\n'.join(lines[i] for i in sorted(selected))[:18000] or '\n'.join(lines[-60:])
+          end=next((i for i,line in enumerate(lines) if '##[group]Run actions/upload-artifact' in line),len(lines))
+          text='\n'.join(lines[max(0,end-160):end])[-45000:]
           for index in range(0,len(text),3000):
               part=text[index:index+3000]
               print('::notice title=Android verification diagnostics '+str(index//3000+1)+'::'+part.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
