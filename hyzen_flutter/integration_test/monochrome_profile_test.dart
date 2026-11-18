@@ -49,7 +49,9 @@ void main() {
       router.go('/home');
       final hero = find.byKey(const ValueKey('home-hero-art'));
       await _waitFor(() => hero.evaluate().isNotEmpty, 'Home hero');
-      final art = tester.widget<HSoftArt>(find.byType(HSoftArt));
+      final art = tester.widget<HSoftArt>(
+        find.ancestor(of: hero, matching: find.byType(HSoftArt)).first,
+      );
       expect(art.loop && art.enabled, isTrue);
       await _sample(binding, 'ambient_hero', () async {
         final initial = tester.getCenter(hero);
