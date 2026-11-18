@@ -25,12 +25,13 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$TARGET_RUN/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure")|.id' > failed-jobs.txt 2>diagnostic-errors.txt
           : > diagnostics.txt
           while read -r job_id; do
-            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" >> diagnostics.txt 2>>diagnostic-errors.txt
+            gh api --allow-escape-sequences "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" >> diagnostics.txt 2>>diagnostic-errors.txt
           done < failed-jobs.txt
           python3 - <<'PY'
           import re
           from pathlib import Path
-          lines=(Path('diagnostics.txt').read_text()+Path('diagnostic-errors.txt').read_text()).splitlines()
+          raw=Path('diagnostics.txt').read_text()+Path('diagnostic-errors.txt').read_text()
+          lines=re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]','',raw).splitlines()
           selected=set()
           for i,line in enumerate(lines):
               if re.search(r'FAIL|Error:|error:|Exception|Timed out|Timeout|HYZEN_PROFILE|checkpoint|BUILD FAILED|What went wrong',line):
