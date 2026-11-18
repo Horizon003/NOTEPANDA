@@ -34,10 +34,12 @@ jobs:
           lines=re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]','',raw).splitlines()
           selected=set()
           for i,line in enumerate(lines):
-              if re.search(r'FAIL|Error:|error:|Exception|Timed out|Timeout|HYZEN_PROFILE|checkpoint|BUILD FAILED|What went wrong',line):
+              if re.search(r'FAILURE:|Error:|error:|Exception:|Exception was thrown|Timed out|TimeoutException|HYZEN_PROFILE|BUILD FAILED|What went wrong|Gradle task.*failed',line):
                   selected.update(range(max(0,i-3),min(len(lines),i+9)))
-          text='\n'.join(lines[i] for i in sorted(selected))[-24000:] or '\n'.join(lines[-60:])
-          print('::notice title=Android verification diagnostics::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
+          text='\n'.join(lines[i] for i in sorted(selected))[:18000] or '\n'.join(lines[-60:])
+          for index in range(0,len(text),3000):
+              part=text[index:index+3000]
+              print('::notice title=Android verification diagnostics '+str(index//3000+1)+'::'+part.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
           Path('diagnostic-excerpt.txt').write_text(text)
           PY
       - uses: actions/upload-artifact@v4
