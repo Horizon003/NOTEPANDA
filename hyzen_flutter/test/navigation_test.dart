@@ -2091,6 +2091,7 @@ void main() {
   }
   if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
     testWidgets('representative screens visual QA', (tester) async {
+      qaClock = DateTime(2026, 11, 18);
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);

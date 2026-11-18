@@ -52,3 +52,18 @@ claim. Require deployment success and an authenticated claim/calendar/rank check
 before marking cloud behavior verified. GitHub Pages uses sample data and is
 visual review evidence only. Physical Note 8 GPU, camera, Drive and notification
 checks remain separate from widget/emulator verification.
+
+## Local verification
+
+- Flutter analyzer: no issues; 194 regression/widget tests passed.
+- New coverage checks silent reading, background/resume, document ownership,
+  30-second uncredited grace, rank pause-to-stop, lost-response reward retries,
+  offline calendar persistence/account isolation, and Home calendar routing/color.
+- Calendar/Streak/Progress layouts checked at 320, 360, 390, 430 and 800 logical
+  pixels with normal and 200% text. Existing maximum display-scale checks remain.
+- Worker: 24 tests passed; shared scoring: 8 tests passed; deploy dry run bundled
+  successfully. This does not establish authenticated production behavior.
+- Actual Flutter widget screenshots: `hyzen_flutter/qa/reference/after/`; previous
+  Home/Progress fixtures: `hyzen_flutter/qa/daily-rhythm/before/`.
+- Android signed build, native update/startup, scanner/document tests and current
+  emulator profiling are tracked by the 1.5.9 workflow, not assumed from 1.5.8.
