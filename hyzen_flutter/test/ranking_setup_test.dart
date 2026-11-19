@@ -48,41 +48,63 @@ class SetupController extends CampusController {
 }
 
 void main() {
-  testWidgets(
-    'first visit prompts for name and explicit visibility; pending year still saves',
-    (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
-      late SetupController controller;
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            sharedPrefsProvider.overrideWithValue(prefs),
-            campusBoardProvider.overrideWith(
-              (ref, period) => controller = SetupController(prefs),
+  for (final narrow in [false, true]) {
+    testWidgets(
+      'first visit saves explicit privacy while year is pending, narrow=$narrow',
+      (tester) async {
+        if (narrow) {
+          tester.view.physicalSize = const Size(320, 800);
+          tester.view.devicePixelRatio = 1;
+          tester.platformDispatcher.textScaleFactorTestValue = 2;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        }
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        late SetupController controller;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPrefsProvider.overrideWithValue(prefs),
+              campusBoardProvider.overrideWith(
+                (ref, period) => controller = SetupController(prefs),
+              ),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light(),
+              home: const CampusRankScreen(),
             ),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light(),
-            home: const CampusRankScreen(),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Make your place in the league'), findsOneWidget);
-      expect(find.textContaining('Firebase'), findsNothing);
-      final confirm = find.widgetWithText(FilledButton, 'Confirm choices');
-      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
-      await tester.enterText(find.byType(TextFormField), 'Haris');
-      await tester.tap(find.text('Keep it private'));
-      await tester.pump();
-      await tester.ensureVisible(confirm);
-      await tester.tap(confirm);
-      await tester.pumpAndSettle();
-      expect(controller.savedName, 'Haris');
-      expect(controller.hidden, true);
-      expect(find.text('Your year is under review'), findsOneWidget);
-      expect(find.textContaining('unavailable. No privacy'), findsNothing);
-    },
-  );
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Make your place in the league'), findsOneWidget);
+        expect(find.textContaining('Firebase'), findsNothing);
+        final confirm = find.widgetWithText(FilledButton, 'Confirm choices');
+        expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+        await tester.enterText(find.byType(TextFormField), 'Haris');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Keep it private'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Keep it private'));
+        await tester.pump();
+        await tester.ensureVisible(confirm);
+        await tester.pumpAndSettle();
+        await tester.tap(confirm);
+        await tester.pumpAndSettle();
+        expect(controller.savedName, 'Haris');
+        expect(controller.hidden, true);
+        await tester.scrollUntilVisible(
+          find.text('Your year is under review'),
+          160,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Your year is under review'), findsOneWidget);
+        expect(find.textContaining('unavailable. No privacy'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }

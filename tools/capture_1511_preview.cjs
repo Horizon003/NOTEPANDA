@@ -26,6 +26,11 @@ for(const s of [
    await page.getByRole('button',{name:'Already a user? Log in',exact:true}).last().click();
    await page.getByRole('textbox').first().waitFor();await page.waitForTimeout(300);
  }
+ await page.setViewportSize({width:s.width+1,height:s.height||900});
+ await page.waitForTimeout(150);
+ await page.setViewportSize({width:s.width,height:s.height||900});
+ await page.screenshot();
+ await page.waitForTimeout(300);
  await page.screenshot({path:`${out}/${s.name}.png`});
  fs.writeFileSync(`${out}/${s.name}.yml`,await page.locator('body').ariaSnapshot());
  evidence.captures.push(s);
@@ -33,11 +38,14 @@ for(const s of [
   await page.getByRole('textbox').fill('Haris');
   await page.getByText('Keep it private',{exact:true}).click();
   await page.getByRole('button',{name:'Confirm choices',exact:true}).click();
-  await page.getByText('You’re studying privately',{exact:true}).waitFor();
+  await page.waitForTimeout(500);
+  fs.writeFileSync(`${out}/ranking-after-save.yml`,await page.locator('body').ariaSnapshot());
+  await page.screenshot({path:`${out}/ranking-after-save.png`});
+  await page.getByRole('group',{name:/You’re studying privately/}).waitFor();
   await page.screenshot({path:`${out}/ranking-private-saved.png`});evidence.checks.push('first-visit explicit privacy choice saved');
  }
  if(s.name==='lectures'){
-  await page.getByText('Lecture player demonstration',{exact:true}).click();
+  await page.getByRole('button',{name:/^Lecture player demonstration/}).click();
   await page.waitForSelector('iframe[title="Lecture video"]',{timeout:20000});
   const src=await page.locator('iframe[title="Lecture video"]').getAttribute('src');
   if(!src.startsWith('https://www.youtube-nocookie.com/embed/M7lc1UVf-VE'))throw Error('Wrong embed');
@@ -47,4 +55,4 @@ for(const s of [
  await page.close();
 }
 await browser.close();fs.writeFileSync(`${out}/browser-evidence.json`,JSON.stringify(evidence,null,2));console.log(JSON.stringify(evidence));if(evidence.errors.length)process.exitCode=1;
-})().catch(e=>{console.error(e);process.exitCode=1;});
+})().catch(e=>{console.error(e);process.exit(1);});
