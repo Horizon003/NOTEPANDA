@@ -1649,10 +1649,10 @@ class _ConnectionState extends ConsumerState<AdminConnectionScreen> {
       children: [
         HeroPanel(
           eyebrow: 'Connected services',
-          title: 'Firebase + Cloudinary',
+          title: 'Connected services',
           subtitle: ref.watch(firebaseReadyProvider)
-              ? 'Firebase initialized'
-              : 'Firebase unavailable',
+              ? 'Account service connected'
+              : 'Account service unavailable',
           icon: Icons.cloud_done_outlined,
         ),
         const Gap(20),
@@ -1668,7 +1668,7 @@ class _ConnectionState extends ConsumerState<AdminConnectionScreen> {
         const ResourceTile(
           icon: Icons.photo_library_outlined,
           color: HColors.teal,
-          title: 'Cloudinary media',
+          title: 'Media storage',
           subtitle: 'Photo uploads use your website’s unsigned preset.',
           trailing: SizedBox.shrink(),
         ),
@@ -1686,7 +1686,7 @@ class _ConnectionState extends ConsumerState<AdminConnectionScreen> {
               if (mounted) {
                 setState(
                   () => status =
-                      'Server read failed. Check your connection and Firebase rules.',
+                      'Server read failed. Check your connection and account access.',
                 );
               }
             } finally {
@@ -1800,7 +1800,7 @@ class _DataState extends ConsumerState<AdminDataScreen> {
           icon: Icons.verified_user_outlined,
           color: HColors.teal,
           title: 'Professional verification',
-          subtitle: 'Verify professional years for Firebase rankings',
+          subtitle: 'Verify professional years for rankings',
           onTap: () => context.push('/admin/manage/rank-verification'),
         ),
         const Gap(12),

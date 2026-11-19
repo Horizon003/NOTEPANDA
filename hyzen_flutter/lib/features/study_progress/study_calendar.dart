@@ -72,8 +72,7 @@ class CalendarController extends ChangeNotifier with WidgetsBindingObserver {
             },
             onError: (Object _) {
               if (!_dead) {
-                error =
-                    'Firebase calendar sync unavailable · local changes are safe';
+                error = 'Calendar sync unavailable · local changes are safe';
                 notifyListeners();
               }
             },
@@ -195,7 +194,7 @@ class CalendarController extends ChangeNotifier with WidgetsBindingObserver {
       Object _,
     ) {
       if (!_dead) {
-        error = 'Firebase calendar sync unavailable · local changes are safe';
+        error = 'Calendar sync unavailable · local changes are safe';
         notifyListeners();
       }
     });

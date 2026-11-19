@@ -542,8 +542,7 @@ class StudyTracker extends ChangeNotifier with WidgetsBindingObserver {
             },
             onError: (Object _) {
               if (!_disposed) {
-                _cloudStatus =
-                    'Firebase sync unavailable · local history is safe';
+                _cloudStatus = 'Sync unavailable · local history is safe';
                 notifyListeners();
               }
             },

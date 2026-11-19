@@ -65,7 +65,7 @@ class FirebaseStudyStore {
     'calendarEvents' => _calendar(data),
     'readCampusBoard' => _board(data),
     'setRankPrivacy' => _privacy(data),
-    _ => throw StateError('Unknown Firebase study operation: $method'),
+    _ => throw StateError('This study action is not available.'),
   };
   Stream<Map<String, dynamic>> watch(String topic) {
     if (topic == 'rewards') {
@@ -463,7 +463,7 @@ class FirebaseStudyStore {
                 .get(const GetOptions(source: Source.server)))
             .data();
     return {
-      'status': 'Firebase study history synced',
+      'status': 'Study history synced',
       'seconds': number(activity?['sessionMs']) ~/ 1000,
     };
   }
@@ -499,19 +499,37 @@ class FirebaseStudyStore {
     }
     await db.runTransaction((tx) async {
       final member = (await tx.get(_member)).data();
-      if (member?['verified'] != true) {
-        throw StateError('Professional year verification is required.');
+      final verified = member?['verified'] == true;
+      final requestedYear = number(input['academicYear']);
+      final year = verified
+          ? number(member?['academicYear'])
+          : (requestedYear >= 1 && requestedYear <= 5
+                ? requestedYear
+                : number(member?['academicYear']));
+      if (year < 1 || year > 5) {
+        throw StateError('Choose your professional year.');
       }
-      final year = number(member?['academicYear']);
-      final ledger =
-          (await tx.get(_state.doc('rank_$year'))).data() ?? _emptyRank(year);
-      tx.update(_member, {
+      final ledger = verified
+          ? (await tx.get(_state.doc('rank_$year'))).data() ?? _emptyRank(year)
+          : _emptyRank(year);
+      final preferences = <String, dynamic>{
         'alias': alias,
         'optOut': optOut,
         'privacyUpdatedAt': FieldValue.serverTimestamp(),
         'firebaseRankConsent': true,
-      });
-      if (optOut) {
+        if (!verified) 'requestedYear': year,
+        if (!verified) 'verificationRequestedAt': FieldValue.serverTimestamp(),
+      };
+      if (member == null) {
+        tx.set(_member, {
+          ...preferences,
+          'verified': false,
+          'academicYear': year,
+        });
+      } else {
+        tx.update(_member, preferences);
+      }
+      if (optOut || !verified) {
         tx.delete(_public);
       } else {
         tx.set(_public, {
@@ -530,10 +548,30 @@ class FirebaseStudyStore {
     final member = (await _member.get(
       const GetOptions(source: Source.server),
     )).data();
+    final setupRequired = member?['firebaseRankConsent'] != true;
+    final verificationRequired = member?['verified'] != true;
+    final privacy = <String, dynamic>{
+      'setupRequired': setupRequired,
+      'verificationRequired': verificationRequired,
+      'optOut': member?['optOut'] != false,
+      'alias': member?['alias'],
+      'academicYear': verificationRequired
+          ? (member?['requestedYear'] ?? member?['academicYear'])
+          : (member?['academicYear']),
+    };
     if (!eligible(member)) {
       return {
-        'status':
-            'Verified year and Firebase ranking consent are required. Open Privacy to confirm.',
+        ...privacy,
+        'statusCode': setupRequired
+            ? 'setup'
+            : verificationRequired
+            ? 'review'
+            : 'private',
+        'status': setupRequired
+            ? 'Choose your ranking name and visibility.'
+            : verificationRequired
+            ? 'Your professional year is awaiting review.'
+            : 'Your ranking profile is private.',
         'entries': <Map<String, dynamic>>[],
         'mine': null,
       };
@@ -622,7 +660,9 @@ class FirebaseStudyStore {
     }
     _cursors.removeWhere((key, _) => key != generation);
     return {
+      ...privacy,
       'status': 'ready',
+      'statusCode': 'ready',
       'academicYear': year,
       'entries': entries,
       'mine': mine,

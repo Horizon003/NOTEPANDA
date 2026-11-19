@@ -133,6 +133,23 @@ void main() {
           snapshots.any((s) => s['todayClaimed'] == true && s['points'] == 100),
           true,
         );
+        await store.call('setRankPrivacy', {
+          'alias': 'Reader',
+          'optOut': false,
+          'academicYear': 2,
+        });
+        final pendingBoard = await store.call('readCampusBoard', {
+          'period': 'week',
+        });
+        expect(pendingBoard['setupRequired'], false);
+        expect(pendingBoard['verificationRequired'], true);
+        expect(
+          (await FirebaseFirestore.instance
+                  .doc('campusMemberships/${user.uid}')
+                  .get())
+              .data()?['verified'],
+          false,
+        );
         await subscription.cancel();
         // Auth emulator accepts unsigned test tokens; this cannot sign into production.
         await FirebaseAuth.instance.signOut();
@@ -181,7 +198,7 @@ void main() {
         await FirebaseAuth.instance.signInWithCustomToken(readerToken);
         expect(
           (await store.call('readCampusBoard', {'period': 'week'}))['status'],
-          contains('consent'),
+          'ready',
         );
         await store.call('setRankPrivacy', {
           'alias': 'Reader',

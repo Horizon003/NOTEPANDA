@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../app/providers.dart';
 import '../../auth/domain/reference_data.dart';
-import '../../../core/utils/links.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/ui_kit.dart';
 import '../../../core/widgets/hyzen_art.dart';
@@ -515,7 +514,7 @@ class FileTile extends ConsumerWidget {
   }
 }
 
-/// Lectures (CONFIRMED pw_lectures_tree; YouTube links open in YouTube app/browser).
+/// Lectures (CONFIRMED pw_lectures_tree; YouTube videos play inside the app).
 class LecturesScreen extends ConsumerWidget {
   const LecturesScreen({super.key});
   @override
@@ -571,10 +570,10 @@ class LecturesScreen extends ConsumerWidget {
                   color: HColors.lectures,
                   title: l.title,
                   subtitle: se.label,
-                  trailing: const Icon(Icons.open_in_new_rounded, size: 20),
+                  trailing: const Icon(Icons.play_arrow_rounded, size: 20),
                   onTap: () => l.uri == null
                       ? showHSnack(context, 'Link missing', error: true)
-                      : openLink(context, l.uri.toString()),
+                      : context.push('/lecture-player', extra: {'title': l.title, 'url': l.uri.toString()}),
                 ),
               );
             }

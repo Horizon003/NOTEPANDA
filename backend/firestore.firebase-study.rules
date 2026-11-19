@@ -263,16 +263,27 @@ service cloud.firestore {
       allow create,update: if studyOwner(uid) && projectedRank(uid,request.resource.data);
       allow delete: if studyAdmin() || (studyOwner(uid) && !rankEligible(getAfter(memberPath(uid)).data));
     }
+    function validRankPreferences(d) {
+      return d.alias is string && d.alias.size() > 0 && d.alias.size() <= 40 && d.optOut is bool
+        && d.firebaseRankConsent == true && d.privacyUpdatedAt == request.time;
+    }
     match /campusMemberships/{uid} {
       allow get: if studyAdmin() || studyOwner(uid);
       allow list: if studyAdmin();
       allow create,update: if studyAdmin() && request.resource.data.verified is bool && request.resource.data.academicYear is int && request.resource.data.academicYear in [1,2,3,4,5] && !existsAfter(publicRankPath(uid));
       allow delete: if studyAdmin() && !existsAfter(publicRankPath(uid));
-      allow update: if studyOwner(uid) && resource.data.verified == true
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alias','optOut','privacyUpdatedAt','firebaseRankConsent'])
-        && request.resource.data.alias is string && request.resource.data.alias.size() > 0 && request.resource.data.alias.size() <= 40 && request.resource.data.optOut is bool
-        && request.resource.data.firebaseRankConsent == true && request.resource.data.privacyUpdatedAt == request.time
-        && (request.resource.data.optOut ? !existsAfter(publicRankPath(uid)) : projectedRank(uid,getAfter(publicRankPath(uid)).data));
+      allow create: if studyOwner(uid)
+        && request.resource.data.keys().hasOnly(['verified','academicYear','alias','optOut','privacyUpdatedAt','firebaseRankConsent','requestedYear','verificationRequestedAt'])
+        && request.resource.data.verified == false && request.resource.data.academicYear in [1,2,3,4,5]
+        && validRankPreferences(request.resource.data)
+        && request.resource.data.requestedYear == request.resource.data.academicYear
+        && request.resource.data.verificationRequestedAt == request.time && !existsAfter(publicRankPath(uid));
+      allow update: if studyOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alias','optOut','privacyUpdatedAt','firebaseRankConsent','requestedYear','verificationRequestedAt'])
+        && validRankPreferences(request.resource.data)
+        && (request.resource.data.diff(resource.data).affectedKeys().hasAny(['requestedYear','verificationRequestedAt'])
+            ? (resource.data.verified == false && request.resource.data.requestedYear in [1,2,3,4,5] && request.resource.data.verificationRequestedAt == request.time) : true)
+        && (!rankEligible(request.resource.data) ? !existsAfter(publicRankPath(uid)) : projectedRank(uid,getAfter(publicRankPath(uid)).data));
     }
 
   }

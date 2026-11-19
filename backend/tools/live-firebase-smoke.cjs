@@ -66,6 +66,13 @@ const day=ms=>Math.floor((ms+18000000)/86400000);
   batch.set(doc(a,`studyUsers/${uid}/verifiedDays/0_${d}`),{day:d,academicYear:0,totalMs:delta,completed:0,bonus:0,lastVersion:3});
   await batch.commit();assert.equal((await getDocFromServer(pulse)).data().totalMs,delta);checks.push('server-timestamp study credit committed');
   await denied(updateDoc(pulse,{totalMs:999999,at:serverTimestamp()}));checks.push('forged study time denied');
+  const member=doc(a,`campusMemberships/${uid}`);
+  await setDoc(member,{verified:false,academicYear:5,requestedYear:5,alias:'Temporary QA',optOut:true,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp(),verificationRequestedAt:serverTimestamp()});
+  assert.equal((await getDocFromServer(member)).data().verified,false);
+  await updateDoc(member,{alias:'Temporary QA saved',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp()});
+  await denied(updateDoc(member,{verified:true}));
+  assert.equal((await getDocFromServer(doc(a,`professionalRanks/${uid}`))).exists(),false);
+  checks.push('pending-year display name/privacy saved without self-verification or public score');
   // Zero-score QA participant exercises real ranking indexes without appearing
   // in the app's points>0 board or altering any student's competitive position.
   await db.doc(`campusMemberships/${uid}`).set({verified:true,academicYear:5,alias:'Temporary QA',optOut:true});

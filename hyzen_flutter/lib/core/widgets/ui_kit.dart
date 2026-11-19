@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'workspace_icons.dart';
+import 'refinement_art.dart';
 
 import 'package:flutter/material.dart';
 
@@ -102,7 +103,13 @@ class ResourceTile extends StatelessWidget {
         child: Row(
           children: [
             leading ??
-                (glyphForIcon(icon) != null
+                (icon == Icons.description_rounded
+                    ? const RefinementArt(RefinementGlyph.document, size: 40)
+                    : (icon == Icons.play_circle_fill_rounded ||
+                          icon == Icons.play_circle_rounded ||
+                          icon == Icons.video_library_outlined)
+                    ? const RefinementArt(RefinementGlyph.lecture, size: 40)
+                    : glyphForIcon(icon) != null
                     ? WorkspaceIcon(
                         glyphForIcon(icon)!,
                         size: compact ? 34 : 40,

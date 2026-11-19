@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/refinement_art.dart';
 import '../../../core/utils/links.dart';
 import '../../content/domain/site_models.dart';
 
@@ -27,10 +28,12 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
         if (speed.abs() > 50) move(speed < 0 ? 1 : -1);
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            colors: [Color(0xfffff1df), Color(0xfff5eef9)],
+          ),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: scheme.outlineVariant),
         ),
         child: Column(
@@ -41,7 +44,7 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
               children: [
                 const Padding(
                   padding: EdgeInsets.only(top: 4),
-                  child: Icon(Icons.campaign_rounded, size: 30),
+                  child: RefinementArt(RefinementGlyph.announcement, size: 56),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -54,7 +57,7 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
                             ? slide.raw['category'].toString()
                             : 'Announcement',
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -62,7 +65,7 @@ class _AnnouncementCarouselState extends State<AnnouncementCarousel> {
                       Text(
                         slide.text,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

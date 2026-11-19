@@ -1,3 +1,4 @@
+import 'features/study_progress/campus_rank_screen.dart';
 // Browser-only review entrypoint. Renders the real app/routes with clearly
 // labelled sample data; never used by lib/main.dart or Android builds.
 import 'dart:async';
@@ -124,6 +125,13 @@ Future<void> main() async {
         // Isolated fixture app only; production authorization is unchanged.
         isAdminProvider.overrideWithValue(initialPath.startsWith('/admin')),
         adminRepositoryProvider.overrideWithValue(_ReviewAdmin(tree)),
+        campusBoardProvider.overrideWith(
+          (ref, period) => _ReviewCampus(
+            prefs,
+            period,
+            Uri.base.queryParameters['scenario'] == 'rank-setup',
+          ),
+        ),
         downloadsProvider.overrideWith(() => _ReviewDownloads(emptyHome)),
         recentProvider.overrideWith(() => _ReviewRecent(emptyHome)),
         pdfStudioHistoryProvider.overrideWith(() => _ReviewOffice(emptyHome)),
@@ -146,7 +154,48 @@ Future<void> main() async {
           (ref, key) => Stream.value(
             ContentSnapshot(
               value: key == 'pw_settings'
-                  ? <String, dynamic>{}
+                  ? <String, dynamic>{
+                      'lecturesEnabled': true,
+                      if (Uri.base.queryParameters['scenario'] == 'notice')
+                        'fullScreenNotice': {
+                          'id': 'review-welcome',
+                          'enabled': true,
+                          'repeat': 'session',
+                          'eyebrow': 'A little focus, every day',
+                          'title': 'Welcome to your study space',
+                          'body':
+                              'Your notes, lectures and study progress, together in one place. Make yourself at home.',
+                          'dismissText': 'Let’s get started',
+                        },
+                    }
+                  : key == 'pw_lectures_tree'
+                  ? [
+                      {
+                        'id': 'review-year',
+                        'label': '2nd Professional',
+                        'semesters': [
+                          {
+                            'id': 'review-semester',
+                            'label': 'Semester 1',
+                            'subjects': [
+                              {
+                                'id': 'review-subject',
+                                'label': 'Pharmacy learning room',
+                                'topics': [
+                                  {
+                                    'id': 'review-lecture',
+                                    'title': 'Lecture player demonstration',
+                                    'youtubeUrl':
+                                        'https://www.youtube.com/watch?v=M7lc1UVf-VE',
+                                    'published': true,
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ]
                   : key == 'pw_notes_tree'
                   ? tree
                   : key == 'pw_announcement' && !emptyHome
@@ -504,4 +553,60 @@ class _ReviewRecent extends RecentController {
             DateTime(2026, 1, 2),
           ),
         ];
+}
+
+// Explicit sample board for visual review; no fabricated production rankings.
+class _ReviewCampus extends CampusController {
+  _ReviewCampus(SharedPreferences prefs, String period, this.setup)
+    : super(null, prefs, 'review_rank_$period', period) {
+    _render();
+  }
+  bool setup;
+  String display = 'Muhammad Haris';
+  bool hidden = false;
+  void _render() {
+    state = AsyncData(
+      CampusBoard(
+        setup ? 'Choose your display name.' : 'ready',
+        setup || hidden
+            ? []
+            : const [
+                CampusEntry(1, 'Ayesha', 2, 240, 259, 'sample-1'),
+                CampusEntry(2, 'Hamza', 2, 180, 195, 'sample-2'),
+                CampusEntry(
+                  3,
+                  'Muhammad Haris',
+                  2,
+                  120,
+                  129,
+                  'ui-review-student',
+                ),
+              ],
+        setup || hidden
+            ? null
+            : CampusEntry(3, display, 2, 120, 129, 'ui-review-student'),
+        DateTime.now(),
+        academicYear: 2,
+        setupRequired: setup,
+        verificationRequired: setup,
+        optOut: hidden,
+        alias: setup ? null : display,
+        statusCode: setup
+            ? 'setup'
+            : hidden
+            ? 'private'
+            : 'ready',
+      ),
+    );
+  }
+
+  @override
+  Future<void> load({bool more = false}) async {}
+  @override
+  Future<void> privacy(String alias, bool optOut, {int? academicYear}) async {
+    display = alias;
+    hidden = optOut;
+    setup = false;
+    _render();
+  }
 }

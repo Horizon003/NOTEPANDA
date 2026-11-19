@@ -140,3 +140,14 @@ test('legacy D1 privacy cannot silently become Firebase ranking consent',async()
  await assertSucceeds(batch.commit());
  await assertSucceeds(getDocs(board));
 });
+test('unverified students can save private setup without self-verifying or publishing scores',async()=>{
+ const uid='pending-learner',client=env.authenticatedContext(uid).firestore(),ref=doc(client,`campusMemberships/${uid}`);
+ const prefs={verified:false,academicYear:2,requestedYear:2,alias:'Learner',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp(),verificationRequestedAt:serverTimestamp()};
+ await assertSucceeds(setDoc(ref,prefs));
+ await assertSucceeds(updateDoc(ref,{alias:'My study name',optOut:true,privacyUpdatedAt:serverTimestamp()}));
+ await assertFails(updateDoc(ref,{verified:true}));
+ await assertFails(updateDoc(ref,{academicYear:5}));
+ await assertFails(setDoc(doc(client,`professionalRanks/${uid}`),{uid,verified:true,academicYear:2,totalPoints:1000}));
+ await assertSucceeds(updateDoc(doc(admin,`campusMemberships/${uid}`),{verified:true}));
+ await assertFails(updateDoc(ref,{requestedYear:5,verificationRequestedAt:serverTimestamp()}));
+});

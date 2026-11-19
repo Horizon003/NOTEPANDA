@@ -27,8 +27,7 @@ class RewardController extends ChangeNotifier with WidgetsBindingObserver {
             apply,
             onError: (Object error) {
               if (!_dead) {
-                this.error =
-                    'Firebase sync unavailable · showing confirmed points';
+                this.error = 'Sync unavailable · showing confirmed points';
                 notifyListeners();
               }
             },

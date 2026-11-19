@@ -50,7 +50,6 @@ import 'package:hyzen_pharmd/features/content/data/content_providers.dart';
 import 'package:hyzen_pharmd/features/academics/domain/models.dart';
 import 'package:hyzen_pharmd/features/viewer/external_files.dart';
 import 'package:hyzen_pharmd/core/widgets/rive_mascot.dart';
-import 'package:hyzen_pharmd/core/widgets/common.dart';
 import 'package:hyzen_pharmd/core/widgets/hyzen_art.dart';
 import 'package:hyzen_pharmd/features/auth/presentation/splash_welcome_screens.dart';
 
@@ -1785,7 +1784,7 @@ void main() {
         guest.read(themeModeProvider.notifier).set(mode);
         await tester.pumpAndSettle();
         expect(find.text('Welcome back'), findsOneWidget);
-        expect(find.byType(HyzenBrandIcon), findsOneWidget);
+        expect(find.byKey(const ValueKey('login-panda-hero')), findsOneWidget);
         await tester.ensureVisible(find.text('Log in'));
         await tester.tap(find.text('Log in'));
         await tester.pumpAndSettle();
@@ -2049,7 +2048,11 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull, reason: 'Admin import at 320dp / 200%');
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'Admin import at 320dp / 200%',
+    );
   });
   if (const bool.fromEnvironment('HYZEN_CAPTURE_QA')) {
     testWidgets('onboarding reference visual QA', (tester) async {

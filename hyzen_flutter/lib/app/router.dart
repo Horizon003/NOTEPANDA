@@ -1,3 +1,4 @@
+import '../features/academics/presentation/lecture_player_screen.dart';
 import '../features/admin/presentation/professional_verification_screen.dart';
 import '../features/study_progress/study_calendar.dart';
 import '../features/search/data/search_scope.dart';
@@ -304,6 +305,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, s) =>
             ScanPdfScreen(initialAction: s.uri.queryParameters['source']),
       ),
+      GoRoute(path: '/lecture-player', builder: (_, state) { final data = state.extra as Map<String, dynamic>? ?? {}; return LecturePlayerScreen(title: '${data['title'] ?? 'Lecture'}', url: '${data['url'] ?? ''}'); }),
       GoRoute(path: '/lectures', builder: (_, __) => const LecturesScreen()),
       GoRoute(
         path: '/notifications',

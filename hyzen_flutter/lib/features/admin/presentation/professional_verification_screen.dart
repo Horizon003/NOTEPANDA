@@ -41,9 +41,7 @@ class _VerificationState extends ConsumerState<ProfessionalVerificationScreen> {
       return const Scaffold(
         appBar: HTopBar(title: 'Professional verification'),
         body: Center(
-          child: Text(
-            'Connect Firebase to manage verified professional years.',
-          ),
+          child: Text('Connect your account to manage professional years.'),
         ),
       );
     }
@@ -61,9 +59,8 @@ class _VerificationState extends ConsumerState<ProfessionalVerificationScreen> {
           TextField(
             controller: uid,
             decoration: const InputDecoration(
-              labelText: 'Firebase Auth UID',
-              helperText:
-                  'Copy the exact UID from the student’s Firebase account.',
+              labelText: 'Student account ID',
+              helperText: 'Copy the exact UID from the student’s account.',
             ),
           ),
           const SizedBox(height: 12),
@@ -96,7 +93,7 @@ class _VerificationState extends ConsumerState<ProfessionalVerificationScreen> {
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Text(
-                  'Could not read verification records. Check Firebase admin access.',
+                  'Could not read verification records. Check administrator access.',
                 );
               }
               if (!snapshot.hasData) {
@@ -111,12 +108,20 @@ class _VerificationState extends ConsumerState<ProfessionalVerificationScreen> {
                         '${m['alias'] ?? 'Student'} · Year ${m['academicYear']}',
                       ),
                       subtitle: Text(
-                        '${m['uid']}\n${m['verified'] == true ? 'Verified' : 'Not verified'}',
+                        '${m['uid']}\n${m['verified'] == true
+                            ? 'Verified'
+                            : m['verificationRequestedAt'] != null
+                            ? 'Review requested · Year ${m['requestedYear'] ?? m['academicYear']}'
+                            : 'Not verified'}',
                       ),
                       isThreeLine: true,
                       onTap: () => setState(() {
                         uid.text = '${m['uid']}';
-                        year = (m['academicYear'] as num?)?.toInt() ?? 1;
+                        year =
+                            (m['requestedYear'] as num? ??
+                                    m['academicYear'] as num?)
+                                ?.toInt() ??
+                            1;
                         verified = m['verified'] == true;
                       }),
                     ),
