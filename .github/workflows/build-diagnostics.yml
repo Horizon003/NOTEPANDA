@@ -32,7 +32,8 @@ jobs:
           from pathlib import Path
           raw=Path('diagnostics.txt').read_text()+Path('diagnostic-errors.txt').read_text()
           lines=re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]','',raw).splitlines()
-          end=next((i for i,line in enumerate(lines) if '##[group]Run actions/upload-artifact' in line),len(lines))
+          failures=[i for i,line in enumerate(lines) if '##[error]' in line]
+          end=min(len(lines),failures[-1]+8) if failures else len(lines)
           text='\n'.join(lines[max(0,end-160):end])[-45000:]
           for index in range(0,len(text),3000):
               part=text[index:index+3000]
