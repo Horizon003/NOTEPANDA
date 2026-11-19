@@ -35,7 +35,7 @@ jobs:
         working-directory: hyzen_flutter
       - run: npm ci --ignore-scripts
         working-directory: backend/functions
-      - run: node --test backend/tests/merge-firebase-rules.test.cjs
+      - run: node --test backend/tests/merge-firebase-rules.test.cjs backend/tests/publish-firebase-rules.test.cjs
       - run: backend/functions/node_modules/.bin/firebase emulators:exec --config backend/firebase-native.json --project demo-hyzen-native --only firestore 'node --test backend/tests/firebase-native.test.cjs'
       - name: Actual Flutter Firebase SDK and admin import/export round trip
         env:
@@ -83,4 +83,9 @@ jobs:
       - name: Create only missing ranking indexes and wait until ready
         run: node backend/tools/create-ranking-indexes.cjs
       - name: Deploy the tested rules merge only
-        run: backend/functions/node_modules/.bin/firebase deploy --config backend/build/firebase-rollout/firebase.json --project pharmawhisper-debd2 --only firestore:rules --non-interactive
+        run: node backend/tools/publish-firebase-rules.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firebase-active-release-${{ github.sha }}
+          path: backend/build/firebase-rollout/deployed-release.json
+          if-no-files-found: error
