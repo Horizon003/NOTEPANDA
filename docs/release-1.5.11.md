@@ -7,3 +7,5 @@
 - Existing study tracking, reminders, rewards, documents, downloads, admin import/export and production signing are retained.
 
 Review prerelease. Physical Infinix Note 8, real camera/Drive and YouTube playback on a physical device require verification. Emulator profile evidence does not establish 60 FPS on physical hardware.
+
+[Interactive Flutter preview](https://horizon003.github.io/pharm-d-with-hyzen/) · [Validation and current screenshots](https://github.com/Horizon003/pharm-d-with-hyzen/blob/work/monochrome-motion-1.5.5/docs/release/1.5.11-validation.md) · [Review PR](https://github.com/Horizon003/pharm-d-with-hyzen/pull/18)
