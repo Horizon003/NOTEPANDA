@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: Completed validation run to inspect
+        description: Validation run to inspect (active or completed)
         required: true
 permissions:
   contents: read
@@ -19,10 +19,10 @@ jobs:
       TARGET_RUN: ${{ inputs.run_id || '44334773642' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Read failed job logs on the Actions runner
+      - name: Read active or failed job logs on the Actions runner
         run: |
           set +e
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$TARGET_RUN/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure")|.id' > failed-jobs.txt 2>diagnostic-errors.txt
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$TARGET_RUN/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure" or .status=="in_progress")|.id' > failed-jobs.txt 2>diagnostic-errors.txt
           : > diagnostics.txt
           while read -r job_id; do
             gh api --allow-escape-sequences "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" >> diagnostics.txt 2>>diagnostic-errors.txt
