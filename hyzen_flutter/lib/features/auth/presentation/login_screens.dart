@@ -566,73 +566,81 @@ class AccountChoiceScreen extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
-            child: ListView(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: AuthBackButton(
-                    onPressed: () => context.canPop()
-                        ? context.pop()
-                        : context.go('/welcome'),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xffffe8d0), Color(0xffe9e5f6)],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AuthBackButton(
+                      onPressed: () => context.canPop()
+                          ? context.pop()
+                          : context.go('/welcome'),
                     ),
-                    borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'PHARM D WITH HYZEN',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xffffe8d0), Color(0xffe9e5f6)],
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PHARM D WITH HYZEN',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Center(
-                        child: RefinementArt(RefinementGlyph.panda, size: 190),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'A little focus.\nA brighter future.',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text('Build a study rhythm that feels like yours.'),
-                    ],
+                        const SizedBox(height: 16),
+                        const Center(
+                          child: RefinementArt(
+                            RefinementGlyph.panda,
+                            size: 190,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'A little focus.\nA brighter future.',
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Build a study rhythm that feels like yours.',
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Make yourself at home',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Keep learning with your notes, resources and progress.',
-                ),
-                const SizedBox(height: 20),
-                HButton(
-                  label: 'Already a user? Log in',
-                  onPressed: onLogin,
-                  icon: Icons.arrow_forward_rounded,
-                ),
-                const SizedBox(height: 8),
-                HButton(
-                  label: 'Create account',
-                  outlined: true,
-                  onPressed: () => context.push('/register/personal'),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  Text(
+                    'Make yourself at home',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Keep learning with your notes, resources and progress.',
+                  ),
+                  const SizedBox(height: 20),
+                  HButton(
+                    label: 'Already a user? Log in',
+                    onPressed: onLogin,
+                    icon: Icons.arrow_forward_rounded,
+                  ),
+                  const SizedBox(height: 8),
+                  HButton(
+                    label: 'Create account',
+                    outlined: true,
+                    onPressed: () => context.push('/register/personal'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

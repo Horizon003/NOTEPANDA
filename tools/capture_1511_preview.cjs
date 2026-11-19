@@ -33,7 +33,7 @@ for(const s of [
   await page.getByRole('textbox').fill('Haris');
   await page.getByText('Keep it private',{exact:true}).click();
   await page.getByRole('button',{name:'Confirm choices',exact:true}).click();
-  await page.getByText('Your year is under review',{exact:true}).waitFor();
+  await page.getByText('You’re studying privately',{exact:true}).waitFor();
   await page.screenshot({path:`${out}/ranking-private-saved.png`});evidence.checks.push('first-visit explicit privacy choice saved');
  }
  if(s.name==='lectures'){
