@@ -9,7 +9,7 @@ const {getAuth}=requireBackend('firebase-admin/auth');
 const {getFirestore}=requireBackend('firebase-admin/firestore');
 const {initializeApp,deleteApp}=requireBackend('firebase/app');
 const {getAuth:clientAuth,signInWithCustomToken,signOut}=requireBackend('firebase/auth');
-const {getFirestore:clientDb,doc,setDoc,getDocFromServer,updateDoc,deleteDoc,writeBatch,serverTimestamp}=requireBackend('firebase/firestore');
+const {getFirestore:clientDb,doc,setDoc,getDocFromServer,updateDoc,deleteDoc,writeBatch,serverTimestamp,collection,query,where,orderBy,limit,getDocsFromServer,getCountFromServer}=requireBackend('firebase/firestore');
 const projectId='pharmawhisper-debd2';
 const day=ms=>Math.floor((ms+18000000)/86400000);
 (async()=>{
@@ -66,11 +66,34 @@ const day=ms=>Math.floor((ms+18000000)/86400000);
   batch.set(doc(a,`studyUsers/${uid}/verifiedDays/0_${d}`),{day:d,academicYear:0,totalMs:delta,completed:0,bonus:0,lastVersion:3});
   await batch.commit();assert.equal((await getDocFromServer(pulse)).data().totalMs,delta);checks.push('server-timestamp study credit committed');
   await denied(updateDoc(pulse,{totalMs:999999,at:serverTimestamp()}));checks.push('forged study time denied');
+  // Zero-score QA participant exercises real ranking indexes without appearing
+  // in the app's points>0 board or altering any student's competitive position.
+  await db.doc(`campusMemberships/${uid}`).set({verified:true,academicYear:5,alias:'Temporary QA',optOut:true});
+  const rank={academicYear:5,weekKey:0,weekPoints:0,weekMinutes:0,monthKey:0,monthPoints:0,monthMinutes:0,totalPoints:0,totalMinutes:0,sourceVersion:0};
+  const consent=writeBatch(a);
+  consent.update(doc(a,`campusMemberships/${uid}`),{alias:'Temporary QA',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp()});
+  consent.set(doc(a,`professionalRanks/${uid}`),{...rank,uid,alias:'Temporary QA',verified:true,optOut:false});
+  await consent.commit();
+  for(const prefix of ['week','month','total']){
+   let filters=[where('academicYear','==',5),where('verified','==',true),where('optOut','==',false)];
+   if(prefix!=='total')filters.push(where(prefix+'Key','==',prefix==='week'?Math.floor((today+3)/7):new Date(today*86400000).getUTCFullYear()*12+new Date(today*86400000).getUTCMonth()+1));
+   const base=()=>query(collection(a,'professionalRanks'),...filters);
+   await getDocsFromServer(query(base(),where(prefix+'Points','>',0),orderBy(prefix+'Points','desc'),orderBy(prefix+'Minutes','desc'),orderBy('uid'),limit(30)));
+   await getCountFromServer(query(base(),where(prefix+'Points','>',0)));
+   await getCountFromServer(query(base(),where(prefix+'Points','==',0),where(prefix+'Minutes','>',0)));
+   await getCountFromServer(query(base(),where(prefix+'Points','==',0),where(prefix+'Minutes','==',0),where('uid','<',uid)));
+  }
+  checks.push('week/month/professional ranking queries and rank-count indexes');
+  const hide=writeBatch(a);
+  hide.update(doc(a,`campusMemberships/${uid}`),{alias:'Temporary QA',optOut:true,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp()});
+  hide.delete(doc(a,`professionalRanks/${uid}`));await hide.commit();
+  assert.equal((await getDocFromServer(doc(a,`professionalRanks/${uid}`))).exists(),false);checks.push('ranking consent and opt-out removal');
+
  } finally {
   let cleanupError;
   for(const app of apps){await signOut(clientAuth(app)).catch(()=>{});await deleteApp(app);}
   for(const uid of uids){
-   try{await db.recursiveDelete(db.doc(`studyUsers/${uid}`));await auth.deleteUser(uid).catch(e=>{if(e.code!=='auth/user-not-found')throw e;});}
+   try{await db.doc(`professionalRanks/${uid}`).delete();await db.doc(`campusMemberships/${uid}`).delete();await db.recursiveDelete(db.doc(`studyUsers/${uid}`));await auth.deleteUser(uid).catch(e=>{if(e.code!=='auth/user-not-found')throw e;});}
    catch(e){cleanupError=e;console.error('QA cleanup incomplete for '+uid);}
   }
   await adminApp.deleteApp(admin);
