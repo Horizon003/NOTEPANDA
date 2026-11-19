@@ -16,8 +16,9 @@ const project = 'pharmawhisper-debd2';
   fs.writeFileSync('backend/build/firebase-rollout/previous-release.json', JSON.stringify(release, null, 2));
   const fragment = fs.readFileSync('backend/firebase-study.rules.fragment', 'utf8');
   fs.writeFileSync('backend/build/firebase-rollout/merged.rules', mergeRules(files[0].content, fragment));
+  fs.copyFileSync('backend/firestore.indexes.json', 'backend/build/firebase-rollout/indexes.json');
   fs.writeFileSync('backend/build/firebase-rollout/firebase.json', JSON.stringify({firestore: {
-    rules: 'merged.rules', indexes: '../../firestore.indexes.json'
+    rules: 'merged.rules', indexes: 'indexes.json'
   }, emulators: {firestore: {port: 8080}, ui: {enabled: false}}}, null, 2));
   console.log('Current production rules backed up; merged candidate prepared. No deployment performed.');
 })().catch(error => { console.error(error.message); process.exitCode = 1; });
