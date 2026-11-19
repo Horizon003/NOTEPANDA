@@ -89,3 +89,17 @@ trusted admin export/migration if they are to be carried forward.
 
 Rollback uses the saved previous rules and release APK; retain Firestore data.
 Goals/tasks that were already device-local are not claimed as multi-device sync.
+
+
+## Current activation status
+
+Production deployment passed in run [44441672939](https://github.com/Horizon003/pharm-d-with-hyzen/actions/runs/44441672939).
+Live authenticated checks passed in run [44442506765](https://github.com/Horizon003/pharm-d-with-hyzen/actions/runs/44442506765), including all ranking query/count indexes and opt-out. Temporary QA data was removed.
+The existing 1.5.10+19 APK needs no rebuild.
+
+Publication uses the standard Firebase Rules REST API: create an immutable,
+server-compiled ruleset, confirm the active release still matches the backup,
+update the release, then read it back to verify. Emulator security tests remain
+mandatory. The CLI's additional `projects:test` permission is not required by
+this publication method. Unit tests ensure compiler failures and concurrent edits
+never update the active release.
