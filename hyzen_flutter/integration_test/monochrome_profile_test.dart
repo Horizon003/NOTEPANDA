@@ -179,9 +179,30 @@ void main() {
         await _wait(const Duration(milliseconds: 1500));
         final name = 'light-${path.substring(1)}';
         _checkpoint('capturing $name');
-        final bytes = await binding
+        var bytes = await binding
             .takeScreenshot(name)
             .timeout(const Duration(seconds: 15));
+        // PixelCopy can return the last converted surface even after the new
+        // route is current. Explicitly repaint and retry outside timing samples;
+        // keep rejecting identical captures rather than publishing stale pixels.
+        for (
+          var retry = 0;
+          previousCapture != null &&
+              listEquals(previousCapture, bytes) &&
+              retry < 3;
+          retry++
+        ) {
+          _checkpoint('retrying stale screenshot $name');
+          for (final view in binding.renderViews) {
+            view.markNeedsPaint();
+          }
+          binding.scheduleFrame();
+          await tester.pump(const Duration(milliseconds: 100));
+          await _wait(const Duration(milliseconds: 1500));
+          bytes = await binding
+              .takeScreenshot(name)
+              .timeout(const Duration(seconds: 15));
+        }
         expect(bytes, isNotEmpty, reason: 'Screenshot $name must contain data');
         expect(
           previousCapture == null || !listEquals(previousCapture, bytes),
