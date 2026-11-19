@@ -1,4 +1,4 @@
-name: Native Flutter 1.5.11 motion profile verification
+name: Native Flutter 1.5.11 profile verification
 on:
   workflow_dispatch:
   push:

@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 const fs=require('node:fs');
 (async()=>{
 const out='hyzen_flutter/qa/1.5.11';fs.mkdirSync(out,{recursive:true});
-const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+const browser=await chromium.launch({executablePath:process.env.CHROME_EXECUTABLE || (fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':'/usr/bin/google-chrome'),headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const evidence={captures:[],checks:[],errors:[]};
 for(const s of [
  {name:'login',route:'/login',width:390},

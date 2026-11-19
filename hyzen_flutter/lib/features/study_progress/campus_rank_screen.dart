@@ -158,10 +158,11 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
         state = AsyncData(
           cached == null
               ? const CampusBoard(
-                  'Rankings are unavailable. Your local study history is safe.',
+                  'Check your connection and refresh. Your saved study history is safe.',
                   [],
                   null,
                   null,
+                  statusCode: 'offline',
                 )
               : decode(
                   Map<String, dynamic>.from(jsonDecode(cached)),
@@ -170,7 +171,13 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
         );
       } catch (_) {
         state = const AsyncData(
-          CampusBoard('No cached rankings available.', [], null, null),
+          CampusBoard(
+            'Check your connection and refresh.',
+            [],
+            null,
+            null,
+            statusCode: 'offline',
+          ),
         );
       }
     } finally {
@@ -520,7 +527,9 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          board.setupRequired
+                          board.statusCode == 'offline'
+                              ? 'Let’s reconnect'
+                              : board.setupRequired
                               ? 'Let’s set up your profile'
                               : board.verificationRequired
                               ? 'Your year is under review'
@@ -529,7 +538,9 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          board.setupRequired
+                          board.statusCode == 'offline'
+                              ? board.status
+                              : board.setupRequired
                               ? 'A display name and visibility choice are all you need to get started.'
                               : board.verificationRequired
                               ? 'Your choices are saved. We’ll review your professional year before your score appears here. Your personal study progress continues.'
@@ -537,10 +548,16 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                         ),
                         const SizedBox(height: 12),
                         TextButton.icon(
-                          onPressed: _privacy,
+                          onPressed: board.statusCode == 'offline'
+                              ? () => ref
+                                    .read(campusBoardProvider(period).notifier)
+                                    .load()
+                              : _privacy,
                           icon: const Icon(Icons.tune_rounded, size: 18),
                           label: Text(
-                            board.setupRequired
+                            board.statusCode == 'offline'
+                                ? 'Try again'
+                                : board.setupRequired
                                 ? 'Set up ranking'
                                 : 'Edit my choices',
                           ),

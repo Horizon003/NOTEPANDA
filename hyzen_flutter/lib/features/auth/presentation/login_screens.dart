@@ -204,12 +204,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             _pw.clear();
                           }),
                         ),
-                        const Spacer(),
-                        const Text(
-                          'PHARM D WITH HYZEN',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'PHARM D WITH HYZEN',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
