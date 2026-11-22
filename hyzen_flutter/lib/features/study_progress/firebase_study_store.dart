@@ -503,6 +503,12 @@ class FirebaseStudyStore {
     }
     await db.runTransaction((tx) async {
       final member = (await tx.get(_member)).data();
+      // Firestore transactions require every read to happen before the first
+      // write. Read the overall ledger up front so first-time public users can
+      // save preferences and publish their zero-score profile atomically.
+      final ledger = optOut
+          ? null
+          : (await tx.get(_state.doc('rank_overall'))).data() ?? _emptyRank(0);
       final preferences = <String, dynamic>{
         'alias': alias,
         'optOut': optOut,
@@ -517,10 +523,8 @@ class FirebaseStudyStore {
       if (optOut) {
         tx.delete(_public);
       } else {
-        final ledger =
-            (await tx.get(_state.doc('rank_overall'))).data() ?? _emptyRank(0);
         tx.set(_public, {
-          ...ledger,
+          ...ledger!,
           'uid': uid,
           'alias': alias,
           'optOut': false,
