@@ -197,16 +197,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 alignment: Alignment.center,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 280),
-                  child: SlideContinue(
-                    key: ValueKey('welcome-slide-$_index'),
-                    label: _index == 2
-                        ? 'Slide to log in'
-                        : 'Slide to continue',
-                    semanticLabel: _index == 2
-                        ? 'Log in'
-                        : 'Continue onboarding',
-                    onComplete: _continue,
-                  ),
+                  child: _index == 0
+                      ? SlideContinue(
+                          label: 'Slide to continue',
+                          semanticLabel: 'Continue onboarding',
+                          onComplete: _continue,
+                        )
+                      : FilledButton(
+                          onPressed: _continue,
+                          child: Text(_index == 2 ? 'Log in' : 'Continue'),
+                        ),
                 ),
               ),
             ),

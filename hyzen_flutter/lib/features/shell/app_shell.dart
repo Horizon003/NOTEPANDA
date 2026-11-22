@@ -6,6 +6,7 @@ import '../updates/update_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/tokens.dart';
+import '../../core/widgets/common.dart';
 import '../../core/widgets/surfaces.dart';
 import '../../core/widgets/main_dock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -269,11 +270,7 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                   if (title == 'NotePanda')
                     Row(
                       children: [
-                        Image.asset(
-                          'assets/brand/hyzen_icon_square.png',
-                          width: integrated ? 24 : 30,
-                          height: integrated ? 24 : 30,
-                        ),
+                        HyzenBrandIcon(size: integrated ? 26 : 32),
                         const SizedBox(width: 10),
                         Flexible(
                           child: Text.rich(

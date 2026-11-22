@@ -1724,7 +1724,9 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
-  testWidgets('panda onboarding retains later mascot pages', (tester) async {
+  testWidgets('only the first onboarding page uses the slide control', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(theme: AppTheme.light(), home: const WelcomeScreen()),
     );
@@ -1747,6 +1749,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(HyzenRiveMascot), findsOneWidget);
+    expect(slider, findsNothing);
+    await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
+    await tester.pumpAndSettle();
+    expect(find.text('Take your notes.\nStudy anywhere.'), findsOneWidget);
+    expect(slider, findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Log in'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
   testWidgets(
@@ -1798,7 +1806,25 @@ void main() {
         );
         tester.view.viewInsets = const FakeViewPadding(bottom: 300);
         await tester.pumpAndSettle();
-        await tester.ensureVisible(find.byTooltip('Show password'));
+        final showPassword = find.byTooltip('Show password');
+        await tester.ensureVisible(showPassword);
+        final eye = tester.widget<IconButton>(
+          find.widgetWithIcon(IconButton, Icons.visibility_outlined),
+        );
+        expect(eye.style!.side!.resolve({}), BorderSide.none);
+        expect(eye.style!.backgroundColor!.resolve({}), Colors.transparent);
+        await tester.tap(showPassword);
+        await tester.pumpAndSettle();
+        expect(find.byTooltip('Hide password'), findsOneWidget);
+        expect(
+          tester
+              .widgetList<EditableText>(find.byType(EditableText))
+              .last
+              .obscureText,
+          isFalse,
+        );
+        await tester.tap(find.byTooltip('Hide password'));
+        await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         tester.view.resetViewInsets();
         await tester.enterText(find.byType(TextFormField).first, '');

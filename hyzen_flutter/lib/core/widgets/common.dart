@@ -33,12 +33,12 @@ class HyzenBrandIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(size * .24),
+    borderRadius: BorderRadius.circular(size * .16),
     child: Image.asset(
       Brand.logoAsset,
       width: size,
       height: size,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       semanticLabel: Brand.appName,
     ),
   );

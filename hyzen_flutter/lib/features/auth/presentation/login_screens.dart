@@ -108,7 +108,12 @@ class _PasswordFieldState extends State<PasswordField> {
         suffixIcon: IconButton(
           tooltip: _obscure ? 'Show password' : 'Hide password',
           iconSize: 20,
-          padding: const EdgeInsets.all(12),
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            side: BorderSide.none,
+            minimumSize: const Size.square(48),
+            padding: const EdgeInsets.all(12),
+          ),
           icon: Icon(
             _obscure
                 ? Icons.visibility_outlined
