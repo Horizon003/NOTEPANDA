@@ -151,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!ref.read(firebaseReadyProvider)) {
       setState(
         () => _error =
-            'Can\u2019t reach PHARM D WITH HYZEN right now. Please check your connection.',
+            'Can\u2019t reach NotePanda right now. Please check your connection.',
       );
       return;
     }
@@ -207,7 +207,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
-                            'PHARM D WITH HYZEN',
+                            'NotePanda',
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               fontSize: 11,
@@ -519,7 +519,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     ),
                     const SizedBox(height: HSpace.xs),
                     Text(
-                      'Enter the email you used for PHARM D WITH HYZEN and we\u2019ll send you a reset link.',
+                      'Enter the email you used for NotePanda and we\u2019ll send you a reset link.',
                       style: t.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: HSpace.xl),
@@ -595,7 +595,7 @@ class AccountChoiceScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'PHARM D WITH HYZEN',
+                          'NotePanda',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,

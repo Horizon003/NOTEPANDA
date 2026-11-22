@@ -18,10 +18,7 @@ class SplashScreen extends StatelessWidget {
           children: [
             const HyzenBrandIcon(size: 64),
             const SizedBox(height: 14),
-            Text(
-              'Pharm D with Hyzen',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('NotePanda', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             const HyzenRiveMascot(
               state: HyzenRiveState.loading,
@@ -84,10 +81,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      'Pharm D with Hyzen',
-                      style: t.textTheme.labelMedium,
-                    ),
+                    child: Text('NotePanda', style: t.textTheme.labelMedium),
                   ),
                   TextButton(
                     onPressed: () => context.push('/login'),

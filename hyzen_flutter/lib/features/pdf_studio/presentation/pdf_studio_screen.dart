@@ -308,7 +308,7 @@ class _PdfStudioScreenState extends ConsumerState<PdfStudioScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
               child: Text(
-                'Opened with PHARM D WITH HYZEN',
+                'Opened with NotePanda',
                 style: TextStyle(
                   color: OfficeColors.ink(context),
                   fontSize: 16,
@@ -626,7 +626,7 @@ class _PdfStudioFileViewerScreenState
       _recorded = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-            ref.read(pdfStudioHistoryProvider.notifier).recordOpen(active.id);
+          ref.read(pdfStudioHistoryProvider.notifier).recordOpen(active.id);
         }
       });
     }

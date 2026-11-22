@@ -40,7 +40,7 @@ class UpdateManifest {
       sha256: hash,
       minimumCode: min,
       notes:
-          '${m['androidReleaseNotes'] ?? 'Improvements and fixes for PHARM D WITH HYZEN.'}',
+          '${m['androidReleaseNotes'] ?? 'Improvements and fixes for NotePanda.'}',
       force: m['androidForceUpdate'] == true,
     );
   }

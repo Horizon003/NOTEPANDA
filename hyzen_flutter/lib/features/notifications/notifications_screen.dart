@@ -39,7 +39,7 @@ class NotificationsController extends Notifier<List<Map<String, dynamic>>> {
       if (a != null) {
         _receive({
           'id': 'ann_${DriveLinks.fnv1a36('${a.text}|${a.linkUrl}')}',
-          'title': 'From PHARM D WITH HYZEN',
+          'title': 'From NotePanda',
           'body': a.text,
           'url': a.linkUrl,
         });

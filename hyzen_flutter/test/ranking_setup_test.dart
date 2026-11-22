@@ -30,15 +30,15 @@ class SetupController extends CampusController {
     hidden = optOut;
     state = AsyncData(
       CampusBoard(
-        'Your year is under review.',
+        'Your ranking profile is private.',
         [],
         null,
         null,
         academicYear: 2,
         alias: alias,
         optOut: optOut,
-        verificationRequired: true,
-        statusCode: 'review',
+        verificationRequired: false,
+        statusCode: 'private',
       ),
     );
   }
@@ -50,7 +50,7 @@ class SetupController extends CampusController {
 void main() {
   for (final narrow in [false, true]) {
     testWidgets(
-      'first visit saves explicit privacy while year is pending, narrow=$narrow',
+      'first visit saves explicit overall-rank privacy, narrow=$narrow',
       (tester) async {
         if (narrow) {
           tester.view.physicalSize = const Size(320, 800);
@@ -78,7 +78,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.text('Make your place in the league'), findsOneWidget);
+        expect(find.text('Join the overall rank'), findsOneWidget);
         expect(find.textContaining('Firebase'), findsNothing);
         final confirm = find.widgetWithText(FilledButton, 'Confirm choices');
         expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
@@ -95,13 +95,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(controller.savedName, 'Haris');
         expect(controller.hidden, true);
-        await tester.scrollUntilVisible(
-          find.text('Your year is under review'),
-          160,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.pumpAndSettle();
-        expect(find.text('Your year is under review'), findsOneWidget);
         expect(find.textContaining('unavailable. No privacy'), findsNothing);
         expect(tester.takeException(), isNull);
       },

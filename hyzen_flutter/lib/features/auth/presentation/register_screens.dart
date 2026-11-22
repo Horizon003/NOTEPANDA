@@ -624,8 +624,7 @@ class _RegisterCredentialsState
               const _StepHeader(
                 step: 3,
                 title: 'Login credentials',
-                subtitle:
-                    'You\u2019ll use these to log in to PHARM D WITH HYZEN.',
+                subtitle: 'You\u2019ll use these to log in to NotePanda.',
               ),
               if (_submitError != null) ...[
                 Container(
@@ -813,7 +812,7 @@ class RegisterSuccessScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: HSpace.xs),
                   Text(
-                    'Your PHARM D WITH HYZEN account is ready.',
+                    'Your NotePanda account is ready.',
                     style: t.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),

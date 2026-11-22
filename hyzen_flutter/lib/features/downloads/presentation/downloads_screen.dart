@@ -133,10 +133,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
               for (final r in list) _DownloadRow(r: r),
               if (opened.isNotEmpty) ...[
                 const Gap(HSpace.lg),
-                Text(
-                  'Opened with PHARM D WITH HYZEN',
-                  style: t.textTheme.titleMedium,
-                ),
+                Text('Opened with NotePanda', style: t.textTheme.titleMedium),
                 Text(
                   'Files from WhatsApp or your phone stay here for offline reading.',
                   style: t.textTheme.bodySmall,
@@ -167,7 +164,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
                           context,
                           title: 'Delete this file?',
                           message:
-                              'This removes PHARM D WITH HYZEN’s local copy of “${item.title}”.',
+                              'This removes NotePanda’s local copy of “${item.title}”.',
                           confirm: 'Delete',
                           destructive: true,
                         )) {
@@ -211,7 +208,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> {
                       context,
                       title: 'Clear reader history?',
                       message:
-                          'Imported local files will be removed from PHARM D WITH HYZEN.',
+                          'Imported local files will be removed from NotePanda.',
                       confirm: 'Clear history',
                       destructive: true,
                     )) {

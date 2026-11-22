@@ -128,7 +128,7 @@ class StudyNotificationScheduler {
         final reminder = reminders[i];
         await _plugin.zonedSchedule(
           idFor('$key:$i'),
-          'PHARM D WITH HYZEN',
+          'NotePanda',
           reminder.message,
           tz.TZDateTime.from(reminder.time, tz.local),
           const NotificationDetails(
@@ -227,7 +227,7 @@ class StudyNotificationScheduler {
         final when = tz.TZDateTime.from(time, tz.local);
         await _plugin.zonedSchedule(
           idFor('$key:$slot'),
-          'PHARM D WITH HYZEN',
+          'NotePanda',
           title,
           when,
           notice,

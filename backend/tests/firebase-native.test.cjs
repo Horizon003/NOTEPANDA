@@ -38,7 +38,7 @@ test('calendar CRUD is owner scoped; invalid payloads are rejected',async()=>{
 test('clock/activity initialize with server timestamps; invented elapsed time is denied',async()=>{
  await assertSucceeds(setDoc(doc(a,'studyUsers/alice/state/clock'),{at:serverTimestamp()}));
  const ref=doc(a,'studyUsers/alice/state/activity');
- const initial={version:1,session:'a'.repeat(32),active:true,closed:false,at:serverTimestamp(),previousAt:serverTimestamp(),previousActive:false,previousSession:'a'.repeat(32),totalMs:0,sessionMs:0,deltaMs:0,creditDay:0,creditYear:0,completion:0,academicYear:0};
+ const initial={version:1,session:'a'.repeat(32),active:true,closed:false,at:serverTimestamp(),previousAt:serverTimestamp(),previousActive:false,previousSession:'a'.repeat(32),totalMs:0,sessionMs:0,deltaMs:0,creditDay:0,creditYear:0,completion:0,academicYear:0,rankScope:'overall'};
  await assertSucceeds(setDoc(ref,initial));
  await assertFails(updateDoc(ref,{totalMs:3600000,at:serverTimestamp()}));
  const old=(await getDoc(ref)).data();
@@ -47,7 +47,7 @@ test('clock/activity initialize with server timestamps; invented elapsed time is
 test('real server-stamped intervals settle once into private history and cannot be replayed',async()=>{
  const uid='reader',client=env.authenticatedContext(uid).firestore(),now=Date.now();
  const at=Timestamp.fromMillis(now-10000),prev=Timestamp.fromMillis(now-20000),d=day(now-10000),session='c'.repeat(32);
- const old={version:1,session,active:true,closed:false,at,previousAt:prev,previousActive:true,previousSession:session,totalMs:0,sessionMs:0,deltaMs:0,creditDay:0,creditYear:0,completion:0,academicYear:0};
+ const old={version:1,session,active:true,closed:false,at,previousAt:prev,previousActive:true,previousSession:session,totalMs:0,sessionMs:0,deltaMs:0,creditDay:0,creditYear:0,completion:0,academicYear:0,rankScope:'overall'};
  await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),`studyUsers/${uid}/state/activity`),old));
  const next={...old,version:2,at:serverTimestamp(),previousAt:at,totalMs:10000,sessionMs:10000,deltaMs:10000,creditDay:d};
  const stats={day:d,academicYear:0,totalMs:10000,completed:0,bonus:0,lastVersion:2};
@@ -55,27 +55,27 @@ test('real server-stamped intervals settle once into private history and cannot 
  await assertSucceeds(batch.commit());
  await assertFails(updateDoc(doc(client,`studyUsers/${uid}/verifiedDays/0_${d}`),{totalMs:20000}));
 });
-test('verified rank credit matches the settled minute and metadata is not self-verifiable',async()=>{
- const uid='ranked',client=env.authenticatedContext(uid).firestore(),now=Date.now(),d=day(now-10000),year=2,session='d'.repeat(32);
+test('overall rank credit is available without a professional-year verification step',async()=>{
+ const uid='ranked',client=env.authenticatedContext(uid).firestore(),now=Date.now(),d=day(now-10000),session='d'.repeat(32);
  const at=Timestamp.fromMillis(now-10000),prev=Timestamp.fromMillis(now-25000);
- const old={version:1,session,active:true,closed:false,at,previousAt:prev,previousActive:true,previousSession:session,totalMs:45000,sessionMs:45000,deltaMs:0,creditDay:d,creditYear:year,completion:0,academicYear:year};
+ const old={version:1,session,active:true,closed:false,at,previousAt:prev,previousActive:true,previousSession:session,totalMs:45000,sessionMs:45000,deltaMs:0,creditDay:d,creditYear:0,completion:0,academicYear:0,rankScope:'overall'};
  await env.withSecurityRulesDisabled(async c=>{
-  await setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,firebaseRankConsent:true,academicYear:year,alias:'Reader',optOut:false});
+  await setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{firebaseRankConsent:true,alias:'Reader',optOut:false});
   await setDoc(doc(c.firestore(),`studyUsers/${uid}/state/activity`),old);
-  await setDoc(doc(c.firestore(),`studyUsers/${uid}/verifiedDays/${year}_${d}`),{day:d,academicYear:year,totalMs:45000,completed:0,bonus:0,lastVersion:1});
+  await setDoc(doc(c.firestore(),`studyUsers/${uid}/verifiedDays/0_${d}`),{day:d,academicYear:0,totalMs:45000,completed:0,bonus:0,lastVersion:1});
  });
- const dt=new Date(d*86400000),stats={academicYear:year,weekKey:Math.floor((d+3)/7),weekPoints:1,weekMinutes:1,monthKey:dt.getUTCFullYear()*12+dt.getUTCMonth()+1,monthPoints:1,monthMinutes:1,totalPoints:1,totalMinutes:1,sourceVersion:2};
+ const dt=new Date(d*86400000),stats={rankScope:'overall',academicYear:0,weekKey:Math.floor((d+3)/7),weekPoints:1,weekMinutes:1,monthKey:dt.getUTCFullYear()*12+dt.getUTCMonth()+1,monthPoints:1,monthMinutes:1,totalPoints:1,totalMinutes:1,sourceVersion:2};
  const batch=writeBatch(client);
  batch.set(doc(client,`studyUsers/${uid}/state/activity`),{...old,version:2,at:serverTimestamp(),previousAt:at,totalMs:60000,sessionMs:60000,deltaMs:15000});
- batch.set(doc(client,`studyUsers/${uid}/verifiedDays/${year}_${d}`),{day:d,academicYear:year,totalMs:60000,completed:0,bonus:0,lastVersion:2});
- batch.set(doc(client,`studyUsers/${uid}/state/rank_${year}`),stats);
- batch.set(doc(client,`professionalRanks/${uid}`),{...stats,uid,alias:'Reader',verified:true,optOut:false});
+ batch.set(doc(client,`studyUsers/${uid}/verifiedDays/0_${d}`),{day:d,academicYear:0,totalMs:60000,completed:0,bonus:0,lastVersion:2});
+ batch.set(doc(client,`studyUsers/${uid}/state/rank_overall`),stats);
+ batch.set(doc(client,`professionalRanks/${uid}`),{...stats,uid,alias:'Reader',optOut:false,rankScope:'overall'});
  await assertSucceeds(batch.commit());
  await assertFails(updateDoc(doc(client,`professionalRanks/${uid}`),{totalPoints:9999}));
- await assertFails(updateDoc(doc(client,`campusMemberships/${uid}`),{academicYear:5}));
- const board=query(collection(client,'professionalRanks'),where('academicYear','==',year),where('verified','==',true),where('optOut','==',false));
+ await assertFails(updateDoc(doc(client,`campusMemberships/${uid}`),{firebaseRankConsent:false}));
+ const board=query(collection(client,'professionalRanks'),where('rankScope','==','overall'),where('optOut','==',false));
  const rows=await assertSucceeds(getDocs(board));assert.equal(rows.size,1);
- const hide=writeBatch(client);hide.update(doc(client,`campusMemberships/${uid}`),{alias:'Reader',optOut:true,privacyUpdatedAt:serverTimestamp()});hide.delete(doc(client,`professionalRanks/${uid}`));await assertSucceeds(hide.commit());
+ const hide=writeBatch(client);hide.update(doc(client,`campusMemberships/${uid}`),{alias:'Reader',optOut:true,privacyUpdatedAt:serverTimestamp(),firebaseRankConsent:true});hide.delete(doc(client,`professionalRanks/${uid}`));await assertSucceeds(hide.commit());
 });
 test('admin verification changes must invalidate the public rank atomically',async()=>{
  const uid='revoked';
@@ -127,27 +127,12 @@ test('personal batches are immutable and never authorize rank or reward changes'
  await assertFails(getDoc(doc(b,'studyUsers/alice/eventBatches/history')));
  await assertFails(setDoc(doc(a,'professionalRanks/alice'),{uid:'alice',totalPoints:999999}));
 });
-test('legacy D1 privacy cannot silently become Firebase ranking consent',async()=>{
- const uid='legacy-private',client=env.authenticatedContext(uid).firestore(),member=doc(client,`campusMemberships/${uid}`),publicRef=doc(client,`professionalRanks/${uid}`);
- await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),`campusMemberships/${uid}`),{verified:true,academicYear:2,alias:'Legacy',optOut:false}));
- const projection={uid,alias:'Legacy',verified:true,optOut:false,academicYear:2,weekKey:0,weekPoints:0,weekMinutes:0,monthKey:0,monthPoints:0,monthMinutes:0,totalPoints:0,totalMinutes:0,sourceVersion:0};
- await assertFails(setDoc(publicRef,projection));
- const board=query(collection(client,'professionalRanks'),where('academicYear','==',2),where('verified','==',true),where('optOut','==',false));
- await assertFails(getDocs(board));
- const batch=writeBatch(client);
- batch.update(member,{alias:'Legacy',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp()});
- batch.set(publicRef,projection);
- await assertSucceeds(batch.commit());
- await assertSucceeds(getDocs(board));
-});
-test('unverified students can save private setup without self-verifying or publishing scores',async()=>{
- const uid='pending-learner',client=env.authenticatedContext(uid).firestore(),ref=doc(client,`campusMemberships/${uid}`);
- const prefs={verified:false,academicYear:2,requestedYear:2,alias:'Learner',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp(),verificationRequestedAt:serverTimestamp()};
+test('ranking preferences are a compact public/private choice and cannot forge scores',async()=>{
+ const uid='overall-learner',client=env.authenticatedContext(uid).firestore(),ref=doc(client,`campusMemberships/${uid}`),publicRef=doc(client,`professionalRanks/${uid}`);
+ const prefs={alias:'Learner',optOut:false,firebaseRankConsent:true,privacyUpdatedAt:serverTimestamp()};
  await assertSucceeds(setDoc(ref,prefs));
- await assertSucceeds(updateDoc(ref,{alias:'My study name',optOut:true,privacyUpdatedAt:serverTimestamp()}));
- await assertFails(updateDoc(ref,{verified:true}));
+ await assertFails(setDoc(publicRef,{uid,alias:'Learner',rankScope:'overall',optOut:false,academicYear:0,totalPoints:1000}));
+ await assertSucceeds(updateDoc(ref,{alias:'Private learner',optOut:true,privacyUpdatedAt:serverTimestamp(),firebaseRankConsent:true}));
+ await assertFails(updateDoc(ref,{firebaseRankConsent:false}));
  await assertFails(updateDoc(ref,{academicYear:5}));
- await assertFails(setDoc(doc(client,`professionalRanks/${uid}`),{uid,verified:true,academicYear:2,totalPoints:1000}));
- await assertSucceeds(updateDoc(doc(admin,`campusMemberships/${uid}`),{verified:true}));
- await assertFails(updateDoc(ref,{requestedYear:5,verificationRequestedAt:serverTimestamp()}));
 });

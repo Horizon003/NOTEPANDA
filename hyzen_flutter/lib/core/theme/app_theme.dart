@@ -209,8 +209,12 @@ class AppTheme {
         thickness: .8,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: Colors.white,
+        // White frosted surfaces keep every prompt readable while allowing a
+        // hint of the soft page gradient to show through at the edges.
+        backgroundColor: const Color(0xF4FFFFFF),
         surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shadowColor: const Color(0x24121216),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         titleTextStyle: text.titleLarge,
         contentTextStyle: text.bodyLarge,

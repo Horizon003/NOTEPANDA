@@ -218,8 +218,8 @@ class StudyProgressScreen extends ConsumerWidget {
                 ),
                 subtitle: Text(
                   rank == null
-                      ? board?.status ?? 'Checking verified ranking…'
-                      : '#${rank.rank} · ${rank.minutes} verified min · ${rank.points} rank points',
+                      ? board?.status ?? 'Checking overall ranking…'
+                      : '#${rank.rank} · ${rank.minutes} study min · ${rank.points} rank points',
                 ),
                 trailing: const Icon(Icons.arrow_forward_rounded, size: 18),
               ),

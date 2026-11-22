@@ -35,12 +35,15 @@ class FirebaseStudyStore {
     return date.year * 12 + date.month;
   }
 
+  /// Ranking is an overall study league.  A learner never needs to prove a
+  /// professional year to participate; the only gate is their own privacy
+  /// choice and a display name.  Legacy `verified`/`academicYear` fields are
+  /// intentionally ignored so older accounts are migrated into the same
+  /// league on their next pulse.
   static bool eligible(Map<String, dynamic>? member) =>
-      member?['verified'] == true &&
       member?['firebaseRankConsent'] == true &&
       member?['optOut'] == false &&
-      number(member?['academicYear']) >= 1 &&
-      number(member?['academicYear']) <= 5;
+      '${member?['alias'] ?? ''}'.trim().isNotEmpty;
   Future<DateTime> _serverTime() async {
     final ref = _state.doc('clock');
     await ref.set({'at': FieldValue.serverTimestamp()});
@@ -121,8 +124,7 @@ class FirebaseStudyStore {
                 day = epochDay(_now);
             Query<Map<String, dynamic>> query = db
                 .collection('professionalRanks')
-                .where('academicYear', isEqualTo: number(m?['academicYear']))
-                .where('verified', isEqualTo: true)
+                .where('rankScope', isEqualTo: 'overall')
                 .where('optOut', isEqualTo: false);
             final prefix = period == 'semester' ? 'total' : period;
             if (prefix != 'total') {
@@ -283,7 +285,10 @@ class FirebaseStudyStore {
       .collection('verifiedDays')
       .doc('${year}_$day');
   Map<String, dynamic> _emptyRank(int year) => {
-    'academicYear': year,
+    'rankScope': 'overall',
+    // Kept as zero for backwards-compatible documents and old clients.  It is
+    // not a professional-year filter and is never shown in the UI.
+    'academicYear': 0,
     'weekKey': 0,
     'weekPoints': 0,
     'weekMinutes': 0,
@@ -312,9 +317,6 @@ class FirebaseStudyStore {
     await db.runTransaction((tx) async {
       final old = (await tx.get(ref)).data();
       final member = (await tx.get(_member)).data();
-      final year = member?['verified'] == true
-          ? number(member?['academicYear'])
-          : 0;
       if (old == null) {
         if (action != 'start') return;
         tx.set(ref, {
@@ -332,7 +334,8 @@ class FirebaseStudyStore {
           'creditDay': 0,
           'creditYear': 0,
           'completion': 0,
-          'academicYear': year,
+          'academicYear': 0,
+          'rankScope': 'overall',
         });
         return;
       }
@@ -348,8 +351,7 @@ class FirebaseStudyStore {
       final at = old['at'] as Timestamp,
           previous = old['previousAt'] as Timestamp;
       final gap = at.millisecondsSinceEpoch - previous.millisecondsSinceEpoch;
-      final day = epochDay(at.toDate()),
-          creditYear = number(old['academicYear']);
+      final day = epochDay(at.toDate()), creditYear = 0;
       final delta =
           old['previousActive'] == true &&
               old['previousSession'] == old['session'] &&
@@ -367,11 +369,11 @@ class FirebaseStudyStore {
           : 0;
       final version = number(old['version']) + 1;
       Map<String, dynamic>? dayRecord, yesterday, rank;
-      final ledger = _state.doc('rank_$year');
+      final ledger = _state.doc('rank_overall');
       if (delta > 0 || completion > 0) {
         dayRecord = (await tx.get(_day(creditYear, day))).data();
         yesterday = (await tx.get(_day(creditYear, day - 1))).data();
-        if (eligible(member) && year == creditYear) {
+        if (eligible(member)) {
           rank = (await tx.get(ledger)).data();
         }
       }
@@ -390,7 +392,8 @@ class FirebaseStudyStore {
         'creditDay': day,
         'creditYear': creditYear,
         'completion': completion,
-        'academicYear': year,
+        'academicYear': 0,
+        'rankScope': 'overall',
       };
       tx.set(ref, next);
       if (delta == 0 && completion == 0) return;
@@ -419,12 +422,13 @@ class FirebaseStudyStore {
         'bonus': afterBonus,
         'lastVersion': version,
       });
-      if (!eligible(member) || year != creditYear) return;
-      final prior = rank ?? _emptyRank(year),
+      if (!eligible(member)) return;
+      final prior = rank ?? _emptyRank(0),
           week = weekForDay(day),
           month = monthForDay(day);
       final stats = {
-        'academicYear': year,
+        'academicYear': 0,
+        'rankScope': 'overall',
         'weekKey': week,
         'weekPoints':
             (prior['weekKey'] == week ? number(prior['weekPoints']) : 0) +
@@ -450,8 +454,8 @@ class FirebaseStudyStore {
         ...stats,
         'uid': uid,
         'alias': member?['alias'] ?? 'Student',
-        'verified': true,
         'optOut': false,
+        'rankScope': 'overall',
       });
     });
   }
@@ -499,45 +503,28 @@ class FirebaseStudyStore {
     }
     await db.runTransaction((tx) async {
       final member = (await tx.get(_member)).data();
-      final verified = member?['verified'] == true;
-      final requestedYear = number(input['academicYear']);
-      final year = verified
-          ? number(member?['academicYear'])
-          : (requestedYear >= 1 && requestedYear <= 5
-                ? requestedYear
-                : number(member?['academicYear']));
-      if (year < 1 || year > 5) {
-        throw StateError('Choose your professional year.');
-      }
-      final ledger = verified
-          ? (await tx.get(_state.doc('rank_$year'))).data() ?? _emptyRank(year)
-          : _emptyRank(year);
       final preferences = <String, dynamic>{
         'alias': alias,
         'optOut': optOut,
         'privacyUpdatedAt': FieldValue.serverTimestamp(),
         'firebaseRankConsent': true,
-        if (!verified) 'requestedYear': year,
-        if (!verified) 'verificationRequestedAt': FieldValue.serverTimestamp(),
       };
       if (member == null) {
-        tx.set(_member, {
-          ...preferences,
-          'verified': false,
-          'academicYear': year,
-        });
+        tx.set(_member, preferences);
       } else {
         tx.update(_member, preferences);
       }
-      if (optOut || !verified) {
+      if (optOut) {
         tx.delete(_public);
       } else {
+        final ledger =
+            (await tx.get(_state.doc('rank_overall'))).data() ?? _emptyRank(0);
         tx.set(_public, {
           ...ledger,
           'uid': uid,
           'alias': alias,
-          'verified': true,
           'optOut': false,
+          'rankScope': 'overall',
         });
       }
     });
@@ -548,29 +535,23 @@ class FirebaseStudyStore {
     final member = (await _member.get(
       const GetOptions(source: Source.server),
     )).data();
-    final setupRequired = member?['firebaseRankConsent'] != true;
-    final verificationRequired = member?['verified'] != true;
+    final setupRequired =
+        member?['firebaseRankConsent'] != true ||
+        '${member?['alias'] ?? ''}'.trim().isEmpty;
+    const verificationRequired = false;
     final privacy = <String, dynamic>{
       'setupRequired': setupRequired,
       'verificationRequired': verificationRequired,
       'optOut': member?['optOut'] != false,
       'alias': member?['alias'],
-      'academicYear': verificationRequired
-          ? (member?['requestedYear'] ?? member?['academicYear'])
-          : (member?['academicYear']),
+      'academicYear': null,
     };
     if (!eligible(member)) {
       return {
         ...privacy,
-        'statusCode': setupRequired
-            ? 'setup'
-            : verificationRequired
-            ? 'review'
-            : 'private',
+        'statusCode': setupRequired ? 'setup' : 'private',
         'status': setupRequired
             ? 'Choose your ranking name and visibility.'
-            : verificationRequired
-            ? 'Your professional year is awaiting review.'
             : 'Your ranking profile is private.',
         'entries': <Map<String, dynamic>>[],
         'mine': null,
@@ -581,8 +562,8 @@ class FirebaseStudyStore {
     if (!['week', 'month', 'semester'].contains(period)) {
       throw StateError('Invalid ranking period.');
     }
-    final year = number(member?['academicYear']),
-        day = epochDay(_now),
+    const year = 0;
+    final day = epochDay(_now),
         prefix = period == 'semester' ? 'total' : period;
     final periodKey = period == 'week'
         ? weekForDay(day)
@@ -590,14 +571,13 @@ class FirebaseStudyStore {
         ? monthForDay(day)
         : year;
     final generation =
-        '$year:$period:$periodKey:${_now.millisecondsSinceEpoch ~/ 15000}';
+        'overall:$period:$periodKey:${_now.millisecondsSinceEpoch ~/ 15000}';
     if (input['generation'] != null && input['generation'] != generation) {
       return {'status': 'refresh', 'entries': [], 'mine': null};
     }
     Query<Map<String, dynamic>> query = db
         .collection('professionalRanks')
-        .where('academicYear', isEqualTo: year)
-        .where('verified', isEqualTo: true)
+        .where('rankScope', isEqualTo: 'overall')
         .where('optOut', isEqualTo: false);
     if (period != 'semester') {
       query = query.where('${prefix}Key', isEqualTo: periodKey);
@@ -620,7 +600,8 @@ class FirebaseStudyStore {
     Map<String, dynamic> entry(Map<String, dynamic> data, int rank) => {
       'uid': data['uid'],
       'alias': data['alias'],
-      'academicYear': year,
+      'academicYear': 0,
+      'rankScope': 'overall',
       'verifiedMinutes': data['${prefix}Minutes'],
       'score': data['${prefix}Points'],
       'rank': rank,
@@ -637,7 +618,7 @@ class FirebaseStudyStore {
     )).data();
     Map<String, dynamic>? mine;
     if (own != null &&
-        own['academicYear'] == year &&
+        own['rankScope'] == 'overall' &&
         (period == 'semester' || own['${prefix}Key'] == periodKey) &&
         number(own['${prefix}Minutes']) > 0) {
       final points = number(own['${prefix}Points']),
@@ -675,19 +656,18 @@ class FirebaseStudyStore {
   Future<void> _ensureProjection() => db.runTransaction((tx) async {
     final member = (await tx.get(_member)).data();
     if (!eligible(member)) return;
-    final year = number(member?['academicYear']);
     final public = (await tx.get(_public)).data();
-    final ledger = (await tx.get(_state.doc('rank_$year'))).data();
-    if (public?['academicYear'] == year &&
+    final ledger = (await tx.get(_state.doc('rank_overall'))).data();
+    if (public?['rankScope'] == 'overall' &&
         public?['alias'] == (member?['alias'] ?? 'Student')) {
       return;
     }
     tx.set(_public, {
-      ...ledger ?? _emptyRank(year),
+      ...ledger ?? _emptyRank(0),
       'uid': uid,
       'alias': member?['alias'] ?? 'Student',
-      'verified': true,
       'optOut': false,
+      'rankScope': 'overall',
     });
   });
 }

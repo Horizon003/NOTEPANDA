@@ -280,7 +280,7 @@ List<AdminField> documentFields(String section) => switch (section) {
     AdminField('vision', 'Vision', type: 'html'),
   ],
   'settings' => const [
-    AdminField('websiteName', 'Platform name', fallback: 'PHARM D WITH HYZEN'),
+    AdminField('websiteName', 'Platform name', fallback: 'NotePanda'),
     AdminField('heroTitle', 'Home headline'),
     AdminField('heroSubtitle', 'Home subtitle'),
     AdminField('email', 'Contact email'),
@@ -1287,7 +1287,7 @@ class _OrdersState extends ConsumerState<AdminOrdersScreen> {
                         .join();
                     await MediaUpload.exportText(
                       'Invoice_${o['orderNumber'] ?? o['id']}.html',
-                      '<!doctype html><meta charset="utf-8"><title>Invoice</title><style>body{font:16px sans-serif;max-width:800px;margin:40px}td{padding:12px;border-bottom:1px solid #ddd}table{width:100%}</style><h1>PHARM D WITH HYZEN</h1><h2>Invoice ${escape.convert('${o['orderNumber']}')}</h2><p>${escape.convert(asMap(o['customer']).values.join(' · '))}</p><p>${escape.convert(asMap(o['address']).values.join(', '))}</p><table>$rows</table><h3>Total ${money(num.tryParse('${asMap(o['totals'])['grandTotal']}') ?? 0)}</h3><p>Status: ${escape.convert(selected)}</p>',
+                      '<!doctype html><meta charset="utf-8"><title>Invoice</title><style>body{font:16px sans-serif;max-width:800px;margin:40px}td{padding:12px;border-bottom:1px solid #ddd}table{width:100%}</style><h1>NotePanda</h1><h2>Invoice ${escape.convert('${o['orderNumber']}')}</h2><p>${escape.convert(asMap(o['customer']).values.join(' · '))}</p><p>${escape.convert(asMap(o['address']).values.join(', '))}</p><table>$rows</table><h3>Total ${money(num.tryParse('${asMap(o['totals'])['grandTotal']}') ?? 0)}</h3><p>Status: ${escape.convert(selected)}</p>',
                       mime: 'text/html',
                     );
                   }, message: 'Invoice exported'),

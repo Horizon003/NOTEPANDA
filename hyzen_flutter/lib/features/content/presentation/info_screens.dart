@@ -203,7 +203,7 @@ class AboutScreen extends ConsumerWidget {
     final scheme = t.colorScheme;
     return TabPage(
       title: 'About',
-      subtitle: 'PHARM D WITH HYZEN',
+      subtitle: 'NotePanda',
       onRefresh: () =>
           refreshContent(ref, ['pw_about', 'pw_credits', 'pw_social']),
       slivers: [
@@ -452,7 +452,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
       if (!mounted) return;
       _subject.clear();
       _body.clear();
-      showHSnack(context, 'Message sent to the PHARM D WITH HYZEN team');
+      showHSnack(context, 'Message sent to the NotePanda team');
     } on FriendlyException catch (e) {
       if (mounted) showHSnack(context, e.message, error: true);
     } catch (_) {
@@ -479,7 +479,7 @@ class _ContactScreenState extends ConsumerState<ContactScreen> {
           padding: const EdgeInsets.all(HSpace.screen),
           children: [
             const Text(
-              'Questions, suggestions or a missing study file? Send the PHARM D WITH HYZEN team a message.',
+              'Questions, suggestions or a missing study file? Send the NotePanda team a message.',
             ),
             const Gap(HSpace.lg),
             if (settings.email.isNotEmpty)

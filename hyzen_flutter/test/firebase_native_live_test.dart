@@ -136,19 +136,18 @@ void main() {
         await store.call('setRankPrivacy', {
           'alias': 'Reader',
           'optOut': false,
-          'academicYear': 2,
         });
         final pendingBoard = await store.call('readCampusBoard', {
           'period': 'week',
         });
         expect(pendingBoard['setupRequired'], false);
-        expect(pendingBoard['verificationRequired'], true);
+        expect(pendingBoard['verificationRequired'], false);
         expect(
           (await FirebaseFirestore.instance
                   .doc('campusMemberships/${user.uid}')
                   .get())
-              .data()?['verified'],
-          false,
+              .data()?['firebaseRankConsent'],
+          true,
         );
         await subscription.cancel();
         // Auth emulator accepts unsigned test tokens; this cannot sign into production.
@@ -225,7 +224,7 @@ void main() {
         });
         final ledger =
             (await FirebaseFirestore.instance
-                    .doc('studyUsers/${user.uid}/state/rank_2')
+                    .doc('studyUsers/${user.uid}/state/rank_overall')
                     .get())
                 .data()!;
         expect(ledger['sourceVersion'], greaterThan(0));
@@ -233,8 +232,8 @@ void main() {
           (await FirebaseFirestore.instance
                   .doc('professionalRanks/${user.uid}')
                   .get())
-              .data()?['academicYear'],
-          2,
+              .data()?['rankScope'],
+          'overall',
         );
         await store.call('setRankPrivacy', {'alias': 'Reader', 'optOut': true});
         expect(

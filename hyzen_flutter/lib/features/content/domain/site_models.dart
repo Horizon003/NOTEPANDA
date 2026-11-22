@@ -26,7 +26,7 @@ class SiteSettings {
   /// CONFIRMED `shopIsComing()` — default true.
   bool get shopComingSoon => _notFalse(raw['shopComingSoon']);
 
-  String get websiteName => _s(raw['websiteName'], 'PHARM D WITH HYZEN');
+  String get websiteName => _s(raw['websiteName'], 'NotePanda');
   String get heroTitle => _s(raw['heroTitle']);
   String get heroSubtitle => _s(raw['heroSubtitle']);
   String get email => _s(raw['email']);

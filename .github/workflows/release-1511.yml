@@ -1,4 +1,4 @@
-name: Signed Android 1.5.11 release
+name: Signed Android 1.5.12 release
 on:
   push:
     branches: [work/monochrome-motion-1.5.5]
@@ -17,7 +17,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: release-1511
+  group: release-1512
   cancel-in-progress: true
 jobs:
   build:
@@ -74,18 +74,18 @@ jobs:
       - name: Build universal release APK through Flutter
         working-directory: hyzen_flutter
         run: |
-          flutter build apk --release --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.11+20
+          flutter build apk --release --no-shrink --target-platform android-arm,android-arm64,android-x64 --dart-define=PUSH_API_BASE="$PUSH_API_BASE" --dart-define=HYZEN_APP_VERSION=1.5.12+21
       - name: Build release native instrumentation tests
         working-directory: hyzen_flutter/android
         run: |
-          defines=$(python3 -c 'import os,base64; print(",".join(base64.b64encode(v.encode()).decode() for v in ["PUSH_API_BASE="+os.environ["PUSH_API_BASE"],"HYZEN_APP_VERSION=1.5.11+20"]))')
+          defines=$(python3 -c 'import os,base64; print(",".join(base64.b64encode(v.encode()).decode() for v in ["PUSH_API_BASE="+os.environ["PUSH_API_BASE"],"HYZEN_APP_VERSION=1.5.12+21"]))')
           gradle :app:assembleReleaseAndroidTest -Pdart-defines="$defines" -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart
       - name: Verify and package
         run: |
           set -euo pipefail
           mkdir -p release
-          cp hyzen_flutter/build/app/outputs/apk/release/app-release.apk release/PharmD-With-Hyzen-1.5.11.apk
-          apk=release/PharmD-With-Hyzen-1.5.11.apk
+          cp hyzen_flutter/build/app/outputs/apk/release/app-release.apk release/NotePanda-1.5.12.apk
+          apk=release/NotePanda-1.5.12.apk
           signer=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
           "$signer" verify --print-certs "$apk" > release/signing-report.txt
           grep -qi '3fd902d131ae56d8de4792c9f5953759e2b375e32bcad8f57f7ef5c0ab887f83' release/signing-report.txt
@@ -93,17 +93,17 @@ jobs:
           for abi in armeabi-v7a arm64-v8a x86_64; do grep -Fxq "lib/$abi/libflutter.so" /tmp/apk-entries.txt; done
           aapt=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -1)
           "$aapt" dump badging "$apk" > release/apk-metadata.txt
-          grep -q "versionCode='20' versionName='1.5.11'" release/apk-metadata.txt
-          (cd release && sha256sum PharmD-With-Hyzen-1.5.11.apk > SHA256SUMS.txt)
+          grep -q "versionCode='21' versionName='1.5.12'" release/apk-metadata.txt
+          (cd release && sha256sum NotePanda-1.5.12.apk > SHA256SUMS.txt)
           printf 'Source commit: %s\nBuild: %s/%s/actions/runs/%s\n' "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > release/provenance.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: signed-release-1511
+          name: signed-release-1512
           path: release/
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
-          name: native-tests-1511
+          name: native-tests-1512
           path: hyzen_flutter/build/app/outputs/apk/androidTest/release/app-release-androidTest.apk
           if-no-files-found: error
       - name: Remove signing files
@@ -117,16 +117,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: signed-release-1511
+          name: signed-release-1512
           path: release
       - uses: actions/download-artifact@v4
         with:
-          name: native-tests-1511
+          name: native-tests-1512
           path: native-test
       - name: Download successful production baseline for update check
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download v1.5.10-19 --pattern PharmD-With-Hyzen-1.5.10.apk --dir baseline
+        run: gh release download v1.5.11-20 --pattern PharmD-With-Hyzen-1.5.11.apk --dir baseline
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -139,11 +139,11 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            adb install baseline/PharmD-With-Hyzen-1.5.10.apk
+            adb install baseline/PharmD-With-Hyzen-1.5.11.apk
             adb install -t native-test/app-release-androidTest.apk
             adb shell am instrument -w -e class com.hyzen.pharmd.UpdateRetentionTest -e phase seed com.hyzen.pharmd.test/androidx.test.runner.AndroidJUnitRunner > update-seed.txt
             grep -q 'OK (1 test)' update-seed.txt
-            adb install -r release/PharmD-With-Hyzen-1.5.11.apk
+            adb install -r release/NotePanda-1.5.12.apk
             adb shell am instrument -w -e class com.hyzen.pharmd.UpdateRetentionTest com.hyzen.pharmd.test/androidx.test.runner.AndroidJUnitRunner > update-verify.txt
             grep -q 'OK (1 test)' update-verify.txt
             adb shell am instrument -w -e notClass com.hyzen.pharmd.UpdateRetentionTest com.hyzen.pharmd.test/androidx.test.runner.AndroidJUnitRunner > native-pdf-tests.txt
@@ -157,7 +157,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: release-1511-install-logs
+          name: release-1512-install-logs
           path: |
             launch-logcat.txt
             update-seed.txt
@@ -220,7 +220,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: signed-release-1511
+          name: signed-release-1512
           path: release
       - uses: actions/download-artifact@v4
         with:
@@ -232,4 +232,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.5.11-20 release/* --target "$GITHUB_SHA" --title 'PHARM D WITH HYZEN 1.5.11 — Study Room & Ranking' --notes-file docs/release-1.5.11.md --prerelease --latest=false
+          gh release create v1.5.12-21 release/* --target "$GITHUB_SHA" --title 'NotePanda 1.5.12 — Overall Rank & New Brand' --notes-file docs/release-1.5.12.md --prerelease --latest=false

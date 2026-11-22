@@ -47,7 +47,7 @@ class AppShell extends ConsumerWidget {
         final leave = await showDialog<bool>(
           context: context,
           builder: (c) => AlertDialog(
-            title: const Text('Close PHARM D WITH HYZEN?'),
+            title: const Text('Close NotePanda?'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -244,7 +244,7 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
             // nested route in its retained navigator. Never show a dead
             // back arrow on the Home header.
             else if (!const [
-                  'PHARM D',
+                  'NotePanda',
                   'Study',
                   'Search',
                   'Office Workspace',
@@ -266,7 +266,7 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (title == 'PHARM D')
+                  if (title == 'NotePanda')
                     Row(
                       children: [
                         Image.asset(
@@ -280,13 +280,13 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'PHARM D ',
+                                  text: 'NOTE',
                                   style: TextStyle(
                                     color: t.colorScheme.onSurface,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'WITH HYZEN',
+                                  text: 'PANDA',
                                   style: TextStyle(
                                     color: t.colorScheme.primary,
                                   ),
@@ -314,7 +314,7 @@ class _Bar extends StatelessWidget implements PreferredSizeWidget {
                         letterSpacing: -.2,
                       ),
                     ),
-                  if (subtitle != null && title != 'PHARM D')
+                  if (subtitle != null && title != 'NotePanda')
                     Text(
                       subtitle!,
                       maxLines: 1,

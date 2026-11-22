@@ -1,6 +1,7 @@
 import 'reward_controller.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'study_cloud.dart';
 import 'package:flutter/material.dart';
@@ -189,11 +190,7 @@ class CampusController extends StateNotifier<AsyncValue<CampusBoard>>
     if (cloud == null) {
       throw StateError('Sign in to save your ranking preferences.');
     }
-    await cloud!.call('setRankPrivacy', {
-      'alias': alias,
-      'optOut': optOut,
-      if (academicYear != null) 'academicYear': academicYear,
-    });
+    await cloud!.call('setRankPrivacy', {'alias': alias, 'optOut': optOut});
     await prefs.remove(key);
     await load();
   }
@@ -250,9 +247,6 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
     bool? visible = data?.setupRequired == false
         ? !(data?.optOut ?? true)
         : null;
-    int? year = data?.verificationRequired == true
-        ? profile?.professionalYear ?? data?.academicYear
-        : data?.academicYear ?? profile?.professionalYear;
     String? error;
     var saving = false;
     try {
@@ -260,153 +254,144 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
         context: context,
         builder: (dialog) => StatefulBuilder(
           builder: (dialog, update) => Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             insetPadding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 24,
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const RefinementArt(RefinementGlyph.rank, size: 64),
-                    const SizedBox(height: 12),
-                    Text(
-                      data?.setupRequired == true
-                          ? 'Make your place in the league'
-                          : 'Your ranking profile',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Choose the name other learners see. You decide whether your profile appears on the leaderboard.',
-                    ),
-                    const SizedBox(height: 18),
-                    TextFormField(
-                      initialValue: name,
-                      maxLength: 40,
-                      style: const TextStyle(fontSize: 16),
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Display name',
-                        hintText: 'Your name or nickname',
-                        counterText: '',
-                      ),
-                      onChanged: (value) => update(() => name = value),
-                    ),
-                    if (profile?.professionalYear == null &&
-                        data?.academicYear == null) ...[
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<int>(
-                        initialValue: year,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Professional year',
-                        ),
-                        items: [
-                          for (var y = 1; y <= 5; y++)
-                            DropdownMenuItem(value: y, child: Text('Year $y')),
-                        ],
-                        onChanged: saving
-                            ? null
-                            : (v) => update(() => year = v),
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    Text(
-                      'Profile visibility',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ChoiceChip(
-                          label: const Text('Show my rank'),
-                          selected: visible == true,
-                          onSelected: saving
-                              ? null
-                              : (_) => update(() => visible = true),
-                        ),
-                        ChoiceChip(
-                          label: const Text('Keep it private'),
-                          selected: visible == false,
-                          onSelected: saving
-                              ? null
-                              : (_) => update(() => visible = false),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Your email, phone number and documents stay private.',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    if (error != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Text(
-                          error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                  child: Material(
+                    color: Colors.white.withValues(alpha: .92),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(22),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const RefinementArt(RefinementGlyph.rank, size: 64),
+                          const SizedBox(height: 12),
+                          Text(
+                            data?.setupRequired == true
+                                ? 'Join the overall rank'
+                                : 'Ranking visibility',
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Choose a display name. You decide whether your score is visible to other learners.',
+                          ),
+                          const SizedBox(height: 18),
+                          TextFormField(
+                            initialValue: name,
+                            maxLength: 40,
+                            style: const TextStyle(fontSize: 16),
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              labelText: 'Display name',
+                              hintText: 'Your name or nickname',
+                              counterText: '',
+                            ),
+                            onChanged: (value) => update(() => name = value),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Profile visibility',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              ChoiceChip(
+                                label: const Text('Show my rank'),
+                                selected: visible == true,
+                                onSelected: saving
+                                    ? null
+                                    : (_) => update(() => visible = true),
+                              ),
+                              ChoiceChip(
+                                label: const Text('Keep it private'),
+                                selected: visible == false,
+                                onSelected: saving
+                                    ? null
+                                    : (_) => update(() => visible = false),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Your email, phone number and documents stay private.',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          if (error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                error!,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 20),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: saving
+                                    ? null
+                                    : () => Navigator.pop(dialog),
+                                child: const Text('Not now'),
+                              ),
+                              FilledButton(
+                                onPressed:
+                                    saving ||
+                                        name.trim().isEmpty ||
+                                        visible == null
+                                    ? null
+                                    : () async {
+                                        update(() => saving = true);
+                                        try {
+                                          await ref
+                                              .read(
+                                                campusBoardProvider(
+                                                  period,
+                                                ).notifier,
+                                              )
+                                              .privacy(name.trim(), !visible!);
+                                          if (dialog.mounted) {
+                                            Navigator.pop(dialog);
+                                          }
+                                        } catch (e) {
+                                          if (dialog.mounted) {
+                                            update(() {
+                                              saving = false;
+                                              error = e is StateError
+                                                  ? e.message
+                                                  : 'Could not save just now. Check your connection and try again.';
+                                            });
+                                          }
+                                        }
+                                      },
+                                child: Text(
+                                  saving ? 'Saving…' : 'Confirm choices',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: saving
-                              ? null
-                              : () => Navigator.pop(dialog),
-                          child: const Text('Not now'),
-                        ),
-                        FilledButton(
-                          onPressed:
-                              saving ||
-                                  name.trim().isEmpty ||
-                                  visible == null ||
-                                  year == null
-                              ? null
-                              : () async {
-                                  update(() => saving = true);
-                                  try {
-                                    await ref
-                                        .read(
-                                          campusBoardProvider(period).notifier,
-                                        )
-                                        .privacy(
-                                          name.trim(),
-                                          !visible!,
-                                          academicYear: year,
-                                        );
-                                    if (dialog.mounted) Navigator.pop(dialog);
-                                  } catch (e) {
-                                    if (dialog.mounted) {
-                                      update(() {
-                                        saving = false;
-                                        error = e is StateError
-                                            ? e.message
-                                            : 'Could not save just now. Check your connection and try again.';
-                                      });
-                                    }
-                                  }
-                                },
-                          child: Text(saving ? 'Saving…' : 'Confirm choices'),
-                        ),
-                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -444,7 +429,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: HTopBar(
-          title: 'Professional rank',
+          title: 'Overall rank',
           actions: [
             IconButton(
               tooltip: 'Ranking privacy',
@@ -474,9 +459,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            board?.academicYear == null
-                                ? 'Your study league'
-                                : 'Professional year ${board!.academicYear}',
+                            'Overall study league',
                             style: theme.textTheme.labelLarge,
                           ),
                           const SizedBox(height: 8),
@@ -531,8 +514,6 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                               ? 'Let’s reconnect'
                               : board.setupRequired
                               ? 'Let’s set up your profile'
-                              : board.verificationRequired
-                              ? 'Your year is under review'
                               : 'You’re studying privately',
                           style: theme.textTheme.titleLarge,
                         ),
@@ -542,8 +523,6 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                               ? board.status
                               : board.setupRequired
                               ? 'A display name and visibility choice are all you need to get started.'
-                              : board.verificationRequired
-                              ? 'Your choices are saved. We’ll review your professional year before your score appears here. Your personal study progress continues.'
                               : 'Your name and score are hidden. You can change this whenever you like.',
                         ),
                         const SizedBox(height: 12),
@@ -558,8 +537,8 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                             board.statusCode == 'offline'
                                 ? 'Try again'
                                 : board.setupRequired
-                                ? 'Set up ranking'
-                                : 'Edit my choices',
+                                ? 'Join overall rank'
+                                : 'Edit visibility',
                           ),
                         ),
                       ],
@@ -588,7 +567,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Your year, together',
+                        'Overall learners',
                         style: theme.textTheme.titleLarge,
                       ),
                     ),
@@ -690,7 +669,7 @@ class _CampusRankScreenState extends ConsumerState<CampusRankScreen> {
                   title: const Text('How your score grows'),
                   children: const [
                     Text(
-                      'One rank point per study minute, up to 360 a day. Completed 10-minute sessions and consistent study days earn bonuses. Week and month totals follow Pakistan time. Your year is checked before you join the public leaderboard.',
+                      'One rank point per focused study minute, up to 360 a day. Completed sessions and consistent study days earn bonuses. Week and month totals follow Pakistan time. Public visibility is always your choice.',
                     ),
                   ],
                 ),

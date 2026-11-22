@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// PHARM D WITH HYZEN design tokens.
+/// NotePanda design tokens.
 ///
 /// Reference-led pastel surfaces, geometric typography and charcoal controls.
 /// Semantic status colors and document annotation ink remain meaningful.

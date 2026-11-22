@@ -94,7 +94,7 @@ class OfficeBrandHeader extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'PHARM D WITH HYZEN',
+                    'NotePanda',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
