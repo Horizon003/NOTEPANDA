@@ -773,7 +773,7 @@ class AdminDocumentScreen extends ConsumerWidget {
                         child: HeroPanel(
                           eyebrow: 'Student preview',
                           title:
-                              '${initial[section == 'notice' ? 'title' : 'text'] ?? 'A message from Hyzen'}',
+                              '${initial[section == 'notice' ? 'title' : 'text'] ?? 'A message from NotePanda'}',
                           subtitle: '${initial['body'] ?? ''}',
                           icon: Icons.campaign_rounded,
                         ),

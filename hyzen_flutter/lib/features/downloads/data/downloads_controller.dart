@@ -119,7 +119,7 @@ class DownloadsController extends Notifier<Map<String, DownloadRecord>> {
     if (!_fs.supported) {
       return Future.error(
         FriendlyException(
-          'Save Offline is available in the Hyzen Android app.',
+          'Save Offline is available in the NotePanda Android app.',
         ),
       );
     }

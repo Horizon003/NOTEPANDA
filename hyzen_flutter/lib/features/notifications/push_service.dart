@@ -52,7 +52,7 @@ class PushService {
         : 'Device registered · push disabled';
     if (kDebugMode && registered && !_loggedSubscription) {
       _loggedSubscription = true;
-      debugPrint('Hyzen OneSignal test subscription: $id');
+      debugPrint('NotePanda OneSignal test subscription: $id');
     }
   }
 
@@ -62,7 +62,7 @@ class PushService {
     if (target != null && target != uid) return;
     final item = <String, dynamic>{
       'id': 'push_${data['messageId'] ?? notification.notificationId}',
-      'title': notification.title ?? 'Hyzen',
+      'title': notification.title ?? 'NotePanda',
       'body': notification.body ?? '',
       'url': safePushRoute(data['route']),
       'opened': opened,

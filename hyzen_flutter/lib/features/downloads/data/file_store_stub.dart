@@ -16,12 +16,12 @@ class _WebFileStore implements FileStore {
     ProgressCb onProgress, {
     bool Function()? cancelled,
   }) => throw FriendlyException(
-    'Save Offline is available in the Hyzen Android app.',
+    'Save Offline is available in the NotePanda Android app.',
   );
   @override
   Future<DownloadedFile> importPreview(String path, String key) =>
       throw FriendlyException(
-        'Save Offline is available in the Hyzen Android app.',
+        'Save Offline is available in the NotePanda Android app.',
       );
   @override
   Future<bool> exists(String path) async => false;

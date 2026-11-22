@@ -316,7 +316,7 @@ class AdminRepository {
   Future<void> restore(Map<String, dynamic> backup) async {
     _guard();
     if (backup.isEmpty || backup.keys.any((k) => !writableKeys.contains(k))) {
-      throw FriendlyException('Choose a valid Hyzen backup.');
+      throw FriendlyException('Choose a valid NotePanda backup.');
     }
     for (final value in backup.values) {
       if (value != null) _checkSize(value);

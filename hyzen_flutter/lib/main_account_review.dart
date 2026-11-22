@@ -326,7 +326,7 @@ class _ReviewAdmin implements AdminRepository {
   @override
   Future<void> restore(Map<String, dynamic> backup) async {
     if (backup.keys.any((k) => !AdminRepository.writableKeys.contains(k))) {
-      throw const FormatException('Choose a Hyzen backup.');
+      throw const FormatException('Choose a NotePanda backup.');
     }
     for (final entry in backup.entries) {
       _set(entry.key, _copy(entry.value));

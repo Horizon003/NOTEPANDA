@@ -352,7 +352,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Text('New to Hyzen?'),
+                        const Text('New to NotePanda?'),
                         TextButton(
                           onPressed: () =>
                               context.pushReplacement('/register/personal'),

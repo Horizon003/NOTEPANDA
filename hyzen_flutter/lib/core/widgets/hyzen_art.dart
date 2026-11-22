@@ -34,10 +34,10 @@ class HyzenArt extends StatelessWidget {
                 fit: BoxFit.contain,
                 cacheWidth: (size * 2).round(),
                 semanticLabel: studying
-                    ? 'Hyzen panda with a study book'
+                    ? 'NotePanda panda with a study book'
                     : name == 'downloads-card'
-                    ? 'Hyzen panda waving from the offline library card'
-                    : 'Hyzen panda with an offline download tablet',
+                    ? 'NotePanda panda waving from the offline library card'
+                    : 'NotePanda panda with an offline download tablet',
               ),
             ),
             Positioned(

@@ -23,7 +23,7 @@ class SplashScreen extends StatelessWidget {
             const HyzenRiveMascot(
               state: HyzenRiveState.loading,
               size: 140,
-              semanticLabel: 'Hyzen panda loading your study space',
+              semanticLabel: 'NotePanda panda loading your study space',
             ),
             const SizedBox(height: 16),
             const SizedBox(
@@ -155,7 +155,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 const SizedBox(height: 16),
                                 Text(
                                   i == 0
-                                      ? 'Learn, practise and grow with Hyzen.\nYour pharmacy journey starts here.'
+                                      ? 'Learn, practise and grow with NotePanda.\nYour pharmacy journey starts here.'
                                       : i == 1
                                       ? 'Notes, MCQs, lectures and past papers,\norganised around your professional year.'
                                       : 'Save your study material once.\nRead it again, even when you are offline.',

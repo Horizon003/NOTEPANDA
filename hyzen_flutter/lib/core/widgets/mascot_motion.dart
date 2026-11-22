@@ -9,7 +9,7 @@ class HyzenMascot extends StatelessWidget {
     super.key,
     required this.state,
     this.size = 220,
-    this.semanticLabel = 'Hyzen panda mascot',
+    this.semanticLabel = 'NotePanda panda mascot',
     this.loop = true,
   });
   final HyzenMascotState state;

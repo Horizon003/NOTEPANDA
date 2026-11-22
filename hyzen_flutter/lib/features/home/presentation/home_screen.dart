@@ -413,7 +413,7 @@ class LegalScreen extends StatelessWidget {
             ),
             child: PanelBlock(
               child: Text(
-                'The official $title has not been supplied yet. The Hyzen owner must provide the final text before public release.\n\n'
+                'The official $title has not been supplied yet. The NotePanda owner must provide the final text before public release.\n\n'
                 'Summary of current practice: your sign-in details are protected by the account service; your profile '
                 '(name, mobile, city, professional year, institution) is stored in your private students record; '
                 'offline files stay on your device.',

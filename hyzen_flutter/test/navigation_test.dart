@@ -827,7 +827,8 @@ void main() {
       find.byWidgetPredicate(
         (w) =>
             w is Image &&
-            w.semanticLabel == 'Hyzen panda with an offline download tablet',
+            w.semanticLabel ==
+                'NotePanda panda with an offline download tablet',
       ),
       findsOneWidget,
     );
