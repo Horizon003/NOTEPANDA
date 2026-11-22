@@ -1,9 +1,10 @@
 'use strict';
 const DAY = 86400000;
 function professionalGroup(member) {
-  if (member?.verified !== true || member.optOut !== false ||
-      !Number.isInteger(member.academicYear) || member.academicYear < 1 || member.academicYear > 5) return null;
-  return `professional-${member.academicYear}`;
+  if (member?.firebaseRankConsent !== true || member.optOut !== false ||
+      typeof member.alias !== 'string' || member.alias.trim().length < 1 ||
+      member.alias.length > 40) return null;
+  return 'overall';
 }
 function dayAt(ms, zone = 'Asia/Karachi') {
   const parts = new Intl.DateTimeFormat('en-CA', {timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(ms);

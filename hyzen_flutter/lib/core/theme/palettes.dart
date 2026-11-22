@@ -6,7 +6,7 @@ import '../../app/providers.dart';
 const brandPalettes = <String, (String, Color)>{
   'graphite': ('Graphite', Color(0xFF1C1C1E)),
   // Kept for admin-managed legacy content; end users no longer select these.
-  'teal': ('Hyzen Teal', Color(0xFF087F76)),
+  'teal': ('NotePanda Teal', Color(0xFF087F76)),
   'ocean': ('Clinical Blue', Color(0xFF2B6F9E)),
   'green': ('Pharmacy Green', Color(0xFF15724A)),
   'sage': ('Apothecary Sage', Color(0xFF5B6E4A)),
@@ -49,8 +49,4 @@ final effectivePaletteProvider = Provider<String>((ref) {
   final chosen = ref.watch(paletteProvider);
   return brandPalettes.containsKey(chosen) ? chosen : 'graphite';
 });
-final paletteColorProvider = Provider<Color>(
-  (ref) =>
-      brandPalettes[ref.watch(effectivePaletteProvider)]?.$2 ??
-      brandPalettes['graphite']!.$2,
-);
+final paletteColorProvider = Provider<Color>((ref) => const Color(0xFF111111));

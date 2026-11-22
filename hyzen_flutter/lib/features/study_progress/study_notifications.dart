@@ -39,7 +39,7 @@ class StudyNotificationScheduler {
     try {
       await _plugin.initialize(
         const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          android: AndroidInitializationSettings('ic_study_notification'),
           iOS: DarwinInitializationSettings(
             requestSoundPermission: false,
             requestAlertPermission: false,
@@ -128,13 +128,14 @@ class StudyNotificationScheduler {
         final reminder = reminders[i];
         await _plugin.zonedSchedule(
           idFor('$key:$i'),
-          'PHARM D WITH HYZEN',
+          'NotePanda',
           reminder.message,
           tz.TZDateTime.from(reminder.time, tz.local),
           const NotificationDetails(
             android: AndroidNotificationDetails(
               'hyzen_study_v1',
               'Study and task reminders',
+              icon: 'ic_study_notification',
               channelDescription: 'Your scheduled study goals and tasks',
               importance: Importance.high,
               priority: Priority.high,
@@ -211,6 +212,7 @@ class StudyNotificationScheduler {
         android: AndroidNotificationDetails(
           'hyzen_study_v1',
           'Study and task reminders',
+          icon: 'ic_study_notification',
           channelDescription: 'Your scheduled study goals and tasks',
           importance: Importance.high,
           priority: Priority.high,
@@ -225,7 +227,7 @@ class StudyNotificationScheduler {
         final when = tz.TZDateTime.from(time, tz.local);
         await _plugin.zonedSchedule(
           idFor('$key:$slot'),
-          'PHARM D WITH HYZEN',
+          'NotePanda',
           title,
           when,
           notice,

@@ -37,7 +37,7 @@ class HyzenRiveMascot extends StatelessWidget {
     super.key,
     required this.state,
     this.size = 220,
-    this.semanticLabel = 'Hyzen panda mascot',
+    this.semanticLabel = 'NotePanda panda mascot',
   });
 
   static const assetPath = 'assets/mascot/hyzen_mascot.riv';
@@ -51,7 +51,9 @@ class HyzenRiveMascot extends StatelessWidget {
       future: _riveAvailable,
       initialData: _riveKnown,
       builder: (context, snapshot) {
-        if (snapshot.data != true) {
+        if (snapshot.data != true ||
+            MediaQuery.disableAnimationsOf(context) ||
+            !TickerMode.of(context)) {
           return HyzenMascot(
             state: state.fallback,
             size: size,

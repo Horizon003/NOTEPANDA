@@ -36,9 +36,9 @@ exports.studyPulse=onCall(options,async request=>{
  const now=Date.now();
  return db.runTransaction(async tx=>{
   const member= (await tx.get(memberRef(uid))).data();
-  if(!eligible(member))throw new HttpsError('permission-denied','Verified campus membership and ranking consent required.');
+  if(!eligible(member))throw new HttpsError('permission-denied','Choose a display name and ranking visibility first.');
   const leaseRef=userRef(uid).collection('state').doc('lease');
-  const sessionRef=userRef(uid).collection('verifiedSessions').doc(`${member.academicYear}_${session}`);
+  const sessionRef=userRef(uid).collection('verifiedSessions').doc(session);
   const [leaseDoc,sessionDoc]=await tx.getAll(leaseRef,sessionRef);
   const lease=leaseDoc.data()||{},record=sessionDoc.data()||{seconds:0,completed:false};
   if(record.completed)return {status:'completed',seconds:record.seconds};
@@ -47,14 +47,14 @@ exports.studyPulse=onCall(options,async request=>{
   const zone=member.timezone||'Asia/Karachi',day=dayAt(now,zone);
   // A heartbeat crossing midnight is discarded conservatively; subsequent
   // heartbeats belong to the new campus day, never credited to both days.
-  const delta=lease.session===session&&lease.academicYear===member.academicYear&&lease.active&&dayAt(lease.last,zone)===day ? leaseDelta(lease.last,now):0;
+  const delta=lease.session===session&&lease.active&&dayAt(lease.last,zone)===day ? leaseDelta(lease.last,now):0;
   const total=record.seconds+delta;
   const completed=action==='stop'&&total>=600;
-  const dayRef=userRef(uid).collection('verifiedDays').doc(`${member.academicYear}_${day}`);
+  const dayRef=userRef(uid).collection('verifiedDays').doc(`0_${day}`);
   const dayRecord=(await tx.get(dayRef)).data()||{seconds:0,completed:0};
-  tx.set(dayRef,{day,academicYear:member.academicYear,seconds:dayRecord.seconds+delta,completed:dayRecord.completed+(completed?1:0)});
+  tx.set(dayRef,{day,academicYear:0,seconds:dayRecord.seconds+delta,completed:dayRecord.completed+(completed?1:0)});
   tx.set(sessionRef,{seconds:total,completed:action==='stop',validCompletion:completed,updatedAt:now});
-  tx.set(leaseRef,{session,academicYear:member.academicYear,last:now,active:action==='start'||action==='heartbeat'});
+  tx.set(leaseRef,{session,academicYear:0,rankScope:'overall',last:now,active:action==='start'||action==='heartbeat'});
   return {status:action,seconds:total};
  });
 });
@@ -63,25 +63,24 @@ exports.setRankPrivacy=onCall(options,async request=>{
  const uid=uidOf(request),alias=String(request.data?.alias||'').trim(),optOut=request.data?.optOut;
  if(typeof optOut!=='boolean'||alias.length<1||alias.length>40||/[\r\n\u0000-\u001f]/.test(alias))throw new HttpsError('invalid-argument','Choose an alias of 1–40 characters.');
  await db.runTransaction(async tx=>{
-  const ref=memberRef(uid),doc=await tx.get(ref);
-  if(!doc.exists)throw new HttpsError('failed-precondition','Campus membership has not been verified.');
-  tx.update(ref,{alias,optOut,privacyUpdatedAt:FieldValue.serverTimestamp()});
+  const ref=memberRef(uid);
+  tx.set(ref,{alias,optOut,firebaseRankConsent:true,privacyUpdatedAt:FieldValue.serverTimestamp()},{merge:true});
  });
  return {saved:true};
 });
 
 // Immutable generations avoid partially published ranks during chunked writes.
 exports.refreshCampusRanks=onSchedule({schedule:'every 15 minutes',region:'us-central1',timeoutSeconds:540},async()=>{
- const members=await db.collection('campusMemberships').where('verified','==',true).get();
+ const members=await db.collection('campusMemberships').where('firebaseRankConsent','==',true).get();
  const campuses=new Map(),now=Date.now();
  for(const doc of members.docs){
   const m=doc.data();if(!eligible(m))continue;
   const zone=m.timezone||'Asia/Karachi',today=dayAt(now,zone);
-  const history=await userRef(doc.id).collection('verifiedDays').where('academicYear','==',m.academicYear).get();
+  const history=await userRef(doc.id).collection('verifiedDays').where('academicYear','==',0).get();
   const days=Object.fromEntries(history.docs.map(d=>[d.data().day||d.id,d.data()]));
   const group = professionalGroup(m);
   if(!campuses.has(group))campuses.set(group,[]);
-  campuses.get(group).push({uid:doc.id,alias:m.alias||'Student',academicYear:m.academicYear,days,today});
+  campuses.get(group).push({uid:doc.id,alias:m.alias||'Student',academicYear:0,days,today});
  }
  for(const [campus,members]of campuses)for(const period of ['week','month','semester']){
   const ref=db.collection('campusLeaderboards').doc(campus).collection('periods').doc(period);
@@ -97,15 +96,15 @@ exports.readCampusBoard=onCall(options,async request=>{
  const uid=uidOf(request),period=request.data?.period;
  if(!['week','month','semester'].includes(period))throw new HttpsError('invalid-argument','Invalid period.');
  const membership=(await memberRef(uid).get()).data();
- if(!eligible(membership))return {status:'Campus verification and ranking consent are required.',entries:[],mine:null};
- const ref=db.collection('campusLeaderboards').doc(`professional-${membership.academicYear}`).collection('periods').doc(period),meta=(await ref.get()).data();
- if(!meta?.generation)return {status:'No verified leaderboard has been published.',entries:[],mine:null};
+ if(!eligible(membership))return {status:'Choose a display name and ranking visibility first.',entries:[],mine:null};
+ const ref=db.collection('campusLeaderboards').doc('overall').collection('periods').doc(period),meta=(await ref.get()).data();
+ if(!meta?.generation)return {status:'No overall leaderboard has been published yet.',entries:[],mine:null};
  const generation=String(request.data?.generation||meta.generation);
  if(generation!==meta.generation)return {status:'refresh',entries:[],mine:null};
  const after=Math.max(0,Number(request.data?.after)||0),entriesRef=ref.collection('generations').doc(generation).collection('entries');
  const page=await entriesRef.orderBy('rank').startAfter(after).limit(30).get();
  const memberships=page.empty?[]:await db.getAll(...page.docs.map(d=>memberRef(d.id)));
- const entries=page.docs.flatMap((d,i)=>{const current=memberships[i].data();return eligible(current)&&current.academicYear===membership.academicYear ? [{...d.data(),alias:current.alias||'Student'}]:[];});
+ const entries=page.docs.flatMap((d,i)=>{const current=memberships[i].data();return eligible(current) ? [{...d.data(),alias:current.alias||'Student'}]:[];});
  const mine=(await entriesRef.doc(uid).get()).data()||null;
  return {status:'ready',entries,mine,updatedAt:meta.updatedAt.toMillis(),generation,
    next:page.size===30?page.docs.at(-1).data().rank:null,alias:membership.alias||'Student'};

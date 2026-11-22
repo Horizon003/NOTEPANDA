@@ -41,7 +41,7 @@ const adminGroups = <String, List<(String, IconData, String)>>{
     ('Section visibility', Icons.toggle_on_outlined, 'sections'),
     ('Settings', Icons.tune_rounded, 'manage/settings'),
   ],
-  'Backend': [('Connection', Icons.cloud_outlined, 'manage/connection')],
+  'Services': [('Connection', Icons.cloud_outlined, 'manage/connection')],
 };
 
 class AdminScreen extends ConsumerStatefulWidget {
@@ -91,7 +91,7 @@ class _AdminState extends ConsumerState<AdminScreen> {
           ref.watch(adminValueProvider('pw_messages')).valueOrNull,
         );
     return TabPage(
-      title: 'PHARM D Admin',
+      title: 'NotePanda Admin',
       drawer: Drawer(
         child: SafeArea(
           child: ListView(
@@ -104,7 +104,7 @@ class _AdminState extends ConsumerState<AdminScreen> {
                     HyzenLogo(size: 52, glow: false),
                     Gap(12),
                     Text(
-                      'PHARM D WITH HYZEN',
+                      'NotePanda',
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                     Text('Admin control centre'),
@@ -165,7 +165,7 @@ class _AdminState extends ConsumerState<AdminScreen> {
           ),
         ),
       ),
-      subtitle: 'PHARM D WITH HYZEN · Admin console',
+      subtitle: 'NotePanda · Admin console',
       actions: [
         IconButton(
           tooltip: 'Student view',

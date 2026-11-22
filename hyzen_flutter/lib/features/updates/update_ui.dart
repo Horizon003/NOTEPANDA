@@ -160,7 +160,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       if (!mounted) return;
       setState(
         () => _error = installed == false
-            ? 'Allow “Install unknown apps” for PHARM D WITH HYZEN, return here, then tap Install update.'
+            ? 'Allow “Install unknown apps” for NotePanda, return here, then tap Install update.'
             : 'Android installer opened. Confirm Update to finish.',
       );
     } on PlatformException catch (e) {
@@ -176,7 +176,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
   Widget build(BuildContext context) => PopScope(
     canPop: !widget.requiredUpdate && !_busy,
     child: AlertDialog(
-      title: Text('PHARM D WITH HYZEN ${widget.manifest.name} is ready'),
+      title: Text('NotePanda ${widget.manifest.name} is ready'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

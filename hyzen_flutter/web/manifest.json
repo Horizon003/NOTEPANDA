@@ -1,11 +1,11 @@
 {
-  "name": "PHARM D WITH HYZEN",
-  "short_name": "PHARM D WITH HYZEN",
+  "name": "NotePanda",
+  "short_name": "NotePanda",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#F5F6F0",
   "theme_color": "#087747",
-  "description": "Your Pharm-D study companion",
+  "description": "Your NotePanda study companion",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [

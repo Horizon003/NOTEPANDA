@@ -1,13 +1,15 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
 const {dayAt,validateEvents,unionSeconds,periodStart,score,rank,leaseDelta,professionalGroup}=require('./scoring');
-test('ranking combines colleges and separates professional years',()=>{
- const member={verified:true,optOut:false,academicYear:1,campusId:'college-a'};
+test('ranking combines colleges and professional years in one optional overall league',()=>{
+ const member={firebaseRankConsent:true,alias:'Reader',optOut:false,academicYear:1,campusId:'college-a'};
  assert.equal(professionalGroup(member),professionalGroup({...member,campusId:'college-b'}));
- assert.notEqual(professionalGroup(member),professionalGroup({...member,academicYear:2}));
- assert.equal(professionalGroup({...member,campusId:undefined}),'professional-1');
- assert.equal(professionalGroup({...member,verified:false}),null);
+ assert.equal(professionalGroup(member),professionalGroup({...member,academicYear:2}));
+ assert.equal(professionalGroup({...member,campusId:undefined}),'overall');
+ assert.equal(professionalGroup({...member,verified:false}),'overall');
+ assert.equal(professionalGroup({...member,alias:'  Reader  '}),'overall');
  assert.equal(professionalGroup({...member,optOut:true}),null);
- assert.equal(professionalGroup({...member,academicYear:'1'}),null);
+ assert.equal(professionalGroup({...member,firebaseRankConsent:false}),null);
+ assert.equal(professionalGroup({...member,alias:''}),null);
 });
 test('campus date and semester boundaries use campus calendar',()=>{
  assert.equal(dayAt(Date.parse('2026-11-07T20:00:00Z')),'2026-11-08');

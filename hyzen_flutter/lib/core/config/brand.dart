@@ -3,9 +3,9 @@
 /// Product name and app mark used across native entry points.
 class Brand {
   Brand._();
-  static const appName = 'PHARM D WITH HYZEN';
-  static const shortName = 'PHARM D';
-  static const tagline = 'Your pharmacy journey';
+  static const appName = 'NotePanda';
+  static const shortName = 'NotePanda';
+  static const tagline = 'Your study journey';
 
   /// Full wordmark logo (used on splash / welcome / auth).
   static const logoAsset = 'assets/brand/hyzen_icon_square.png';

@@ -48,7 +48,7 @@ Future<SubmitResult> submitRegistration(Ref ref, String password) async {
   if (errs.isNotEmpty) throw FriendlyException(errs.values.first);
   if (!ref.read(firebaseReadyProvider)) {
     throw FriendlyException(
-      'Can\u2019t reach PHARM D WITH HYZEN right now. Please check your connection.',
+      'Can\u2019t reach NotePanda right now. Please check your connection.',
     );
   }
 
