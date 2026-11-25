@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/readme-hero.svg" alt="Pharm D with Hyzen: Study smarter. Documents simpler." width="100%" />
+  <img src="docs/assets/readme-hero.svg" alt="Note Panda: Study smarter. Documents simpler." width="100%" />
 </p>
 
 <div align="center">
@@ -23,7 +23,7 @@ A Flutter-powered study companion for Pharm D students, with a practical **Offic
 <tr>
 <td width="67%" valign="middle">
 
-### 👋 Meet Hyzen
+### 👋 Meet Note Panda
 
 **Big study plans. Less document chaos.**
 
@@ -109,7 +109,7 @@ Educational content availability may depend on account access, backend setup, an
 
 ```mermaid
 flowchart TD
-    H["🐼 Pharm D with Hyzen"]
+    H["🐼 Note Panda"]
     H --> S["📚 Study Space"]
     H --> O["📄 Office Workspace"]
     S --> R["Subjects and resources"]
@@ -137,8 +137,8 @@ The maintained Flutter source lives in [`hyzen_flutter/`](hyzen_flutter/). The r
 **Requirements:** Flutter 3.35.4, Dart 3.9.x, JDK 17, Android SDK.
 
 ```bash
-git clone https://github.com/Horizon003/pharm-d-with-hyzen.git
-cd pharm-d-with-hyzen/hyzen_flutter
+git clone https://github.com/Horizon003/NOTEPANDA.git
+cd NOTEPANDA/hyzen_flutter
 
 flutter pub get
 flutter analyze
@@ -152,11 +152,11 @@ Some signed-in features require an authorized backend configuration, and product
 
 **Actively maintained / evolving.** Not every feature has completed physical Android acceptance testing. Live Drive API/OAuth configuration and some production validation remain outstanding; no claim is made that all workflows are production-ready.
 
-[![Android build workflow](https://github.com/Horizon003/pharm-d-with-hyzen/actions/workflows/android-apk.yml/badge.svg)](https://github.com/Horizon003/pharm-d-with-hyzen/actions/workflows/android-apk.yml)
+[![Android build workflow](https://github.com/Horizon003/NOTEPANDA/actions/workflows/android-apk.yml/badge.svg)](https://github.com/Horizon003/NOTEPANDA/actions/workflows/android-apk.yml)
 
 - **Repository established:** October 16, 2026.
-- **Commit history:** [View development activity](https://github.com/Horizon003/pharm-d-with-hyzen/commits/main/).
-- **Issue tracking:** [Open issues and improvement ideas](https://github.com/Horizon003/pharm-d-with-hyzen/issues).
+- **Commit history:** [View development activity](https://github.com/Horizon003/NOTEPANDA/commits/main/).
+- **Issue tracking:** [Open issues and improvement ideas](https://github.com/Horizon003/NOTEPANDA/issues).
 - **Historical release details:** [Archived 1.3.3 README](docs/RELEASE_1_3_3_ARCHIVE.md).
 
 This project has used AI-assisted engineering workflows, including ChatGPT, alongside maintainer-led requirements, coding, reviews, debugging, and automated tests.
@@ -165,7 +165,7 @@ This project has used AI-assisted engineering workflows, including ChatGPT, alon
 
 Students, developers, testers, and accessibility-minded contributors are welcome.
 
-1. Look through [Issues](https://github.com/Horizon003/pharm-d-with-hyzen/issues).
+1. Look through [Issues](https://github.com/Horizon003/NOTEPANDA/issues).
 2. Read [CONTRIBUTING.md](CONTRIBUTING.md).
 3. Make a focused change, run analysis/tests, and open a pull request.
 
@@ -182,5 +182,5 @@ Original project code is made available under the [MIT License](LICENSE). **The 
 <br/>
 <strong>Made for study sessions, built to keep improving.</strong>
 <br/>
-<sub>Pharm D with Hyzen · Maintained by Horizon003 and contributors</sub>
+<sub>Note Panda · Maintained by Horizon003 and contributors</sub>
 </p>
