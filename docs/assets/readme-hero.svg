@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="ttl dsc">
-<title id="ttl">NOTE PANDA MADE BY HYZEN</title><desc id="dsc">Dark minimal banner featuring a book, document and study tools for Pharm D students.</desc>
+<title id="ttl">PHARM D WITH HYZEN: NOTEPANDA MADE BY HYZEN</title><desc id="dsc">Dark minimal banner featuring a book, document and study tools for Pharm D students.</desc>
 <defs>
  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#050607"/><stop offset=".6" stop-color="#1c1e20"/><stop offset="1" stop-color="#424549"/></linearGradient>
  <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34383b"/><stop offset="1" stop-color="#171a1b"/></linearGradient>
@@ -16,7 +16,7 @@
 <text x="71" y="213" fill="#e9ebec" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" letter-spacing="-1.4">WITH HYZEN</text>
 <rect x="71" y="232" width="345" height="3.5" rx="2" fill="url(#line)"/>
 <text x="71" y="271" fill="#d7dddd" font-family="Arial, sans-serif" font-size="17" letter-spacing=".4">Study smarter. Documents simpler.</text>
-<text x="72" y="304" fill="#a2aca9" font-family="Arial, sans-serif" font-size="13" letter-spacing="2.5">BUILT FOR LEARNERS. OPEN TO BUILDERS.</text>
+<text x="72" y="304" fill="#a2aca9" font-family="Arial, sans-serif" font-size="13" letter-spacing="2.5">NOTEPANDA MADE BY HYZEN</text>
 <rect x="770" y="42" width="346" height="278" rx="23" fill="url(#panel)" stroke="#ffffff" stroke-opacity=".17"/>
 <rect x="794" y="71" width="150" height="208" rx="13" fill="#f1f2f2" opacity=".96"/>
 <path d="M828 112c19-11 43-11 63 0v105c-20-11-43-11-63 0z" fill="none" stroke="#3c4345" stroke-width="6" stroke-linejoin="round"/>
