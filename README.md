@@ -6,7 +6,7 @@
 
 **A calmer way to study. A smarter way to work with documents.**
 
-[![Download APK](https://img.shields.io/badge/Download_APK-v1.5.13_(Build_22)-087F76?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Horizon003/NOTEPANDA/releases/download/v1.5.13-22/NotePanda-1.5.13.apk)
+[![Download Note Panda APK](docs/assets/download-apk.svg)](https://github.com/Horizon003/NOTEPANDA/releases/download/v1.5.13-22/NotePanda-1.5.13.apk)
 
 [Release details](https://github.com/Horizon003/NOTEPANDA/releases/tag/v1.5.13-22)
 
